@@ -115,6 +115,33 @@ Skill(skill="cortex")
 
 ---
 
+## Cortex Script Triggers (MANDATORY)
+
+These scripts live in `~/.claude/skills/cortex/bin/`. Run them at the specified times — no exceptions.
+
+### `healthcheck.py` — First session of the day
+- Run `python ~/.claude/skills/cortex/bin/healthcheck.py` during bootstrap if it hasn't been run today
+- If any check fails, attempt auto-fix or warn the user
+- Do NOT skip this — environment drift causes silent failures
+
+### `evolve.py` — Every completed subtask
+- After completing every subtask, run:
+  `python ~/.claude/skills/cortex/bin/evolve.py`
+- If `--apply` would fix issues, ask the user before applying
+- Log improvements in WorkLog
+
+### `stash.py` — After creating any reusable script
+- When you write a Python script during a session that could be reused (data pipeline, report generator, converter, etc.), capture it:
+  `python ~/.claude/skills/cortex/bin/stash.py --name "descriptive-name" --source /path/to/script.py --tags "tag1,tag2"`
+- Signs of a reusable script: generic logic, no hardcoded project values, solves a common task
+- Do NOT stash one-off debugging scripts or project-specific glue code
+
+### `startup.py` — NOT used (redundant)
+- The bootstrap sequence in SKILL.md replaces this script — do NOT run it
+- It only prints the same steps you already execute from SKILL.md instructions
+
+---
+
 ## Re-invoke Cortex
 
 Re-invoke `/cortex` when the user mentions: obsidian, KB, knowledge, worklog, board, epic, story, sprint, ticket, issue, google workspace, gws, drive, sheets, docs, slides, gmail, calendar, email, pdf, excel, word, powerpoint, screenshot, ffmpeg, pandoc, imagemagick, document, report, invoice, presentation, spreadsheet, chart, image, video, audio, convert, export, database, mysql, query, sql.
