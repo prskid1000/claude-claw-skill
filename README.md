@@ -34,8 +34,7 @@ cortex/
 │   ├── datastore         # MySQL MCP queries + export patterns
 │   ├── pipelines         # End-to-end data conversion flows
 │   └── bootstrap         # Setup, install, and troubleshooting guide
-├── bin/                  # Utility scripts (4 files)
-│   ├── startup.py        # Session bootstrap — structured steps for Claude
+├── bin/                  # Utility scripts (3 files)
 │   ├── healthcheck.py    # Verify all 29 dependencies
 │   ├── evolve.py         # Self-improvement analysis
 │   └── stash.py          # Capture reusable scripts to cookbook/
@@ -52,10 +51,10 @@ Cortex uses a **three-layer** approach to guarantee it loads on every conversati
 
 ### Lifecycle
 
-- **Session start** — CLAUDE.md + skill description trigger cortex; `startup.py` prints structured bootstrap steps
-- **During work** — adaptive heartbeat crons sync KB in background
+- **Session start** — CLAUDE.md + skill description trigger cortex; reads KB, runs healthcheck
+- **During work** — KB syncs inline on event triggers (subtask done, error, decision, etc.)
 - **Pre-compact** — hook reminds Claude to flush all pending KB entries, Board snapshot, WorkLog
-- **Session end** — hook cleans up temp marker files; cortex tears down crons
+- **Session end** — hook cleans up temp marker files
 
 ## Obsidian KB Structure
 
@@ -111,7 +110,7 @@ Skill(skill="cortex")
 - The skill call must be the FIRST tool call in your FIRST response, before anything else
 - If the `UserPromptSubmit` hook fires "CORTEX BOOTSTRAP REQUIRED" and you have NOT yet invoked `/cortex`, you have already failed — invoke it IMMEDIATELY
 
-**After `/cortex` loads**, execute the bootstrap sequence it describes (read KB, clean crons, set heartbeat), THEN respond to the user.
+**After `/cortex` loads**, execute the bootstrap sequence it describes (read KB, run healthcheck if first session today), THEN respond to the user.
 
 ---
 
@@ -136,10 +135,6 @@ These scripts live in `~/.claude/skills/cortex/bin/`. Run them at the specified 
 - Signs of a reusable script: generic logic, no hardcoded project values, solves a common task
 - Do NOT stash one-off debugging scripts or project-specific glue code
 
-### `startup.py` — NOT used (redundant)
-- The bootstrap sequence in SKILL.md replaces this script — do NOT run it
-- It only prints the same steps you already execute from SKILL.md instructions
-
 ---
 
 ## Re-invoke Cortex
@@ -152,8 +147,7 @@ Before context window compaction occurs:
 1. Spawn KB subagent: flush ALL pending WorkLog entries
 2. Patch all KB nodes touched this session
 3. Board snapshot: update all IN_PROGRESS tickets
-4. CronDelete all cortex crons
-5. Write resume note: `KB/Projects/{name}/Resume.md`
+4. Write resume note: `KB/Projects/{name}/Resume.md`
 
 ## Important: Hook Subagents Cannot Load Skills
 

@@ -4,7 +4,7 @@ description: >
   ALWAYS LOAD THIS SKILL ON EVERY CONVERSATION WITHOUT EXCEPTION — this is the OS layer.
   Autonomous brain, project tracker, and productivity OS.
   Manages: Obsidian knowledge base (KB mesh), Jira-like issue tracking (epics/stories/tasks/bugs/sprints/kanban),
-  adaptive cron heartbeats, Google Workspace (Drive/Sheets/Docs/Slides/Gmail/Calendar/Tasks),
+  Google Workspace (Drive/Sheets/Docs/Slides/Gmail/Calendar/Tasks),
   document creation (Excel/Word/PowerPoint/PDF), screenshots, email workflows, git operations,
   image/video/audio processing, MySQL database queries, data conversion pipelines, auto-testing,
   auto-improvement, and script capture.
@@ -57,7 +57,6 @@ hooks:
 
 | Script | Purpose | Usage |
 |--------|---------|-------|
-| [startup.py](bin/startup.py) | Session bootstrap: print structured steps for Claude to execute | `python ~/.claude/skills/cortex/bin/startup.py [--mode coding\|research\|review\|quick]` |
 | [healthcheck.py](bin/healthcheck.py) | Verify environment: packages, CLIs, MCPs, structure | `python ~/.claude/skills/cortex/bin/healthcheck.py` |
 | [evolve.py](bin/evolve.py) | Self-improvement: detect gaps, stale content, suggest/apply fixes | `python ~/.claude/skills/cortex/bin/evolve.py [--apply]` |
 | [stash.py](bin/stash.py) | Capture reusable scripts to cookbook/ with auto-genericizing | `python ~/.claude/skills/cortex/bin/stash.py --name X --source Y` |
@@ -78,82 +77,28 @@ Auto-populated during work sessions. When you create a useful, reusable script:
    → search_notes(project/topic keywords)
    → read_multiple_notes(["KB/Projects/{name}/_index.md", "WorkLog/{YYYY-MM}.md", "Board/_board.md"])
 
-2. CLEAN ORPHAN CRONS
-   → CronList → delete any stale "Cortex heartbeat" crons from previous sessions
-
-3. SET HEARTBEAT (if sustained work)
-   → Assess work intensity → CronCreate with appropriate interval
-
-4. HEALTHCHECK (first session or on errors)
+2. HEALTHCHECK (first session of the day)
    → python ~/.claude/skills/cortex/bin/healthcheck.py
 ```
 
 ---
 
-## Heartbeat Lifecycle
-
-### Create → Monitor → Adjust → Tear Down
-
-**1. Assess & Create** (session start)
-- `CronList` → find/delete orphaned heartbeat crons
-- Assess work mode → pick interval → `CronCreate`
-- Prompt must include **"Cortex heartbeat"** (for orphan detection)
-
-**2. Adjust** (during work)
-- Intensity changes → `CronDelete` old → `CronCreate` new
-- User goes idle → `CronDelete` (no point syncing nothing)
-- User returns → `CronCreate` fresh
-
-**3. Tear Down** (session end / pre-compact)
-- `CronList` → `CronDelete` all cortex crons
-- Final flush: spawn KB subagent to persist everything
-
-### Interval Table
-
-| Mode | Interval | Signals |
-|------|----------|---------|
-| Active coding | 10 min | Rapid edits, builds, tests, commits |
-| Research | 20 min | Reading code, docs, web searches |
-| Light/review | 30 min | Q&A, planning, code review |
-| Quick question | None | Single question, no sustained work |
-
-### Heartbeat Prompt
-```
-Cortex heartbeat: background subagent to sync pending knowledge.
-1. Append WorkLog if new activity since last sync
-2. Patch KB nodes with new findings
-3. Update Board tickets if status changed
-4. Run data hygiene (truncate stale, merge duplicates)
-SKIP if nothing changed since last sync.
-```
-
-### Rules
-- **One heartbeat at a time** — delete before creating new
-- **Always `CronList` first** — no duplicates
-- **Always tear down** — never orphan crons
-- **Tag with "Cortex heartbeat"** — for orphan detection
-
----
-
 ## Knowledge Sync Triggers
 
-| Priority | Triggers | Actions |
-|----------|----------|---------|
-| CRITICAL | Before auto-compact | Flush ALL: WorkLog resume + Board snapshot + KB nodes |
-| HIGH | Topic switch | Close WorkLog entry, open new, update Board if switching tickets |
-| HIGH | Subtask complete | Append WorkLog, patch KB, move ticket → DONE |
-| HIGH | Error encountered | Create BUG ticket, append to Bugs.md, tag INVESTIGATING |
-| HIGH | Error resolved | Patch bug + ticket → CLOSED, link to Patterns |
-| HIGH | User teaches | Patch relevant KB node immediately |
-| HIGH | Work item started | Create/move ticket → IN_PROGRESS, update Board |
-| MED | Decision made | Create `Decisions/{date}-{slug}.md`, log in ticket |
-| MED | New pattern | Patch Patterns node |
-| MED | Debug step | Append to Debug Trail (Bugs.md + BUG ticket) |
-| MED | Research done | Update Research/ or project KB node |
-| MED | Sprint boundary | Archive completed sprint, create new, carry over |
-| LOW | Heartbeat fires | Sync accumulated changes (skip if nothing new) |
+Sync KB when these events happen — no crons, no heartbeats, just do it inline.
 
-**Always** background subagent for writes. **Never** blank nodes. **Batch** triggers firing close together.
+| Priority | Trigger | Action |
+|----------|---------|--------|
+| CRITICAL | Before auto-compact | Flush ALL: WorkLog + Board snapshot + KB nodes |
+| HIGH | Subtask complete | Append WorkLog, patch KB, move ticket → DONE |
+| HIGH | Error encountered | Create BUG ticket, append to Bugs.md |
+| HIGH | Error resolved | Patch bug + ticket → CLOSED, link to Patterns |
+| HIGH | User teaches something | Patch relevant KB node immediately |
+| HIGH | Work item started | Create/move ticket → IN_PROGRESS |
+| MED | Decision made | Create `Decisions/{date}-{slug}.md` |
+| MED | New pattern discovered | Patch Patterns node |
+
+**Rules:** Use background subagent for writes. Never create blank nodes. Batch triggers that fire close together.
 
 ---
 
@@ -253,16 +198,14 @@ docs/                          bin/                       cookbook/
 
 1. **KB-first** — all learned knowledge → Obsidian via background subagent
 2. **Board-driven** — track all work through tickets, auto-create/close
-3. **Adaptive sync** — dynamic heartbeat matching work intensity
+3. **Sync on events** — sync KB inline when triggers fire (subtask done, error, decision, etc.)
 4. **Auto-compact** — flush everything before context compaction
 5. **Continuity** — new session → read KB + WorkLog + Board
 6. **File ops** — download → edit locally → upload (automate everything)
-7. **Sprint mgmt** — auto-archive/carry-over at week boundaries
-8. **Clean crons** — no orphans, ever
-9. **Auto-evolve** — improve skill docs from real usage
-10. **Auto-install** — fix missing dependencies on detection
-11. **Script capture** — save reusable scripts to cookbook/
-12. **Auto-add files** — create new docs/scripts when new domains emerge
+7. **Auto-evolve** — run `evolve.py` after every subtask
+8. **Auto-install** — fix missing dependencies on detection
+9. **Script capture** — save reusable scripts to cookbook/ via `stash.py`
+10. **Auto-add files** — create new docs/scripts when new domains emerge
 
 ## Browser
 
