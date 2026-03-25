@@ -23,6 +23,7 @@ Cortex is an always-on skill that gives Claude Code persistent memory, Jira-like
 ```
 cortex/
 ├── SKILL.md              # Entry point — file map, heartbeat lifecycle, triggers
+├── README.md             # This file
 ├── docs/                 # Reference documentation (9 files)
 │   ├── knowledge-base    # Obsidian KB system + 14 MCP tools
 │   ├── issue-tracker     # Jira-like board + ticket templates
@@ -41,14 +42,6 @@ cortex/
 └── cookbook/              # Auto-populated reusable script templates
 ```
 
-## Naming Convention
-
-| Folder | Pattern | Examples |
-|--------|---------|---------|
-| `docs/` | `{domain-noun}.md` | `knowledge-base`, `datastore`, `mailbox` |
-| `bin/` | `{action-noun}.py` | `healthcheck`, `evolve`, `stash` |
-| `cookbook/` | `{descriptive-name}.py` | `csv-to-styled-excel`, `pdf-invoice-parser` |
-
 ## Auto-Trigger Mechanism
 
 Cortex uses a **three-layer** approach to guarantee it loads on every conversation:
@@ -63,6 +56,90 @@ Cortex uses a **three-layer** approach to guarantee it loads on every conversati
 - **During work** — adaptive heartbeat crons sync KB in background
 - **Pre-compact** — hook reminds Claude to flush all pending KB entries, Board snapshot, WorkLog
 - **Session end** — hook cleans up temp marker files; cortex tears down crons
+
+## Obsidian KB Structure
+
+Cortex expects (and will create on first run) this vault structure:
+
+```
+Vault/
+├── KB/
+│   ├── _index.md                # Root index → links to all branches
+│   ├── Projects/{Name}/
+│   │   ├── _index.md            # Project overview
+│   │   ├── Architecture.md      # System design, tech stack
+│   │   ├── Entities.md          # Domain models, schemas
+│   │   ├── Patterns.md          # Conventions & patterns
+│   │   ├── APIs.md              # Endpoints, services
+│   │   ├── Bugs.md              # Known issues, gotchas
+│   │   └── {Topic}.md           # Other dense topic nodes
+│   ├── Patterns/                # Cross-project patterns
+│   ├── Decisions/               # ADR-style: {YYYY-MM-DD}-{slug}.md
+│   └── People/                  # Team roles, preferences
+├── Board/
+│   ├── _board.md                # Kanban dashboard
+│   ├── _counter.md              # Auto-increment ticket IDs
+│   ├── Epics/                   # EPIC-NNN.md
+│   ├── Stories/                 # STORY-NNN.md
+│   ├── Tasks/                   # TASK-NNN.md
+│   └── Bugs/                    # BUG-NNN.md
+├── WorkLog/{YYYY-MM}.md         # Append-only monthly log
+└── Research/                    # Deep-dive notes
+```
+
+## CLAUDE.md Setup
+
+Copy the block below into your `~/.claude/CLAUDE.md` to enable automatic cortex bootstrap. This is the most critical piece — without it, Claude may not invoke the skill on session start.
+
+````markdown
+# User-Level Instructions
+
+---
+
+## ⚠️ STEP ZERO — DO THIS FIRST, EVERY TIME ⚠️
+
+**Your VERY FIRST action in EVERY conversation MUST be:**
+
+```
+Skill(skill="cortex")
+```
+
+- Do NOT output ANY text before invoking `/cortex`
+- Do NOT greet the user first
+- Do NOT acknowledge the user's message first
+- Do NOT reason about whether cortex is needed — it ALWAYS is
+- The skill call must be the FIRST tool call in your FIRST response, before anything else
+- If the `UserPromptSubmit` hook fires "CORTEX BOOTSTRAP REQUIRED" and you have NOT yet invoked `/cortex`, you have already failed — invoke it IMMEDIATELY
+
+**After `/cortex` loads**, execute the bootstrap sequence it describes (read KB, clean crons, set heartbeat), THEN respond to the user.
+
+---
+
+## Re-invoke Cortex
+
+Re-invoke `/cortex` when the user mentions: obsidian, KB, knowledge, worklog, board, epic, story, sprint, ticket, issue, google workspace, gws, drive, sheets, docs, slides, gmail, calendar, email, pdf, excel, word, powerpoint, screenshot, ffmpeg, pandoc, imagemagick, document, report, invoice, presentation, spreadsheet, chart, image, video, audio, convert, export, database, mysql, query, sql.
+
+## Pre-Compact Protocol (CRITICAL — before context compaction)
+
+Before context window compaction occurs:
+1. Spawn KB subagent: flush ALL pending WorkLog entries
+2. Patch all KB nodes touched this session
+3. Board snapshot: update all IN_PROGRESS tickets
+4. CronDelete all cortex crons
+5. Write resume note: `KB/Projects/{name}/Resume.md`
+
+## Important: Hook Subagents Cannot Load Skills
+
+Agent-type hooks in settings.json spawn subagents that have NO access to skills. Do not rely on hooks to run `/cortex` bootstrap — it must be triggered from the main conversation via the skill system.
+````
+
+## Naming Convention
+
+| Folder | Pattern | Examples |
+|--------|---------|---------|
+| `docs/` | `{domain-noun}.md` | `knowledge-base`, `datastore`, `mailbox` |
+| `bin/` | `{action-noun}.py` | `healthcheck`, `evolve`, `stash` |
+| `cookbook/` | `{descriptive-name}.py` | `csv-to-styled-excel`, `pdf-invoice-parser` |
 
 ## Quick Start
 
