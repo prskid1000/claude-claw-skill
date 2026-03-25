@@ -8,6 +8,7 @@ Exit codes: 0 = all pass, 1 = some failures (auto-fix attempted), 2 = critical f
 
 import subprocess
 import sys
+import json
 from pathlib import Path
 
 RESULTS = {"pass": [], "fail": [], "warn": [], "fixed": []}
@@ -87,11 +88,22 @@ for name, cmd in CLI_TOOLS.items():
 print("\n=== GOOGLE WORKSPACE AUTH ===")
 # ============================================================
 
-ok, output = run_cmd("gws drive files list --params '{\"pageSize\":1}' --format json", timeout=15)
-if ok:
-    check("GWS: Drive access", True)
+ok, output = run_cmd("gws auth status", timeout=15)
+if ok and output:
+    try:
+        auth_info = json.loads(output)
+        token_valid = auth_info.get("token_valid", False)
+        has_refresh = auth_info.get("has_refresh_token", False)
+        if token_valid and has_refresh:
+            check("GWS: Auth", True)
+        else:
+            check("GWS: Auth", False)
+            warn("GWS", "Token invalid or missing refresh token — run 'gws auth login'")
+    except json.JSONDecodeError:
+        check("GWS: Auth", False)
+        warn("GWS", "Could not parse auth status output")
 else:
-    check("GWS: Drive access", False)
+    check("GWS: Auth", False)
     warn("GWS", "Run 'gws auth login' to authenticate")
 
 # ============================================================
