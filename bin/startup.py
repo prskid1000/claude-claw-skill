@@ -7,8 +7,13 @@ Usage: python ~/.claude/skills/cortex/bin/startup.py [--mode coding|research|rev
 """
 
 import argparse
+import sys
+import io
 from datetime import datetime, date
 from pathlib import Path
+
+# Fix Unicode output on Windows cp1252 consoles
+sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8", errors="replace")
 
 INTERVALS = {
     "coding": 10,

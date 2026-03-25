@@ -51,8 +51,9 @@ ref_dir = SKILL_DIR / "docs"
 script_dir = SKILL_DIR / "bin"
 example_dir = SKILL_DIR / "cookbook"
 
-# Find all referenced files in SKILL.md
-referenced_refs = re.findall(r'docs/(\S+\.md)', skill_md)
+# Find all referenced files in SKILL.md (extract clean filenames from markdown links)
+raw_refs = re.findall(r'docs/([\w-]+\.md)', skill_md)
+referenced_refs = list(dict.fromkeys(raw_refs))  # dedupe, preserve order
 actual_refs = [f.name for f in ref_dir.glob("*.md")] if ref_dir.exists() else []
 
 for ref in referenced_refs:
