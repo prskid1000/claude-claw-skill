@@ -117,7 +117,7 @@ check("Skill: bin/ exists", (skill_dir / "bin").is_dir())
 check("Skill: cookbook/ exists", (skill_dir / "cookbook").is_dir())
 
 ref_files = [
-    "knowledge-base.md", "issue-tracker.md", "workspace.md",
+    "workspace.md",
     "doc-forge.md", "mailbox.md", "media-kit.md",
     "datastore.md", "pipelines.md", "bootstrap.md"
 ]

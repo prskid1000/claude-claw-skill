@@ -2,7 +2,7 @@
 
 > Install missing tools, packages, MCP servers. Auto-fix where possible, guide where not.
 
-**Related:** [knowledge-base.md](knowledge-base.md) | [datastore.md](datastore.md) | [workspace.md](workspace.md)
+**Related:** [datastore.md](datastore.md) | [workspace.md](workspace.md)
 
 ---
 
@@ -62,22 +62,6 @@ except ImportError:
 ## MCP Servers
 
 All configured in `~/.claude/settings.json` under `mcpServers`.
-
-### Obsidian
-
-```json
-{
-  "mcpServers": {
-    "obsidian": {
-      "command": "npx",
-      "args": ["-y", "obsidian-mcp", "/path/to/vault"]
-    }
-  }
-}
-```
-
-Install: `npm install -g obsidian-mcp`
-Verify: `mcp__obsidian__get_vault_stats()`
 
 ### MySQL
 
@@ -149,7 +133,6 @@ gws drive files list --params '{"pageSize":1}'
 | `npm` not found | Install Node.js: `winget install OpenJS.NodeJS` |
 | GWS auth expired | `! gws auth login` |
 | MCP won't start | Check `~/.claude/settings.json` for typos |
-| Obsidian vault not found | Update vault path in MCP config |
 | MySQL connection refused | Verify host/port/credentials in env vars |
 | Edge not found | Update path in DevTools launch command |
 | FFmpeg not in PATH | Add install dir to system PATH, restart terminal |

@@ -130,8 +130,6 @@ desc_match = re.search(r'description:\s*>\s*\n(.*?)---', skill_md, re.DOTALL)
 if desc_match:
     description = desc_match.group(1).lower()
     topic_keywords = {
-        "knowledge-base": ["obsidian", "knowledge", "kb"],
-        "issue-tracker": ["board", "ticket", "sprint", "epic", "jira"],
         "workspace": ["gws", "google", "drive", "sheets"],
         "doc-forge": ["document", "excel", "word", "pdf", "powerpoint"],
         "mailbox": ["email", "gmail"],

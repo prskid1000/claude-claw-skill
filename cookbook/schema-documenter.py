@@ -14,7 +14,7 @@ Usage:
 """
 Generate Markdown documentation of a MySQL database schema.
 Queries INFORMATION_SCHEMA for tables, columns, keys, and relationships.
-Output can be saved to Obsidian vault.
+Output can be saved as a Markdown file.
 
 Usage:
     python schema-documenter.py --host localhost --db myapp --user root -o schema.md

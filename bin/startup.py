@@ -40,41 +40,31 @@ def main():
     args = parser.parse_args()
 
     now = datetime.now().strftime("%Y-%m-%d %H:%M")
-    month = datetime.now().strftime("%Y-%m")
 
     print(f"=== CORTEX BOOTSTRAP ({now}) ===")
     print()
 
-    # Step 1: KB context to read
-    print("STEP 1 — READ KB CONTEXT:")
-    print(f"  read_multiple_notes([")
-    print(f'    "WorkLog/{month}.md",')
-    print(f'    "Board/_board.md"')
-    print(f"  ])")
-    print(f"  search_notes(user's topic keywords)")
-    print()
-
-    # Step 2: Orphan cron cleanup
-    print("STEP 2 — CLEAN ORPHAN CRONS:")
+    # Step 1: Orphan cron cleanup
+    print("STEP 1 — CLEAN ORPHAN CRONS:")
     print("  CronList → delete any with 'Cortex heartbeat' in prompt")
     print()
 
-    # Step 3: Heartbeat
+    # Step 2: Heartbeat
     interval = INTERVALS[args.mode]
     if interval > 0:
-        print(f"STEP 3 — SET HEARTBEAT ({args.mode} mode, {interval}min):")
+        print(f"STEP 2 — SET HEARTBEAT ({args.mode} mode, {interval}min):")
         print(f"  CronCreate(interval={interval}min, prompt='Cortex heartbeat: ...')")
     else:
-        print("STEP 3 — SKIP HEARTBEAT (quick question mode)")
+        print("STEP 2 — SKIP HEARTBEAT (quick question mode)")
     print()
 
-    # Step 4: Healthcheck
+    # Step 3: Healthcheck
     needs_health = check_healthcheck_needed()
     if needs_health:
-        print("STEP 4 — HEALTHCHECK (first session today):")
+        print("STEP 3 — HEALTHCHECK (first session today):")
         print("  python ~/.claude/skills/cortex/bin/healthcheck.py")
     else:
-        print("STEP 4 — SKIP HEALTHCHECK (already ran today)")
+        print("STEP 3 — SKIP HEALTHCHECK (already ran today)")
     print()
 
     print("=== BOOTSTRAP READY ===")
