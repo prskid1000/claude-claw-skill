@@ -134,31 +134,6 @@ for f in legacy_docs:
     else:
         warn("Docs", f"Missing cortex/docs/{f} (ok if migrated to sub-skills)")
 
-# Sub-skills (optional but recommended)
-subskills = [
-    "cortex-workspace",
-    "cortex-doc-forge",
-    "cortex-mailbox",
-    "cortex-media-kit",
-    "cortex-datastore",
-    "cortex-pipelines",
-    "cortex-bootstrap",
-]
-for s in subskills:
-    d = root / s
-    if not d.exists():
-        warn("Sub-skill", f"{s} not found (ok if not installed yet)")
-        continue
-    check(f"Sub-skill: {s}/SKILL.md exists", (d / "SKILL.md").exists())
-    if (d / "docs").is_dir():
-        idx = d / "docs" / "index.md"
-        if idx.exists():
-            check(f"Sub-skill doc: {s}/docs/index.md", True)
-        else:
-            warn("Sub-skill docs", f"Missing {s}/docs/index.md")
-    else:
-        warn("Sub-skill docs", f"Missing {s}/docs/ directory")
-
 # ============================================================
 print("\n=== SUMMARY ===")
 # ============================================================
