@@ -1,8 +1,8 @@
-# Mailbox — Email Workflows
+# Email Workflows — Compose / Send / Attachments
 
 > Compose emails with Python MIME, send/read via Gmail CLI, manage attachments and threads.
 
-**Related:** [workspace.md](workspace.md) | [doc-forge.md](doc-forge.md) | [pipelines.md](pipelines.md)
+**Related:** [gws-quickref.md](gws-quickref.md) | [create-documents.md](create-documents.md) | [data-pipelines.md](data-pipelines.md)
 
 ---
 
@@ -87,7 +87,7 @@ msg['References'] = '<original-message-id>'
 
 ## Gmail CLI
 
-Full CLI reference in [workspace.md](workspace.md). Quick reference:
+Full CLI reference in [gws-quickref.md](gws-quickref.md). Quick reference:
 
 ```bash
 # Search
@@ -129,7 +129,7 @@ gws gmail users messages attachments get \
 ### Generate Report → Email It
 
 ```
-1. Create doc with Python (see doc-forge.md)
+1. Create doc with Python (see create-documents.md)
 2. Compose email with attachment (see above)
 3. gws gmail send
 ```

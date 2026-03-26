@@ -1,8 +1,8 @@
-# Pipelines — Data Conversion Flows
+# Data Pipelines — Source → Transform → Output
 
 > End-to-end workflows: source → transform → output → upload/email.
 
-**Related:** [doc-forge.md](doc-forge.md) | [datastore.md](datastore.md) | [workspace.md](workspace.md) | [mailbox.md](mailbox.md)
+**Related:** [create-documents.md](create-documents.md) | [database-workflows.md](database-workflows.md) | [gws-quickref.md](gws-quickref.md) | [email-workflows.md](email-workflows.md)
 
 ---
 
@@ -77,7 +77,7 @@ gws drive files update --params '{"fileId":"ID"}' --upload /tmp/sheet_updated.xl
 
 ```python
 # 1. Query via mcp__mcp_server_mysql__mysql_query
-# 2. Build styled Excel (see doc-forge.md)
+# 2. Build styled Excel (see create-documents.md)
 from openpyxl import Workbook
 from openpyxl.styles import Font, PatternFill
 
@@ -162,11 +162,11 @@ gws drive files create --upload /tmp/report.pdf \
 ## Full Pipeline: Collect → Analyze → Report → Email
 
 ```
-1. Query database → mcp__mcp_server_mysql__mysql_query     (datastore.md)
+1. Query database → mcp__mcp_server_mysql__mysql_query     (database-workflows.md)
 2. Process data → Python aggregation/filtering
-3. Create Excel with charts → openpyxl                      (doc-forge.md)
-4. Generate PDF summary → reportlab                         (doc-forge.md)
-5. Upload both to Drive → gws drive files create            (workspace.md)
-6. Compose email with attachments → MIME                     (mailbox.md)
-7. Send → gws gmail users messages send                      (workspace.md)
+3. Create Excel with charts → openpyxl                      (create-documents.md)
+4. Generate PDF summary → reportlab                         (create-documents.md)
+5. Upload both to Drive → gws drive files create            (gws-quickref.md)
+6. Compose email with attachments → MIME                     (email-workflows.md)
+7. Send → gws gmail users messages send                      (gws-quickref.md)
 ```

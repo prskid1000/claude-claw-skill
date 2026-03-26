@@ -1,8 +1,8 @@
-# Bootstrap — Setup & Installation
+# Setup — Install & Troubleshoot
 
 > Install missing tools, packages, MCP servers. Auto-fix where possible, guide where not.
 
-**Related:** [datastore.md](datastore.md) | [workspace.md](workspace.md)
+**Related:** [database-workflows.md](database-workflows.md) | [gws-quickref.md](gws-quickref.md)
 
 ---
 

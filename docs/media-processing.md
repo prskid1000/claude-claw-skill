@@ -1,8 +1,8 @@
-# Media Kit — Image, Video, Audio & Conversion
+# Media Processing — Images / Video / Audio / Conversion
 
 > FFmpeg, Pillow, ImageMagick, Pandoc, and screenshot tools.
 
-**Related:** [doc-forge.md](doc-forge.md) | [pipelines.md](pipelines.md)
+**Related:** [create-documents.md](create-documents.md) | [data-pipelines.md](data-pipelines.md)
 
 ---
 
@@ -141,4 +141,4 @@ pandoc ch1.md ch2.md -o book.docx                     # Multi-input
 pandoc input.md -o out.pdf --metadata title="T" --metadata author="A"
 ```
 
-**Note:** PDF output via pandoc requires LaTeX (`xelatex`). If not installed, use pymupdf/reportlab instead — see [doc-forge.md](doc-forge.md).
+**Note:** PDF output via pandoc requires LaTeX (`xelatex`). If not installed, use pymupdf/reportlab instead — see [create-documents.md](create-documents.md).

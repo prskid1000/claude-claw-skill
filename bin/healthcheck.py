@@ -123,9 +123,13 @@ else:
 
 # Legacy monolith docs (may be removed once fully split into sub-skills)
 legacy_docs = [
-    "workspace.md",
-    "doc-forge.md", "mailbox.md", "media-kit.md",
-    "datastore.md", "pipelines.md", "bootstrap.md",
+    "gws-quickref.md",
+    "create-documents.md",
+    "email-workflows.md",
+    "media-processing.md",
+    "database-workflows.md",
+    "data-pipelines.md",
+    "setup.md",
 ]
 for f in legacy_docs:
     p = cortex_dir / "docs" / f
