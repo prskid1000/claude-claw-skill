@@ -2,10 +2,16 @@
 
 Productivity OS for Claude Code — document creation, tool orchestration, and automation.
 
+## Install
+
+```bash
+git clone https://github.com/prskid1000/claude-claw-skill.git ~/.claude/skills/claude-claw
+```
+
 ## Quick Start
 
 ```bash
-# Invoke the skill
+# Invoke the skill in Claude Code
 /claude-claw
 
 # Run healthcheck
