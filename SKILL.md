@@ -4,7 +4,8 @@ description: >
   Always-load productivity skill for Google Workspace, documents, media, database, and data pipelines.
   This skill should be used when the user asks to "create an Excel file", "generate a PDF", "make a Word document",
   "build a PowerPoint", "send an email", "query the database", "process an image", "convert a video",
-  "upload to Drive", "create a Google Sheet", or any document/media/data workflow.
+  "upload to Drive", "create a Google Sheet", "add a note in Obsidian", "search my vault",
+  "take a screenshot", or any document/media/data/notes workflow.
 priority: critical
 ---
 
@@ -28,6 +29,7 @@ Detailed tool capabilities, commands, and API surfaces. Load when working with a
 | HTML/XML parsing | [references/web-parsing.md](references/web-parsing.md) |
 | Email / MIME | [references/email-reference.md](references/email-reference.md) |
 | Database / MySQL | [references/database-reference.md](references/database-reference.md) |
+| Obsidian CLI | [references/obsidian-cli.md](references/obsidian-cli.md) |
 | Install / troubleshoot | [references/setup.md](references/setup.md) |
 
 ## Examples
@@ -44,6 +46,7 @@ Working code blocks for common tasks. Load when executing a specific workflow.
 | Database query & export | [examples/database-export.md](examples/database-export.md) |
 | End-to-end pipelines | [examples/data-pipelines.md](examples/data-pipelines.md) |
 | Document conversion | [examples/document-conversion.md](examples/document-conversion.md) |
+| Obsidian vault workflows | [examples/obsidian-workflows.md](examples/obsidian-workflows.md) |
 
 ## Scripts
 
@@ -84,6 +87,7 @@ python ~/.claude/skills/cortex/scripts/healthcheck.py
 | Task | Tool |
 |------|------|
 | Google Workspace | `gws` CLI |
+| Obsidian vault | `obsidian` CLI (100+ commands) |
 | MySQL database | `mcp__mcp_server_mysql__mysql_query` |
 | HTML/XML parsing | `lxml`, `beautifulsoup4` |
 | Email composition | Python `email.mime` + `gws gmail` |

@@ -40,6 +40,7 @@ python -c "import docx; print('python-docx OK')"
 | Tool | Check command | Install command (winget) | Purpose |
 |------|--------------|------------------------|---------|
 | `gws` | `gws --version` | `npm install -g @anthropic/gws` | Google Workspace CLI (Drive, Sheets, Docs, Slides, Gmail, Calendar) |
+| `obsidian` | `obsidian version` | Built into Obsidian v1.12+ | Obsidian vault CLI (100+ commands: notes, search, tasks, plugins, dev) |
 | `git` | `git --version` | `winget install Git.Git` | Version control |
 | `ffmpeg` | `ffmpeg -version` | `winget install Gyan.FFmpeg` | Video/audio processing, conversion, streaming |
 | `pandoc` | `pandoc --version` | `winget install JohnMacFarlane.Pandoc` | Universal document converter (45+ input, 60+ output formats) |

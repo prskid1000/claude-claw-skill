@@ -74,6 +74,7 @@ print("\n=== CLI TOOLS ===")
 
 CLI_TOOLS = {
     "gws": "gws --version",
+    "obsidian": "obsidian version",
     "git": "git --version",
     "ffmpeg": "ffmpeg -version",
     "pandoc": "pandoc --version",
@@ -127,6 +128,7 @@ reference_files = [
     "web-parsing.md",
     "email-reference.md",
     "database-reference.md",
+    "obsidian-cli.md",
     "setup.md",
 ]
 for f in reference_files:
@@ -146,6 +148,7 @@ example_files = [
     "database-export.md",
     "data-pipelines.md",
     "document-conversion.md",
+    "obsidian-workflows.md",
 ]
 for f in example_files:
     p = cortex_dir / "examples" / f

@@ -45,6 +45,7 @@ cortex/
 │   ├── web-parsing.md    # lxml, BeautifulSoup4
 │   ├── email-reference.md    # Python MIME + Gmail CLI
 │   ├── database-reference.md # MySQL MCP
+│   ├── obsidian-cli.md    # Obsidian CLI (100+ commands)
 │   └── setup.md          # Installation & troubleshooting
 └── examples/             # Working code blocks
     ├── office-documents.md   # Excel, Word, PowerPoint
@@ -54,7 +55,8 @@ cortex/
     ├── email-workflows.md    # Email composition & Gmail
     ├── database-export.md    # Database query & export
     ├── data-pipelines.md     # End-to-end workflows
-    └── document-conversion.md # Pandoc conversions
+    ├── document-conversion.md # Pandoc conversions
+    └── obsidian-workflows.md  # Obsidian vault operations
 ```
 
 ## Naming Convention
