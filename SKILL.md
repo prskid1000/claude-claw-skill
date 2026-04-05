@@ -81,14 +81,14 @@ Working code blocks for common tasks. Load when executing a specific workflow.
 | Video/audio processing | `ffmpeg` |
 | Document conversion | `pandoc` |
 | PDF page screenshots | `pymupdf` (fitz) |
-| Web screenshots | Chrome DevTools MCP (Edge) — *optional, requires the MCP server* |
+| Web screenshots / browser automation | Chrome DevTools MCP (`mcp__plugin_chrome-devtools-mcp_chrome-devtools__*`) — provisioned by the claude-claw bootstrap |
 
 ### Data & Integration
 | Task | Tool |
 |------|------|
 | Google Workspace | `gws` CLI |
 | ClickUp tasks | `clickup` CLI (tasks, sprints, comments, time, git) |
-| MySQL database | MySQL MCP server tool (*optional, requires separate setup — see `references/database-reference.md`*) |
+| MySQL database | `mcp__mcp_server_mysql__mysql_query` — provisioned by the claude-claw bootstrap |
 | HTML/XML parsing | `lxml`, `beautifulsoup4` |
 | Email composition | Python `email.mime` + `gws gmail users messages send` |
 
@@ -103,6 +103,3 @@ Source -> Transform (Python) -> Output file (/tmp/) -> Upload/Send (gws)
 3. **Output**: save to `/tmp/` as .xlsx, .docx, .pdf, .png, etc.
 4. **Deliver**: `gws drive +upload /tmp/file.xlsx` or `gws gmail +send --to ... --subject ... --body ...` (convenience helpers); for full control use `gws drive files create --upload` / `gws gmail users messages send`.
 
-## Browser
-
-- Always use Microsoft Edge, never Chrome.

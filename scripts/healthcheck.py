@@ -89,6 +89,8 @@ CLI_TOOLS = {
     "ffmpeg": "ffmpeg -version",
     "pandoc": "pandoc --version",
     "magick (ImageMagick)": "magick --version",
+    "node": "node --version",
+    "npx": "npx --version",
 }
 
 for name, cmd in CLI_TOOLS.items():
@@ -116,6 +118,57 @@ if ok and output:
 else:
     check("GWS: Auth", False)
     warn("GWS", "Run 'gws auth login' to authenticate")
+
+# ============================================================
+print("\n=== MCP SERVERS ===")
+# ============================================================
+#
+# The skill depends on two MCP servers. This block only VERIFIES config;
+# it does not patch ~/.claude.json automatically (that file is the harness's
+# main config and is too high-stakes to rewrite from a script). On failure
+# the exact fix is printed and the user applies it manually, then restarts
+# Claude Code.
+#
+# Note: do NOT wrap `npx` in `cmd /c` in these configs — Claude Code's MCP
+# launcher already spawns Windows servers as `cmd.exe /d /s /c "npx ..."`
+# internally. A manual wrapper causes double-wrapping.
+
+claude_json = Path.home() / ".claude.json"
+plugin_mcp_json = (
+    Path.home()
+    / ".claude" / "plugins" / "cache" / "chrome-devtools-plugins"
+    / "chrome-devtools-mcp" / "latest" / ".mcp.json"
+)
+
+# --- MySQL MCP ---
+mysql_ok = False
+if claude_json.exists():
+    try:
+        cfg = json.loads(claude_json.read_text(encoding="utf-8"))
+        entry = cfg.get("mcpServers", {}).get("mcp_server_mysql")
+        if entry and entry.get("command") == "npx" and "@benborla29/mcp-server-mysql" in " ".join(entry.get("args", [])):
+            mysql_ok = True
+    except Exception as e:
+        warn("MCP: mysql", f"Could not parse ~/.claude.json: {e}")
+
+check("MCP: mysql (~/.claude.json -> mcpServers.mcp_server_mysql)", mysql_ok)
+if not mysql_ok:
+    warn("MCP: mysql", "Add to ~/.claude.json under mcpServers. See references/setup.md -> 'MySQL' for the exact JSON block. Restart Claude Code after editing.")
+
+# --- Chrome DevTools MCP (plugin-provided) ---
+cdt_ok = False
+if plugin_mcp_json.exists():
+    try:
+        cdt_cfg = json.loads(plugin_mcp_json.read_text(encoding="utf-8"))
+        cdt_entry = cdt_cfg.get("chrome-devtools", {})
+        if cdt_entry.get("command") == "npx" and "chrome-devtools-mcp" in " ".join(cdt_entry.get("args", [])):
+            cdt_ok = True
+    except Exception as e:
+        warn("MCP: chrome-devtools", f"Could not parse plugin .mcp.json: {e}")
+
+check("MCP: chrome-devtools (plugin .mcp.json)", cdt_ok)
+if not cdt_ok:
+    warn("MCP: chrome-devtools", f"Plugin cache at {plugin_mcp_json} is missing or malformed. Install/reinstall via the Claude Code plugin marketplace (chrome-devtools-plugins).")
 
 # ============================================================
 print("\n=== SKILL STRUCTURE ===")

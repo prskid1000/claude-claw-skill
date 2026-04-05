@@ -50,25 +50,34 @@ python -c "import docx; print('python-docx OK')"
 
 ---
 
-## MCP Servers (optional)
+## MCP Servers
 
-The blocks below describe optional MCP integrations. The core skill works without them — skip any you don't need. Check your current MCP tool list before assuming any of these are available.
+These MCPs are first-class `claude-claw` dependencies and are verified on every session by `scripts/healthcheck.py`. If a check fails, the healthcheck prints the exact fix to apply — it will not patch `~/.claude.json` automatically.
 
-### MySQL (optional)
+> **Windows note:** Do **not** manually wrap `npx` in `cmd /c` in your config. Claude Code's MCP launcher already spawns Windows MCP servers as `cmd.exe /d /s /c "npx ..."` internally. A manual wrapper causes double-wrapping.
 
-#### settings.json config
+### MySQL
+
+Installed as a user-level MCP in `~/.claude.json` → `mcpServers.mcp_server_mysql`.
+
+#### ~/.claude.json entry
 ```json
 {
   "mcpServers": {
-    "mcp-server-mysql": {
+    "mcp_server_mysql": {
+      "type": "stdio",
       "command": "npx",
-      "args": ["-y", "@benborla29/mcp-server-mysql"],
+      "args": ["@benborla29/mcp-server-mysql"],
       "env": {
         "MYSQL_HOST": "127.0.0.1",
         "MYSQL_PORT": "3306",
         "MYSQL_USER": "root",
         "MYSQL_PASS": "password",
-        "MYSQL_DB": "database_name"
+        "MYSQL_DB": "database_name",
+        "ALLOW_INSERT_OPERATION": "true",
+        "ALLOW_UPDATE_OPERATION": "true",
+        "ALLOW_DELETE_OPERATION": "false",
+        "MULTI_DB_WRITE_MODE": "true"
       }
     }
   }
@@ -97,26 +106,37 @@ mcp__mcp_server_mysql__mysql_query(query="SELECT 1 AS test")
 
 ---
 
-### Chrome DevTools (Edge) (optional)
+### Chrome DevTools
 
-#### settings.json config
+Installed via the `chrome-devtools-plugins` plugin marketplace, not via manual `mcpServers` config. The plugin ships its own `.mcp.json` at:
+
+```
+~/.claude/plugins/cache/chrome-devtools-plugins/chrome-devtools-mcp/latest/.mcp.json
+```
+
+Default content (do not modify — the healthcheck verifies it):
 ```json
 {
-  "mcpServers": {
-    "chrome-devtools": {
-      "command": "npx",
-      "args": ["-y", "@anthropic/chrome-devtools-mcp@latest"]
-    }
+  "chrome-devtools": {
+    "command": "npx",
+    "args": ["chrome-devtools-mcp@latest"]
   }
 }
 ```
 
-#### Launch Edge with remote debugging
-```bash
-start msedge --remote-debugging-port=9222 --user-data-dir="C:/tmp/edge-debug"
+Install / update the plugin via the Claude Code plugin manager. Verify with:
+```python
+mcp__plugin_chrome-devtools-mcp_chrome-devtools__list_pages()
 ```
 
-Always use Microsoft Edge, not Chrome. The `--remote-debugging-port=9222` flag enables DevTools Protocol access.
+#### Connect to an existing browser (advanced)
+If you need to drive a specific, already-running browser instance (e.g. a pre-authenticated profile, or Edge), start the browser with a remote debugging port and point the MCP at it via `--browserUrl`:
+```bash
+# start browser (Chrome or Edge) with remote debugging
+start chrome --remote-debugging-port=9222 --user-data-dir="C:/tmp/debug-profile"
+# or: start msedge --remote-debugging-port=9222 --user-data-dir="C:/tmp/debug-profile"
+```
+Then override the plugin `.mcp.json` args to `["chrome-devtools-mcp@latest", "--browserUrl=http://127.0.0.1:9222"]` and restart Claude Code. Note: the `-e`/`--executablePath` flag is **not** a reliable way to redirect the MCP at a non-Chrome browser — Puppeteer's launch validation falls back to a bundled Chrome if the binary isn't recognized.
 
 ---
 
@@ -178,10 +198,11 @@ gws --account work drive files list
 | magick not found | `command not found: magick` | `winget install ImageMagick.ImageMagick` then restart shell |
 | clickup not found | `command not found: clickup` | Download binary from [releases](https://github.com/triptechtravel/clickup-cli/releases) → `~/.local/bin/clickup.exe` |
 | clickup auth failed | 401 or "not authenticated" | Run `clickup auth login` then `clickup space select` |
-| MySQL MCP fails | Tool call returns connection error | Check MYSQL_HOST, MYSQL_PORT, MYSQL_USER, MYSQL_PASS in settings.json; verify MySQL is running |
+| MySQL MCP fails | Tool call returns connection error | Check MYSQL_HOST, MYSQL_PORT, MYSQL_USER, MYSQL_PASS in `~/.claude.json`; verify MySQL is running |
 | MySQL access denied | `Access denied for user` | Verify credentials; check user grants with `SHOW GRANTS FOR 'user'@'host'` |
-| Chrome DevTools MCP fails | Cannot connect to browser | Launch Edge with `--remote-debugging-port=9222`; verify port not blocked |
-| Edge already running | DevTools port conflict | Close all Edge instances first, then relaunch with debug flag |
+| MCP config change not picked up | Edited `.mcp.json` or `~/.claude.json`, tool still uses old behavior | `.mcp.json` is read once at Claude Code startup. Fully quit Claude Code (including background `node.exe` processes for the MCP server), then relaunch |
+| `cmd /c` warning on an mcpServers entry | Config linter flags "Windows requires 'cmd /c' wrapper" | Ignore it — Claude Code auto-wraps `npx` on Windows (`cmd.exe /d /s /c "npx ..."`). Adding a manual wrapper causes double-wrapping |
+| Chrome DevTools MCP launches Chrome instead of a custom browser | `-e` / `--executablePath` flag is ignored | Puppeteer validates the binary and falls back to bundled Chrome silently. Use `--browserUrl` against a manually started browser instead (see the "Connect to an existing browser" section above) |
 | npm global install fails | EACCES permission error | Run terminal as Administrator, or use `npx` instead of global install |
 | PATH not updated | Tool installed but not found | Restart shell/terminal after installing CLI tools |
 | Pandoc PDF fails | `pdflatex not found` | Install a LaTeX distribution (`winget install MiKTeX.MiKTeX`) or use `--pdf-engine=weasyprint` |

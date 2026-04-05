@@ -1,6 +1,6 @@
 # Database / MySQL Reference
 
-> **Optional feature.** This reference assumes a MySQL MCP server is installed and configured. Check your active MCP tools — if `mcp__mcp_server_mysql__mysql_query` (or similar) is not listed, this integration is unavailable in your current environment. As a fallback, connect directly from Python using `pymysql` / `mysql-connector-python` with your own credentials; the SQL patterns below still apply.
+> The MySQL MCP (`mcp__mcp_server_mysql__mysql_query`) is a first-class `claude-claw` dependency — its presence and config are verified on every session by `scripts/healthcheck.py`. If the tool is not available, run the healthcheck and apply the fix it prints. As a fallback for ad-hoc scripts, you can still connect directly via `pymysql` / `mysql-connector-python`; the SQL patterns below apply either way.
 
 ---
 
