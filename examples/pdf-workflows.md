@@ -1124,7 +1124,7 @@ print("Saved: /tmp/encrypted.pdf")
 ### Merge Multiple PDFs
 
 ```python
-from pypdf import PdfMerger
+from PyPDF2 import PdfMerger
 
 merger = PdfMerger()
 
@@ -1144,7 +1144,7 @@ print("Saved: /tmp/merged.pdf")
 ### Add Watermark
 
 ```python
-from pypdf import PdfReader, PdfWriter
+from PyPDF2 import PdfReader, PdfWriter
 
 reader = PdfReader("/tmp/input.pdf")
 watermark_reader = PdfReader("/tmp/watermark.pdf")
@@ -1165,7 +1165,7 @@ print("Saved: /tmp/watermarked.pdf")
 ### Encrypt/Decrypt
 
 ```python
-from pypdf import PdfReader, PdfWriter
+from PyPDF2 import PdfReader, PdfWriter
 
 # Decrypt a protected PDF
 reader = PdfReader("/tmp/protected.pdf")
@@ -1192,7 +1192,7 @@ print("Saved: /tmp/re_encrypted.pdf")
 ### Extract Text
 
 ```python
-from pypdf import PdfReader
+from PyPDF2 import PdfReader
 
 reader = PdfReader("/tmp/input.pdf")
 
@@ -1224,7 +1224,7 @@ for p in parts[:20]:
 ### Add Bookmarks
 
 ```python
-from pypdf import PdfReader, PdfWriter
+from PyPDF2 import PdfReader, PdfWriter
 
 reader = PdfReader("/tmp/input.pdf")
 writer = PdfWriter()
@@ -1251,8 +1251,8 @@ print("Saved: /tmp/bookmarked.pdf")
 ### Fill Form Fields
 
 ```python
-from pypdf import PdfReader, PdfWriter
-from pypdf.generic import NameObject, TextStringObject
+from PyPDF2 import PdfReader, PdfWriter
+from PyPDF2.generic import NameObject, TextStringObject
 
 reader = PdfReader("/tmp/fillable_form.pdf")
 writer = PdfWriter()

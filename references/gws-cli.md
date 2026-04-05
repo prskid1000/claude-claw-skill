@@ -1,14 +1,36 @@
 # Google Workspace CLI (`gws`) Reference
 
-Complete command reference for the `gws` CLI tool. Covers Drive, Sheets, Docs, Slides, Gmail, Calendar, and Tasks.
+Complete command reference for the `gws` CLI tool (version **0.16.0**). Covers Drive, Sheets, Docs, Slides, Gmail, Calendar, and Tasks.
 
 ---
 
-## General Syntax
+## Convention (READ FIRST)
 
-```
-gws <service> <resource> <method> [FLAGS]
-```
+`gws` 0.16.0 does **not** accept resource IDs as positional arguments. Every path/ID must be passed inside the `--params` JSON object. Key rules:
+
+1. **IDs go inside `--params`**, never as bare positional args.
+   - Wrong: `gws drive files get <FILE_ID>`
+   - Right: `gws drive files get --params '{"fileId": "<FILE_ID>"}'`
+2. **Gmail commands require the `users` sub-resource** and `"userId": "me"` in params.
+   - Wrong: `gws gmail messages list --params '{"q":"is:unread"}'`
+   - Right: `gws gmail users messages list --params '{"userId":"me","q":"is:unread"}'`
+3. **Sheet values live under `sheets spreadsheets values`**, not `sheets values`.
+   - Wrong: `gws sheets values get ...`
+   - Right: `gws sheets spreadsheets values get --params '{"spreadsheetId":"...","range":"..."}'`
+4. **Param names follow the Google Discovery API** path parameter names exactly: `fileId`, `spreadsheetId`, `documentId`, `presentationId`, `pageObjectId`, `calendarId`, `eventId`, `driveId`, `permissionId`, `commentId`, `replyId`, `revisionId`, `tasklist`, `task`, `userId`, `id` (Gmail drafts/labels/threads), `setting`, `sheetId`.
+5. **`drive.comments.list` requires `fields`** — pass `"fields": "*"` (or a specific field mask) inside params.
+6. **General syntax:**
+   ```
+   gws <service> <resource> [sub-resource] <method> [--params '{...}'] [--json '{...}'] [FLAGS]
+   ```
+7. Use `gws schema <service>.<resource>.<method>` to inspect exact parameter/body shapes. The `--help` output on any leaf command is authoritative.
+
+### Windows / Python note
+
+On Windows, `gws` is installed as a `.cmd` shim, so calling it from Python via `subprocess.run(["gws", ...])` will fail with `FileNotFoundError` unless you either:
+
+- pass `shell=True`: `subprocess.run("gws drive files list --format json", shell=True, ...)`, or
+- resolve the shim first: `subprocess.run([shutil.which("gws"), "drive", "files", "list"], ...)`.
 
 ---
 
@@ -16,14 +38,54 @@ gws <service> <resource> <method> [FLAGS]
 
 | Flag | Purpose |
 |------|---------|
-| `--format table\|csv\|yaml\|json` | Set output format (default: table) |
+| `--params '{...}'` | URL/path/query parameters as a JSON object (holds **all** IDs) |
+| `--json '{...}'` | Request body as a JSON object (POST/PATCH/PUT) |
+| `--format json\|table\|yaml\|csv` | Set output format (default: json) |
 | `--page-all` | Auto-paginate through all results (streams NDJSON) |
+| `--page-limit <N>` | Max pages with `--page-all` (default 10) |
+| `--page-delay <MS>` | Delay between pages in ms (default 100) |
 | `--upload <PATH>` | Attach a local file for upload |
 | `--upload-content-type <MIME>` | MIME type of the uploaded file |
 | `--output <PATH>` | Save binary response body to a local file |
-| `--params '{...}'` | URL/query parameters as a JSON object |
-| `--json '{...}'` | Request body as a JSON object |
-| `--fields <FIELD_MASK>` | Partial response field mask (comma-separated) |
+| `--api-version <VER>` | Override the API version (e.g. v2, v3) |
+| `--dry-run` | Validate locally without sending |
+
+---
+
+## Ergonomic `+helper` Commands
+
+`gws` ships a set of high-level helpers (prefixed with `+`) that wrap common workflows. Prefer these when you don't need raw API control — they handle RFC 2822 / base64 / threading / MIME detection for you.
+
+| Helper | One-liner | Example |
+|---|---|---|
+| `gws drive +upload <file>` | Upload a local file with auto-detected MIME and filename. | `gws drive +upload ./report.pdf --parent <FOLDER_ID>` |
+| `gws gmail +send` | Send a plain-text or HTML email. | `gws gmail +send --to alice@example.com --subject 'Hi' --body 'Hello'` |
+| `gws gmail +triage` | Read-only unread inbox summary (sender/subject/date). | `gws gmail +triage --max 10 --query 'from:boss'` |
+| `gws gmail +reply` | Reply to a message (auto In-Reply-To / References / threadId). | `gws gmail +reply --message-id <MSG_ID> --body 'Thanks!'` |
+| `gws gmail +reply-all` | Reply-all; supports `--remove` to drop recipients. | `gws gmail +reply-all --message-id <MSG_ID> --body 'ack' --remove bob@example.com` |
+| `gws gmail +forward` | Forward a message with optional note. | `gws gmail +forward --message-id <MSG_ID> --to dave@example.com --body 'FYI'` |
+| `gws gmail +watch` | Stream new emails as NDJSON. | `gws gmail +watch` |
+| `gws sheets +append` | Append a row (CSV string or JSON array of rows). | `gws sheets +append --spreadsheet <SSID> --values 'Alice,100,true'` |
+| `gws sheets +read` | Read a range, read-only. | `gws sheets +read --spreadsheet <SSID> --range 'Sheet1!A1:D10'` |
+| `gws docs +write` | Append text to a Google Doc. | `gws docs +write --document <DOC_ID> --text 'New paragraph'` |
+| `gws calendar +insert` | Create a simple event on a calendar. | `gws calendar +insert --summary 'Standup' --start 2026-04-10T09:00:00-07:00 --end 2026-04-10T09:30:00-07:00` |
+| `gws calendar +agenda` | Read-only upcoming events across calendars. | `gws calendar +agenda --today` |
+
+Run `gws <service> +<helper> --help` for full option lists.
+
+---
+
+## Auth
+
+```
+gws auth login                    # OAuth2 browser flow
+gws auth login --readonly         # Read-only scopes
+gws auth login -s drive,gmail     # Restrict scope picker to listed services
+gws auth status                   # Current auth state
+gws auth logout                   # Clear saved creds and token cache
+gws auth export                   # Print decrypted credentials to stdout
+gws auth setup --project <GCP>    # Configure GCP project + OAuth client (needs gcloud)
+```
 
 ---
 
@@ -32,7 +94,7 @@ gws <service> <resource> <method> [FLAGS]
 ### files
 
 #### list
-List files in Drive. Use `--params` to pass `q` (search query), `orderBy`, `pageSize`, `driveId`, `corpora`, etc.
+List files in Drive. Use `--params` to pass `q`, `orderBy`, `pageSize`, `driveId`, `corpora`, etc.
 
 ```
 gws drive files list --params '{"q": "mimeType=\"application/vnd.google-apps.spreadsheet\"", "pageSize": 10}'
@@ -44,8 +106,8 @@ gws drive files list --params '{"q": "\"<FOLDER_ID>\" in parents"}' --format jso
 Retrieve file metadata by ID.
 
 ```
-gws drive files get <FILE_ID>
-gws drive files get <FILE_ID> --fields "id,name,mimeType,size,modifiedTime"
+gws drive files get --params '{"fileId": "<FILE_ID>"}'
+gws drive files get --params '{"fileId": "<FILE_ID>", "fields": "id,name,mimeType,size,modifiedTime"}'
 ```
 
 #### create
@@ -70,50 +132,51 @@ gws drive files create --json '{"name": "invoice.pdf"}' \
 ```
 
 #### update
-Update file metadata and/or content. Supply the file ID as the resource identifier.
+Update file metadata and/or content. File ID goes in `--params`.
 
 ```
 # Rename a file
-gws drive files update <FILE_ID> --json '{"name": "New Name"}'
+gws drive files update --params '{"fileId": "<FILE_ID>"}' --json '{"name": "New Name"}'
 
 # Replace file content
-gws drive files update <FILE_ID> \
+gws drive files update --params '{"fileId": "<FILE_ID>"}' \
   --upload /tmp/updated.xlsx \
   --upload-content-type "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
 
 # Move a file to a different folder
-gws drive files update <FILE_ID> --params '{"addParents": "<NEW_FOLDER_ID>", "removeParents": "<OLD_FOLDER_ID>"}'
+gws drive files update --params '{"fileId": "<FILE_ID>", "addParents": "<NEW_FOLDER_ID>", "removeParents": "<OLD_FOLDER_ID>"}'
 ```
 
 #### delete
 Permanently delete a file (bypasses trash).
 
 ```
-gws drive files delete <FILE_ID>
+gws drive files delete --params '{"fileId": "<FILE_ID>"}'
 ```
 
 #### copy
 Copy a file. Provide new metadata in `--json`.
 
 ```
-gws drive files copy <FILE_ID> --json '{"name": "Copy of Report", "parents": ["<FOLDER_ID>"]}'
+gws drive files copy --params '{"fileId": "<FILE_ID>"}' \
+  --json '{"name": "Copy of Report", "parents": ["<FOLDER_ID>"]}'
 ```
 
 #### export
-Export a Google Workspace document to a different format. Specify `mimeType` in `--params` and save with `--output`.
+Export a Google Workspace document to a different format. Both `fileId` and `mimeType` go in `--params`; save with `--output`.
 
 ```
 # Export Google Doc as PDF
-gws drive files export <FILE_ID> --params '{"mimeType": "application/pdf"}' --output /tmp/doc.pdf
+gws drive files export --params '{"fileId": "<FILE_ID>", "mimeType": "application/pdf"}' --output /tmp/doc.pdf
 
 # Export Google Sheet as CSV
-gws drive files export <FILE_ID> --params '{"mimeType": "text/csv"}' --output /tmp/sheet.csv
+gws drive files export --params '{"fileId": "<FILE_ID>", "mimeType": "text/csv"}' --output /tmp/sheet.csv
 
 # Export Google Slides as PDF
-gws drive files export <FILE_ID> --params '{"mimeType": "application/pdf"}' --output /tmp/slides.pdf
+gws drive files export --params '{"fileId": "<FILE_ID>", "mimeType": "application/pdf"}' --output /tmp/slides.pdf
 
 # Export Google Doc as DOCX
-gws drive files export <FILE_ID> --params '{"mimeType": "application/vnd.openxmlformats-officedocument.wordprocessingml.document"}' --output /tmp/doc.docx
+gws drive files export --params '{"fileId": "<FILE_ID>", "mimeType": "application/vnd.openxmlformats-officedocument.wordprocessingml.document"}' --output /tmp/doc.docx
 ```
 
 ### permissions
@@ -122,9 +185,9 @@ gws drive files export <FILE_ID> --params '{"mimeType": "application/vnd.openxml
 Grant access to a file or folder.
 
 ```
-gws drive permissions create <FILE_ID> --json '{"role": "reader", "type": "anyone"}'
-gws drive permissions create <FILE_ID> --json '{"role": "writer", "type": "user", "emailAddress": "user@example.com"}'
-gws drive permissions create <FILE_ID> --json '{"role": "reader", "type": "domain", "domain": "example.com"}'
+gws drive permissions create --params '{"fileId": "<FILE_ID>"}' --json '{"role": "reader", "type": "anyone"}'
+gws drive permissions create --params '{"fileId": "<FILE_ID>"}' --json '{"role": "writer", "type": "user", "emailAddress": "user@example.com"}'
+gws drive permissions create --params '{"fileId": "<FILE_ID>"}' --json '{"role": "reader", "type": "domain", "domain": "example.com"}'
 ```
 
 Roles: `owner`, `organizer`, `fileOrganizer`, `writer`, `commenter`, `reader`
@@ -134,104 +197,112 @@ Types: `user`, `group`, `domain`, `anyone`
 List all permissions on a file.
 
 ```
-gws drive permissions list <FILE_ID>
+gws drive permissions list --params '{"fileId": "<FILE_ID>"}'
 ```
 
 #### get
 Get a specific permission by ID.
 
 ```
-gws drive permissions get <FILE_ID> --params '{"permissionId": "<PERMISSION_ID>"}'
+gws drive permissions get --params '{"fileId": "<FILE_ID>", "permissionId": "<PERMISSION_ID>"}'
 ```
 
 #### update
-Update an existing permission (e.g., change role).
+Update an existing permission (e.g. change role).
 
 ```
-gws drive permissions update <FILE_ID> <PERMISSION_ID> --json '{"role": "writer"}'
+gws drive permissions update --params '{"fileId": "<FILE_ID>", "permissionId": "<PERMISSION_ID>"}' \
+  --json '{"role": "writer"}'
 ```
 
 #### delete
 Revoke a permission.
 
 ```
-gws drive permissions delete <FILE_ID> <PERMISSION_ID>
+gws drive permissions delete --params '{"fileId": "<FILE_ID>", "permissionId": "<PERMISSION_ID>"}'
 ```
 
 ### comments
 
+> Note: `comments list` **requires** a `fields` parameter. Use `"fields": "*"` for everything.
+
 #### list
 ```
-gws drive comments list <FILE_ID>
+gws drive comments list --params '{"fileId": "<FILE_ID>", "fields": "*"}'
 ```
 
 #### get
 ```
-gws drive comments get <FILE_ID> <COMMENT_ID>
+gws drive comments get --params '{"fileId": "<FILE_ID>", "commentId": "<COMMENT_ID>", "fields": "*"}'
 ```
 
 #### create
 ```
-gws drive comments create <FILE_ID> --json '{"content": "Please review this section."}'
+gws drive comments create --params '{"fileId": "<FILE_ID>", "fields": "*"}' \
+  --json '{"content": "Please review this section."}'
 ```
 
 #### update
 ```
-gws drive comments update <FILE_ID> <COMMENT_ID> --json '{"content": "Updated comment text."}'
+gws drive comments update --params '{"fileId": "<FILE_ID>", "commentId": "<COMMENT_ID>", "fields": "*"}' \
+  --json '{"content": "Updated comment text."}'
 ```
 
 #### delete
 ```
-gws drive comments delete <FILE_ID> <COMMENT_ID>
+gws drive comments delete --params '{"fileId": "<FILE_ID>", "commentId": "<COMMENT_ID>"}'
 ```
 
 ### replies
 
 #### list
 ```
-gws drive replies list <FILE_ID> <COMMENT_ID>
+gws drive replies list --params '{"fileId": "<FILE_ID>", "commentId": "<COMMENT_ID>", "fields": "*"}'
 ```
 
 #### get
 ```
-gws drive replies get <FILE_ID> <COMMENT_ID> <REPLY_ID>
+gws drive replies get --params '{"fileId": "<FILE_ID>", "commentId": "<COMMENT_ID>", "replyId": "<REPLY_ID>", "fields": "*"}'
 ```
 
 #### create
 ```
-gws drive replies create <FILE_ID> <COMMENT_ID> --json '{"content": "Acknowledged."}'
+gws drive replies create --params '{"fileId": "<FILE_ID>", "commentId": "<COMMENT_ID>", "fields": "*"}' \
+  --json '{"content": "Acknowledged."}'
 ```
 
 #### update
 ```
-gws drive replies update <FILE_ID> <COMMENT_ID> <REPLY_ID> --json '{"content": "Updated reply."}'
+gws drive replies update --params '{"fileId": "<FILE_ID>", "commentId": "<COMMENT_ID>", "replyId": "<REPLY_ID>", "fields": "*"}' \
+  --json '{"content": "Updated reply."}'
 ```
 
 #### delete
 ```
-gws drive replies delete <FILE_ID> <COMMENT_ID> <REPLY_ID>
+gws drive replies delete --params '{"fileId": "<FILE_ID>", "commentId": "<COMMENT_ID>", "replyId": "<REPLY_ID>"}'
 ```
 
 ### revisions
 
 #### list
 ```
-gws drive revisions list <FILE_ID>
+gws drive revisions list --params '{"fileId": "<FILE_ID>"}'
 ```
 
 #### get
 ```
-gws drive revisions get <FILE_ID> <REVISION_ID>
+gws drive revisions get --params '{"fileId": "<FILE_ID>", "revisionId": "<REVISION_ID>"}'
 ```
 
 #### update
 ```
-gws drive revisions update <FILE_ID> <REVISION_ID> --json '{"keepForever": true}'
+gws drive revisions update --params '{"fileId": "<FILE_ID>", "revisionId": "<REVISION_ID>"}' \
+  --json '{"keepForever": true}'
 ```
 
 #### delete
 ```
-gws drive revisions delete <FILE_ID> <REVISION_ID>
+gws drive revisions delete --params '{"fileId": "<FILE_ID>", "revisionId": "<REVISION_ID>"}'
 ```
 
 ### drives (Shared Drives)
@@ -244,7 +315,7 @@ gws drive drives list --params '{"pageSize": 50}'
 
 #### get
 ```
-gws drive drives get <DRIVE_ID>
+gws drive drives get --params '{"driveId": "<DRIVE_ID>"}'
 ```
 
 #### create
@@ -256,12 +327,12 @@ gws drive drives create --params '{"requestId": "unique-id-123"}' --json '{"name
 
 #### update
 ```
-gws drive drives update <DRIVE_ID> --json '{"name": "Renamed Drive"}'
+gws drive drives update --params '{"driveId": "<DRIVE_ID>"}' --json '{"name": "Renamed Drive"}'
 ```
 
 #### delete
 ```
-gws drive drives delete <DRIVE_ID>
+gws drive drives delete --params '{"driveId": "<DRIVE_ID>"}'
 ```
 
 ---
@@ -281,15 +352,15 @@ gws sheets spreadsheets create --json '{"properties": {"title": "My Spreadsheet"
 Get spreadsheet metadata (sheets, named ranges, etc.).
 
 ```
-gws sheets spreadsheets get <SPREADSHEET_ID>
-gws sheets spreadsheets get <SPREADSHEET_ID> --fields "spreadsheetId,properties.title,sheets.properties"
+gws sheets spreadsheets get --params '{"spreadsheetId": "<SPREADSHEET_ID>"}'
+gws sheets spreadsheets get --params '{"spreadsheetId": "<SPREADSHEET_ID>", "fields": "spreadsheetId,properties.title,sheets.properties"}'
 ```
 
 #### batchUpdate
 Apply one or more structural changes (add/delete sheets, merge cells, formatting, charts, pivot tables, etc.).
 
 ```
-gws sheets spreadsheets batchUpdate <SPREADSHEET_ID> --json '{
+gws sheets spreadsheets batchUpdate --params '{"spreadsheetId": "<SPREADSHEET_ID>"}' --json '{
   "requests": [
     {"addSheet": {"properties": {"title": "New Tab"}}},
     {"deleteSheet": {"sheetId": 0}}
@@ -297,21 +368,24 @@ gws sheets spreadsheets batchUpdate <SPREADSHEET_ID> --json '{
 }'
 ```
 
-### values
+### spreadsheets values
+
+> Note: these live under `sheets spreadsheets values`, **not** `sheets values`.
 
 #### get
 Read a range of cell values.
 
 ```
-gws sheets values get <SPREADSHEET_ID> --params '{"range": "Sheet1!A1:D10"}'
-gws sheets values get <SPREADSHEET_ID> --params '{"range": "Sheet1!A1:D10", "valueRenderOption": "FORMATTED_VALUE"}'
+gws sheets spreadsheets values get --params '{"spreadsheetId": "<SPREADSHEET_ID>", "range": "Sheet1!A1:D10"}'
+gws sheets spreadsheets values get --params '{"spreadsheetId": "<SPREADSHEET_ID>", "range": "Sheet1!A1:D10", "valueRenderOption": "FORMATTED_VALUE"}'
 ```
 
 #### update
 Write values to a range. Set `valueInputOption` to `USER_ENTERED` (applies formulas/formatting) or `RAW` (stores literal strings).
 
 ```
-gws sheets values update <SPREADSHEET_ID> --params '{"range": "Sheet1!A1", "valueInputOption": "USER_ENTERED"}' \
+gws sheets spreadsheets values update \
+  --params '{"spreadsheetId": "<SPREADSHEET_ID>", "range": "Sheet1!A1", "valueInputOption": "USER_ENTERED"}' \
   --json '{"values": [["Name", "Score"], ["Alice", 95], ["Bob", 87]]}'
 ```
 
@@ -319,7 +393,8 @@ gws sheets values update <SPREADSHEET_ID> --params '{"range": "Sheet1!A1", "valu
 Append rows after the last row with data in the given range.
 
 ```
-gws sheets values append <SPREADSHEET_ID> --params '{"range": "Sheet1!A:D", "valueInputOption": "USER_ENTERED"}' \
+gws sheets spreadsheets values append \
+  --params '{"spreadsheetId": "<SPREADSHEET_ID>", "range": "Sheet1!A:D", "valueInputOption": "USER_ENTERED"}' \
   --json '{"values": [["Charlie", 92], ["Diana", 88]]}'
 ```
 
@@ -327,21 +402,22 @@ gws sheets values append <SPREADSHEET_ID> --params '{"range": "Sheet1!A:D", "val
 Clear values from a range (preserves formatting).
 
 ```
-gws sheets values clear <SPREADSHEET_ID> --params '{"range": "Sheet1!A1:D10"}'
+gws sheets spreadsheets values clear --params '{"spreadsheetId": "<SPREADSHEET_ID>", "range": "Sheet1!A1:D10"}'
 ```
 
 #### batchGet
 Read multiple ranges in one call.
 
 ```
-gws sheets values batchGet <SPREADSHEET_ID> --params '{"ranges": ["Sheet1!A1:B5", "Sheet2!A1:C3"]}'
+gws sheets spreadsheets values batchGet \
+  --params '{"spreadsheetId": "<SPREADSHEET_ID>", "ranges": ["Sheet1!A1:B5", "Sheet2!A1:C3"]}'
 ```
 
 #### batchUpdate
 Write to multiple ranges in one call.
 
 ```
-gws sheets values batchUpdate <SPREADSHEET_ID> --json '{
+gws sheets spreadsheets values batchUpdate --params '{"spreadsheetId": "<SPREADSHEET_ID>"}' --json '{
   "valueInputOption": "USER_ENTERED",
   "data": [
     {"range": "Sheet1!A1", "values": [["Header1", "Header2"]]},
@@ -350,13 +426,15 @@ gws sheets values batchUpdate <SPREADSHEET_ID> --json '{
 }'
 ```
 
-### sheets
+### spreadsheets sheets
 
 #### copyTo
 Copy a sheet to another spreadsheet.
 
 ```
-gws sheets sheets copyTo <SPREADSHEET_ID> <SHEET_ID> --json '{"destinationSpreadsheetId": "<TARGET_SPREADSHEET_ID>"}'
+gws sheets spreadsheets sheets copyTo \
+  --params '{"spreadsheetId": "<SPREADSHEET_ID>", "sheetId": <SHEET_ID_INT>}' \
+  --json '{"destinationSpreadsheetId": "<TARGET_SPREADSHEET_ID>"}'
 ```
 
 ---
@@ -376,14 +454,14 @@ gws docs documents create --json '{"title": "My Document"}'
 Retrieve document content and metadata.
 
 ```
-gws docs documents get <DOCUMENT_ID>
+gws docs documents get --params '{"documentId": "<DOCUMENT_ID>"}'
 ```
 
 #### batchUpdate
 Apply structural edits: insert/delete text, apply formatting, insert tables, images, page breaks, etc.
 
 ```
-gws docs documents batchUpdate <DOCUMENT_ID> --json '{
+gws docs documents batchUpdate --params '{"documentId": "<DOCUMENT_ID>"}' --json '{
   "requests": [
     {"insertText": {"location": {"index": 1}, "text": "Hello, World!\n"}},
     {"updateTextStyle": {
@@ -412,35 +490,35 @@ gws slides presentations create --json '{"title": "My Presentation"}'
 Retrieve presentation metadata and slide content.
 
 ```
-gws slides presentations get <PRESENTATION_ID>
+gws slides presentations get --params '{"presentationId": "<PRESENTATION_ID>"}'
 ```
 
 #### batchUpdate
 Apply changes: create slides, insert text, add images, update layouts, etc.
 
 ```
-gws slides presentations batchUpdate <PRESENTATION_ID> --json '{
+gws slides presentations batchUpdate --params '{"presentationId": "<PRESENTATION_ID>"}' --json '{
   "requests": [
     {"createSlide": {"insertionIndex": 1, "slideLayoutReference": {"predefinedLayout": "TITLE_AND_BODY"}}}
   ]
 }'
 ```
 
-### pages
+### presentations pages
 
 #### get
 Get a specific page (slide, layout, or master).
 
 ```
-gws slides presentations pages get <PRESENTATION_ID> <PAGE_ID>
+gws slides presentations pages get --params '{"presentationId": "<PRESENTATION_ID>", "pageObjectId": "<PAGE_ID>"}'
 ```
 
 #### getThumbnail
 Get a thumbnail image of a page. Save with `--output`.
 
 ```
-gws slides presentations pages getThumbnail <PRESENTATION_ID> <PAGE_ID> \
-  --params '{"thumbnailProperties.mimeType": "PNG", "thumbnailProperties.thumbnailSize": "LARGE"}' \
+gws slides presentations pages getThumbnail \
+  --params '{"presentationId": "<PRESENTATION_ID>", "pageObjectId": "<PAGE_ID>", "thumbnailProperties.mimeType": "PNG", "thumbnailProperties.thumbnailSize": "LARGE"}' \
   --output /tmp/slide-thumb.png
 ```
 
@@ -448,174 +526,185 @@ gws slides presentations pages getThumbnail <PRESENTATION_ID> <PAGE_ID> \
 
 ## Gmail
 
-### messages
+> All Gmail API commands live under `gws gmail users <resource> <method>` and need `"userId": "me"` in `--params`.
+
+### users messages
 
 #### list
 List messages matching a query.
 
 ```
-gws gmail messages list --params '{"q": "is:unread", "maxResults": 20}'
-gws gmail messages list --params '{"q": "from:boss@example.com newer_than:7d"}' --page-all
+gws gmail users messages list --params '{"userId": "me", "q": "is:unread", "maxResults": 20}'
+gws gmail users messages list --params '{"userId": "me", "q": "from:boss@example.com newer_than:7d"}' --page-all
 ```
 
 #### get
 Get a specific message. Use `format` param: `full`, `metadata`, `minimal`, `raw`.
 
 ```
-gws gmail messages get <MESSAGE_ID>
-gws gmail messages get <MESSAGE_ID> --params '{"format": "full"}'
-gws gmail messages get <MESSAGE_ID> --params '{"format": "raw"}' --output /tmp/email.eml
+gws gmail users messages get --params '{"userId": "me", "id": "<MESSAGE_ID>"}'
+gws gmail users messages get --params '{"userId": "me", "id": "<MESSAGE_ID>", "format": "full"}'
+gws gmail users messages get --params '{"userId": "me", "id": "<MESSAGE_ID>", "format": "raw"}' --output /tmp/email.eml
 ```
 
 #### send
-Send an email. Provide the RFC 2822 message as a base64url-encoded `raw` field, or use the simplified JSON body.
+Send an email. Provide the RFC 2822 message as a base64url-encoded `raw` field. For most cases, prefer `gws gmail +send`.
 
 ```
-gws gmail messages send --json '{"raw": "<BASE64URL_ENCODED_RFC2822>"}'
+gws gmail users messages send --params '{"userId": "me"}' --json '{"raw": "<BASE64URL_ENCODED_RFC2822>"}'
 ```
 
 #### trash
-Move a message to trash.
-
 ```
-gws gmail messages trash <MESSAGE_ID>
+gws gmail users messages trash --params '{"userId": "me", "id": "<MESSAGE_ID>"}'
 ```
 
 #### untrash
-Remove a message from trash.
-
 ```
-gws gmail messages untrash <MESSAGE_ID>
+gws gmail users messages untrash --params '{"userId": "me", "id": "<MESSAGE_ID>"}'
 ```
 
 #### delete
 Permanently delete a message (irreversible).
 
 ```
-gws gmail messages delete <MESSAGE_ID>
+gws gmail users messages delete --params '{"userId": "me", "id": "<MESSAGE_ID>"}'
 ```
 
 #### modify
 Add or remove labels on a message.
 
 ```
-gws gmail messages modify <MESSAGE_ID> --json '{"addLabelIds": ["UNREAD"], "removeLabelIds": ["INBOX"]}'
+gws gmail users messages modify --params '{"userId": "me", "id": "<MESSAGE_ID>"}' \
+  --json '{"addLabelIds": ["UNREAD"], "removeLabelIds": ["INBOX"]}'
 ```
 
 #### batchModify
 Modify labels on multiple messages at once.
 
 ```
-gws gmail messages batchModify --json '{
+gws gmail users messages batchModify --params '{"userId": "me"}' --json '{
   "ids": ["<MSG_ID_1>", "<MSG_ID_2>"],
   "addLabelIds": ["Label_123"],
   "removeLabelIds": ["UNREAD"]
 }'
 ```
 
-### drafts
+### users drafts
+
+> Drafts use the path parameter name `id`, not `draftId`.
 
 #### list
 ```
-gws gmail drafts list
+gws gmail users drafts list --params '{"userId": "me"}'
 ```
 
 #### get
 ```
-gws gmail drafts get <DRAFT_ID>
+gws gmail users drafts get --params '{"userId": "me", "id": "<DRAFT_ID>"}'
 ```
 
 #### create
 ```
-gws gmail drafts create --json '{"message": {"raw": "<BASE64URL_ENCODED_RFC2822>"}}'
+gws gmail users drafts create --params '{"userId": "me"}' \
+  --json '{"message": {"raw": "<BASE64URL_ENCODED_RFC2822>"}}'
 ```
 
 #### update
 ```
-gws gmail drafts update <DRAFT_ID> --json '{"message": {"raw": "<BASE64URL_ENCODED_RFC2822>"}}'
+gws gmail users drafts update --params '{"userId": "me", "id": "<DRAFT_ID>"}' \
+  --json '{"message": {"raw": "<BASE64URL_ENCODED_RFC2822>"}}'
 ```
 
 #### send
 ```
-gws gmail drafts send --json '{"id": "<DRAFT_ID>"}'
+gws gmail users drafts send --params '{"userId": "me"}' --json '{"id": "<DRAFT_ID>"}'
 ```
 
 #### delete
 ```
-gws gmail drafts delete <DRAFT_ID>
+gws gmail users drafts delete --params '{"userId": "me", "id": "<DRAFT_ID>"}'
 ```
 
-### labels
+### users labels
+
+> Labels use the path parameter name `id`, not `labelId`.
 
 #### list
 ```
-gws gmail labels list
+gws gmail users labels list --params '{"userId": "me"}'
 ```
 
 #### get
 ```
-gws gmail labels get <LABEL_ID>
+gws gmail users labels get --params '{"userId": "me", "id": "<LABEL_ID>"}'
 ```
 
 #### create
 ```
-gws gmail labels create --json '{"name": "Projects/Active", "labelListVisibility": "labelShow", "messageListVisibility": "show"}'
+gws gmail users labels create --params '{"userId": "me"}' \
+  --json '{"name": "Projects/Active", "labelListVisibility": "labelShow", "messageListVisibility": "show"}'
 ```
 
 #### update
 ```
-gws gmail labels update <LABEL_ID> --json '{"name": "Projects/Archive"}'
+gws gmail users labels update --params '{"userId": "me", "id": "<LABEL_ID>"}' \
+  --json '{"name": "Projects/Archive"}'
 ```
 
 #### delete
 ```
-gws gmail labels delete <LABEL_ID>
+gws gmail users labels delete --params '{"userId": "me", "id": "<LABEL_ID>"}'
 ```
 
-### threads
+### users threads
+
+> Threads use the path parameter name `id`, not `threadId`.
 
 #### list
 ```
-gws gmail threads list --params '{"q": "subject:weekly report"}'
+gws gmail users threads list --params '{"userId": "me", "q": "subject:weekly report"}'
 ```
 
 #### get
 ```
-gws gmail threads get <THREAD_ID>
+gws gmail users threads get --params '{"userId": "me", "id": "<THREAD_ID>"}'
 ```
 
 #### modify
 ```
-gws gmail threads modify <THREAD_ID> --json '{"addLabelIds": ["IMPORTANT"]}'
+gws gmail users threads modify --params '{"userId": "me", "id": "<THREAD_ID>"}' \
+  --json '{"addLabelIds": ["IMPORTANT"]}'
 ```
 
 #### trash
 ```
-gws gmail threads trash <THREAD_ID>
+gws gmail users threads trash --params '{"userId": "me", "id": "<THREAD_ID>"}'
 ```
 
 #### untrash
 ```
-gws gmail threads untrash <THREAD_ID>
+gws gmail users threads untrash --params '{"userId": "me", "id": "<THREAD_ID>"}'
 ```
 
 #### delete
 ```
-gws gmail threads delete <THREAD_ID>
+gws gmail users threads delete --params '{"userId": "me", "id": "<THREAD_ID>"}'
 ```
 
-### history
+### users history
 
 #### list
 List history of changes since a given `startHistoryId`.
 
 ```
-gws gmail history list --params '{"startHistoryId": "12345", "historyTypes": ["messageAdded", "labelAdded"]}'
+gws gmail users history list \
+  --params '{"userId": "me", "startHistoryId": "12345", "historyTypes": ["messageAdded", "labelAdded"]}'
 ```
 
 ### Gmail Search Operators
 
-Use these in the `q` parameter for `messages list` and `threads list`.
+Use these in the `q` parameter for `users messages list` and `users threads list`.
 
 | Operator | Description |
 |----------|-------------|
@@ -661,20 +750,20 @@ from:alice@example.com OR from:bob@example.com has:attachment
 List events on a calendar. Default calendar: `primary`.
 
 ```
-gws calendar events list <CALENDAR_ID> --params '{"timeMin": "2025-01-01T00:00:00Z", "timeMax": "2025-12-31T23:59:59Z", "singleEvents": true, "orderBy": "startTime"}'
-gws calendar events list primary --params '{"timeMin": "2025-04-01T00:00:00Z", "maxResults": 10, "singleEvents": true}'
+gws calendar events list --params '{"calendarId": "<CALENDAR_ID>", "timeMin": "2025-01-01T00:00:00Z", "timeMax": "2025-12-31T23:59:59Z", "singleEvents": true, "orderBy": "startTime"}'
+gws calendar events list --params '{"calendarId": "primary", "timeMin": "2025-04-01T00:00:00Z", "maxResults": 10, "singleEvents": true}'
 ```
 
 #### get
 ```
-gws calendar events get <CALENDAR_ID> <EVENT_ID>
+gws calendar events get --params '{"calendarId": "<CALENDAR_ID>", "eventId": "<EVENT_ID>"}'
 ```
 
 #### insert
 Create a new event.
 
 ```
-gws calendar events insert <CALENDAR_ID> --json '{
+gws calendar events insert --params '{"calendarId": "<CALENDAR_ID>"}' --json '{
   "summary": "Team Standup",
   "location": "Conference Room A",
   "description": "Daily sync meeting",
@@ -692,40 +781,45 @@ gws calendar events insert <CALENDAR_ID> --json '{
 Update an existing event.
 
 ```
-gws calendar events update <CALENDAR_ID> <EVENT_ID> --json '{"summary": "Updated Meeting Title"}'
+gws calendar events update --params '{"calendarId": "<CALENDAR_ID>", "eventId": "<EVENT_ID>"}' \
+  --json '{"summary": "Updated Meeting Title"}'
 ```
 
 #### delete
 ```
-gws calendar events delete <CALENDAR_ID> <EVENT_ID>
+gws calendar events delete --params '{"calendarId": "<CALENDAR_ID>", "eventId": "<EVENT_ID>"}'
 ```
 
 #### quickAdd
 Create an event from a natural-language string.
 
 ```
-gws calendar events quickAdd <CALENDAR_ID> --params '{"text": "Lunch with Alice at noon tomorrow at Cafe Mocha"}'
+gws calendar events quickAdd \
+  --params '{"calendarId": "<CALENDAR_ID>", "text": "Lunch with Alice at noon tomorrow at Cafe Mocha"}'
 ```
 
 #### instances
 List instances of a recurring event.
 
 ```
-gws calendar events instances <CALENDAR_ID> <EVENT_ID> --params '{"timeMin": "2025-04-01T00:00:00Z", "timeMax": "2025-06-30T23:59:59Z"}'
+gws calendar events instances \
+  --params '{"calendarId": "<CALENDAR_ID>", "eventId": "<EVENT_ID>", "timeMin": "2025-04-01T00:00:00Z", "timeMax": "2025-06-30T23:59:59Z"}'
 ```
 
 #### move
-Move an event to a different calendar.
+Move an event to a different calendar. `destination` is required.
 
 ```
-gws calendar events move <CALENDAR_ID> <EVENT_ID> --params '{"destination": "<TARGET_CALENDAR_ID>"}'
+gws calendar events move \
+  --params '{"calendarId": "<CALENDAR_ID>", "eventId": "<EVENT_ID>", "destination": "<TARGET_CALENDAR_ID>"}'
 ```
 
 #### watch
 Set up push notifications for event changes.
 
 ```
-gws calendar events watch <CALENDAR_ID> --json '{"id": "unique-channel-id", "type": "web_hook", "address": "https://example.com/webhook"}'
+gws calendar events watch --params '{"calendarId": "<CALENDAR_ID>"}' \
+  --json '{"id": "unique-channel-id", "type": "web_hook", "address": "https://example.com/webhook"}'
 ```
 
 ### calendarList
@@ -739,7 +833,7 @@ gws calendar calendarList list
 
 #### get
 ```
-gws calendar calendarList get <CALENDAR_ID>
+gws calendar calendarList get --params '{"calendarId": "<CALENDAR_ID>"}'
 ```
 
 #### insert
@@ -751,14 +845,15 @@ gws calendar calendarList insert --json '{"id": "shared-calendar@group.calendar.
 
 #### update
 ```
-gws calendar calendarList update <CALENDAR_ID> --json '{"colorId": "9", "selected": true}'
+gws calendar calendarList update --params '{"calendarId": "<CALENDAR_ID>"}' \
+  --json '{"colorId": "9", "selected": true}'
 ```
 
 #### delete
 Remove a calendar from the user's list.
 
 ```
-gws calendar calendarList delete <CALENDAR_ID>
+gws calendar calendarList delete --params '{"calendarId": "<CALENDAR_ID>"}'
 ```
 
 ### settings
@@ -769,8 +864,10 @@ gws calendar settings list
 ```
 
 #### get
+> Uses path param name `setting` (not `settingId`).
+
 ```
-gws calendar settings get <SETTING_ID>
+gws calendar settings get --params '{"setting": "<SETTING_ID>"}'
 ```
 
 ### freebusy
@@ -790,6 +887,8 @@ gws calendar freebusy query --json '{
 
 ## Tasks
 
+> Tasks uses path param names **`tasklist`** and **`task`** (not `tasklistId` / `taskId`).
+
 ### tasklists
 
 #### list
@@ -799,7 +898,7 @@ gws tasks tasklists list
 
 #### get
 ```
-gws tasks tasklists get <TASKLIST_ID>
+gws tasks tasklists get --params '{"tasklist": "<TASKLIST_ID>"}'
 ```
 
 #### insert
@@ -809,54 +908,57 @@ gws tasks tasklists insert --json '{"title": "Work Tasks"}'
 
 #### update
 ```
-gws tasks tasklists update <TASKLIST_ID> --json '{"title": "Renamed Task List"}'
+gws tasks tasklists update --params '{"tasklist": "<TASKLIST_ID>"}' --json '{"title": "Renamed Task List"}'
 ```
 
 #### delete
 ```
-gws tasks tasklists delete <TASKLIST_ID>
+gws tasks tasklists delete --params '{"tasklist": "<TASKLIST_ID>"}'
 ```
 
 ### tasks
 
 #### list
 ```
-gws tasks tasks list <TASKLIST_ID>
-gws tasks tasks list <TASKLIST_ID> --params '{"showCompleted": false, "showHidden": false}'
+gws tasks tasks list --params '{"tasklist": "<TASKLIST_ID>"}'
+gws tasks tasks list --params '{"tasklist": "<TASKLIST_ID>", "showCompleted": false, "showHidden": false}'
 ```
 
 #### get
 ```
-gws tasks tasks get <TASKLIST_ID> <TASK_ID>
+gws tasks tasks get --params '{"tasklist": "<TASKLIST_ID>", "task": "<TASK_ID>"}'
 ```
 
 #### insert
 ```
-gws tasks tasks insert <TASKLIST_ID> --json '{"title": "Review PR #42", "notes": "Check edge cases", "due": "2025-04-15T00:00:00Z"}'
+gws tasks tasks insert --params '{"tasklist": "<TASKLIST_ID>"}' \
+  --json '{"title": "Review PR #42", "notes": "Check edge cases", "due": "2025-04-15T00:00:00Z"}'
 ```
 
 #### update
 ```
-gws tasks tasks update <TASKLIST_ID> <TASK_ID> --json '{"title": "Updated task title", "status": "completed"}'
+gws tasks tasks update --params '{"tasklist": "<TASKLIST_ID>", "task": "<TASK_ID>"}' \
+  --json '{"title": "Updated task title", "status": "completed"}'
 ```
 
 #### delete
 ```
-gws tasks tasks delete <TASKLIST_ID> <TASK_ID>
+gws tasks tasks delete --params '{"tasklist": "<TASKLIST_ID>", "task": "<TASK_ID>"}'
 ```
 
 #### move
 Reorder a task or move it under a parent task.
 
 ```
-gws tasks tasks move <TASKLIST_ID> <TASK_ID> --params '{"parent": "<PARENT_TASK_ID>", "previous": "<PREVIOUS_TASK_ID>"}'
+gws tasks tasks move \
+  --params '{"tasklist": "<TASKLIST_ID>", "task": "<TASK_ID>", "parent": "<PARENT_TASK_ID>", "previous": "<PREVIOUS_TASK_ID>"}'
 ```
 
 #### clear
 Remove all completed tasks from a task list.
 
 ```
-gws tasks tasks clear <TASKLIST_ID>
+gws tasks tasks clear --params '{"tasklist": "<TASKLIST_ID>"}'
 ```
 
 ---
@@ -926,42 +1028,49 @@ gws tasks tasks clear <TASKLIST_ID>
 ### Share with anyone (public link)
 
 ```
-gws drive permissions create <FILE_ID> --json '{"role": "reader", "type": "anyone"}'
+gws drive permissions create --params '{"fileId": "<FILE_ID>"}' \
+  --json '{"role": "reader", "type": "anyone"}'
 ```
 
 Retrieve the shareable link after granting permission:
 ```
-gws drive files get <FILE_ID> --fields "webViewLink"
+gws drive files get --params '{"fileId": "<FILE_ID>", "fields": "webViewLink"}'
 ```
 
 ### Share with a specific user
 
 ```
 # Read-only
-gws drive permissions create <FILE_ID> --json '{"role": "reader", "type": "user", "emailAddress": "user@example.com"}'
+gws drive permissions create --params '{"fileId": "<FILE_ID>"}' \
+  --json '{"role": "reader", "type": "user", "emailAddress": "user@example.com"}'
 
 # Edit access
-gws drive permissions create <FILE_ID> --json '{"role": "writer", "type": "user", "emailAddress": "user@example.com"}'
+gws drive permissions create --params '{"fileId": "<FILE_ID>"}' \
+  --json '{"role": "writer", "type": "user", "emailAddress": "user@example.com"}'
 
 # Comment-only
-gws drive permissions create <FILE_ID> --json '{"role": "commenter", "type": "user", "emailAddress": "user@example.com"}'
+gws drive permissions create --params '{"fileId": "<FILE_ID>"}' \
+  --json '{"role": "commenter", "type": "user", "emailAddress": "user@example.com"}'
 ```
 
 ### Share with a domain
 
 ```
-gws drive permissions create <FILE_ID> --json '{"role": "reader", "type": "domain", "domain": "example.com"}'
+gws drive permissions create --params '{"fileId": "<FILE_ID>"}' \
+  --json '{"role": "reader", "type": "domain", "domain": "example.com"}'
 ```
 
 ### Share with a Google Group
 
 ```
-gws drive permissions create <FILE_ID> --json '{"role": "writer", "type": "group", "emailAddress": "team@googlegroups.com"}'
+gws drive permissions create --params '{"fileId": "<FILE_ID>"}' \
+  --json '{"role": "writer", "type": "group", "emailAddress": "team@googlegroups.com"}'
 ```
 
 ### Transfer ownership
 
 ```
-gws drive permissions create <FILE_ID> --json '{"role": "owner", "type": "user", "emailAddress": "newowner@example.com"}' \
-  --params '{"transferOwnership": true}'
+gws drive permissions create \
+  --params '{"fileId": "<FILE_ID>", "transferOwnership": true}' \
+  --json '{"role": "owner", "type": "user", "emailAddress": "newowner@example.com"}'
 ```

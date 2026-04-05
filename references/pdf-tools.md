@@ -842,13 +842,13 @@ text = page.get_text("text", textpage=tp)
 
 ---
 
-## 2. PyPDF2 / pypdf -- PDF Merge / Split / Transform
+## 2. PyPDF2 -- PDF Merge / Split / Transform
 
 ```python
-from pypdf import PdfReader, PdfWriter, PdfMerger
+from PyPDF2 import PdfReader, PdfWriter, PdfMerger
 ```
 
-> Note: `PyPDF2` is deprecated. Use `pypdf` (lowercase). API is largely identical.
+> This skill standardises on `PyPDF2` (installed by default — see `setup.md` and `scripts/healthcheck.py`). The maintained fork `pypdf` exposes a near-identical API; to switch, `pip install pypdf` and replace `PyPDF2` with `pypdf` in the imports below.
 
 ### 2.1 Core Operations
 
@@ -904,7 +904,7 @@ page.merge_page(overlay_page)      # overlay another page (watermark/stamp)
 page.merge_transformed_page(page2, transformation)  # with Transformation object
 
 # Transformation object
-from pypdf import Transformation
+from PyPDF2 import Transformation
 op = Transformation().rotate(45).scale(1.5).translate(tx=100, ty=50)
 page.add_transformation(op)
 
@@ -915,7 +915,7 @@ page.trimbox
 page.bleedbox
 page.artbox
 # Settable:
-page.cropbox = pypdf.generic.RectangleObject([0, 0, 300, 400])
+page.cropbox = PyPDF2.generic.RectangleObject([0, 0, 300, 400])
 ```
 
 ---
@@ -973,7 +973,7 @@ writer.add_metadata({
     "/Subject": "Subject",
     "/Keywords": "key1, key2",
     "/Creator": "My App",
-    "/Producer": "pypdf",
+    "/Producer": "PyPDF2",
 })
 ```
 
@@ -1021,7 +1021,7 @@ writer.add_outline_item(
 #### Annotations
 
 ```python
-from pypdf.annotations import (
+from PyPDF2.annotations import (
     Text, FreeText, Line, PolyLine, Polygon, Rectangle, Circle,
     Highlight, Underline, Squiggly, StrikeOut, Stamp, Ink, Link,
 )
@@ -1070,7 +1070,7 @@ for page in writer.pages:
     for annot in page.get("/Annots", []):
         annot_obj = annot.get_object()
         if annot_obj.get("/Subtype") == "/Widget":
-            annot_obj[pypdf.generic.NameObject("/Ff")] = pypdf.generic.NumberObject(1)  # read-only
+            annot_obj[PyPDF2.generic.NameObject("/Ff")] = PyPDF2.generic.NumberObject(1)  # read-only
 ```
 
 #### Attachments

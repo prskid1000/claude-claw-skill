@@ -50,9 +50,11 @@ python -c "import docx; print('python-docx OK')"
 
 ---
 
-## MCP Servers
+## MCP Servers (optional)
 
-### MySQL
+The blocks below describe optional MCP integrations. The core skill works without them — skip any you don't need. Check your current MCP tool list before assuming any of these are available.
+
+### MySQL (optional)
 
 #### settings.json config
 ```json
@@ -95,7 +97,7 @@ mcp__mcp_server_mysql__mysql_query(query="SELECT 1 AS test")
 
 ---
 
-### Chrome DevTools (Edge)
+### Chrome DevTools (Edge) (optional)
 
 #### settings.json config
 ```json
@@ -118,25 +120,16 @@ Always use Microsoft Edge, not Chrome. The `--remote-debugging-port=9222` flag e
 
 ---
 
-### ClickUp
+### ClickUp (CLI, not MCP)
 
-#### settings.json config
-```json
-{
-  "mcpServers": {
-    "clickup": {
-      "command": "npx",
-      "args": ["-y", "@anthropic/clickup-mcp@latest"],
-      "env": {
-        "CLICKUP_API_TOKEN": "pk_..."
-      }
-    }
-  }
-}
+This skill uses the standalone `clickup` CLI (installed via the CLI Tools table above), **not** an MCP server. Authenticate with:
+
+```bash
+clickup auth login           # interactive OAuth/API-token flow
+clickup space select         # pick default workspace/space
 ```
 
-#### API Token
-Obtain from ClickUp: Settings > Apps > API Token. Store in the `CLICKUP_API_TOKEN` env var.
+See `references/clickup-cli.md` for the full command surface.
 
 ---
 

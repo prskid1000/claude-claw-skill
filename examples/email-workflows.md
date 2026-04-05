@@ -160,37 +160,65 @@ with open("/tmp/chart.png", "rb") as f:
 
 ## Gmail via `gws` CLI
 
-### Search Unread Emails
+> **Windows + subprocess:** `gws` is a `.cmd` shim on Windows, so `subprocess.run(["gws", ...])` without `shell=True` raises `FileNotFoundError`. Resolve it once at the top of your script:
+> ```python
+> import shutil
+> GWS = shutil.which("gws") or "gws"
+> ```
+> Then use `[GWS, "gmail", ...]` in every `subprocess.run` call. All Python examples below assume `GWS` has been defined.
+>
+> **Tip:** For everyday sending / triage / replies, the `gws gmail +send`, `+triage`, `+reply`, `+reply-all`, `+forward` helpers are simpler than the raw API — no MIME plumbing required. Drop to the raw API (shown below) only when you need attachments, custom headers, or batch operations.
+
+### Quick sends with helpers (no MIME needed)
+
+```bash
+# Send a plain or HTML email in one command
+gws gmail +send --to alice@example.com --subject 'Hi' --body 'Hello!'
+gws gmail +send --to alice@example.com --subject 'Hi' --body '<b>Bold</b>' --html
+gws gmail +send --to a@x.com --cc b@x.com --bcc c@x.com --subject S --body B
+
+# Reply / reply-all / forward (handles threading automatically)
+gws gmail +reply     --message-id <MESSAGE_ID> --body 'Thanks, got it!'
+gws gmail +reply-all --message-id <MESSAGE_ID> --body 'Sounds good' --remove bob@x.com
+gws gmail +forward   --message-id <MESSAGE_ID> --to dave@example.com --body 'FYI'
+
+# Unread inbox summary
+gws gmail +triage --max 5 --query 'from:boss@x.com' --labels
+```
+
+### Search Unread Emails (raw API)
 
 ```bash
 # List unread emails
-gws gmail messages list --params '{"q": "is:unread", "maxResults": 10}' --format json
+gws gmail users messages list --params '{"userId":"me","q":"is:unread","maxResults":10}' --format json
 
 # Search with multiple criteria
-gws gmail messages list --params '{"q": "is:unread from:boss@company.com after:2025/01/01", "maxResults": 20}' --format json
+gws gmail users messages list --params '{"userId":"me","q":"is:unread from:boss@company.com after:2025/01/01","maxResults":20}' --format json
 
 # Search by subject
-gws gmail messages list --params '{"q": "subject:\"monthly report\"", "maxResults": 5}' --format json
+gws gmail users messages list --params '{"userId":"me","q":"subject:\"monthly report\"","maxResults":5}' --format json
 ```
 
 ### Read Email with Metadata
 
 ```bash
 # Get full message (headers + body)
-gws gmail messages get <MESSAGE_ID> --format json
-
-# Get specific fields only
-gws gmail messages get <MESSAGE_ID> --fields "id,threadId,labelIds,payload/headers" --format json
+gws gmail users messages get --params '{"userId":"me","id":"<MESSAGE_ID>","format":"full"}' --format json
 
 # Get message with metadata format (headers only, no body)
-gws gmail messages get <MESSAGE_ID> --params '{"format": "metadata", "metadataHeaders": ["From","To","Subject","Date"]}' --format json
+gws gmail users messages get --params '{"userId":"me","id":"<MESSAGE_ID>","format":"metadata","metadataHeaders":["From","To","Subject","Date"]}' --format json
+
+# Minimal (IDs and labels only)
+gws gmail users messages get --params '{"userId":"me","id":"<MESSAGE_ID>","format":"minimal"}' --format json
 ```
 
 ### Send Email (base64 Raw)
 
 ```python
-import subprocess, base64
+import shutil, subprocess, base64, json
 from email.mime.text import MIMEText
+
+GWS = shutil.which("gws") or "gws"
 
 msg = MIMEText("Hello from the pipeline!")
 msg["Subject"] = "Automated Report"
@@ -200,18 +228,21 @@ msg["To"] = "recipient@example.com"
 raw = base64.urlsafe_b64encode(msg.as_bytes()).decode("ascii")
 
 subprocess.run([
-    "gws", "gmail", "messages", "send",
-    "--json", f'{{"raw": "{raw}"}}',
+    GWS, "gmail", "users", "messages", "send",
+    "--params", json.dumps({"userId": "me"}),
+    "--json", json.dumps({"raw": raw}),
 ], check=True)
 ```
 
 ### Send Email with Attachment (base64 Raw)
 
 ```python
-import subprocess, base64
+import shutil, subprocess, base64, json
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from email.mime.application import MIMEApplication
+
+GWS = shutil.which("gws") or "gws"
 
 msg = MIMEMultipart()
 msg["Subject"] = "Invoice Attached"
@@ -227,16 +258,19 @@ with open("/tmp/invoice.pdf", "rb") as f:
 raw = base64.urlsafe_b64encode(msg.as_bytes()).decode("ascii")
 
 subprocess.run([
-    "gws", "gmail", "messages", "send",
-    "--json", f'{{"raw": "{raw}"}}',
+    GWS, "gmail", "users", "messages", "send",
+    "--params", json.dumps({"userId": "me"}),
+    "--json", json.dumps({"raw": raw}),
 ], check=True)
 ```
 
 ### Send Reply in Thread
 
 ```python
-import subprocess, base64
+import shutil, subprocess, base64, json
 from email.mime.text import MIMEText
+
+GWS = shutil.which("gws") or "gws"
 
 msg = MIMEText("Confirmed, will proceed with the plan.")
 msg["Subject"] = "Re: Project Plan"
@@ -249,26 +283,31 @@ raw = base64.urlsafe_b64encode(msg.as_bytes()).decode("ascii")
 thread_id = "18abc1234def5678"
 
 subprocess.run([
-    "gws", "gmail", "messages", "send",
-    "--json", f'{{"raw": "{raw}", "threadId": "{thread_id}"}}',
+    GWS, "gmail", "users", "messages", "send",
+    "--params", json.dumps({"userId": "me"}),
+    "--json", json.dumps({"raw": raw, "threadId": thread_id}),
 ], check=True)
 ```
+
+> For non-attachment replies, `gws gmail +reply --message-id <ID> --body '...'` is much shorter and sets `In-Reply-To`/`References`/`threadId` for you.
 
 ### Mark as Read
 
 ```bash
-gws gmail messages modify <MESSAGE_ID> --json '{"removeLabelIds": ["UNREAD"]}'
+gws gmail users messages modify \
+  --params '{"userId":"me","id":"<MESSAGE_ID>"}' \
+  --json '{"removeLabelIds":["UNREAD"]}'
 ```
 
 ### Download Attachment
 
 ```bash
-# List message to find attachment IDs
-gws gmail messages get <MESSAGE_ID> --fields "payload/parts" --format json
+# Inspect message parts to find attachmentId
+gws gmail users messages get --params '{"userId":"me","id":"<MESSAGE_ID>","format":"full"}' --format json
 
 # Download attachment
-gws gmail messages attachments get <ATTACHMENT_ID> \
-  --params '{"messageId": "<MESSAGE_ID>"}' \
+gws gmail users messages attachments get \
+  --params '{"userId":"me","messageId":"<MESSAGE_ID>","id":"<ATTACHMENT_ID>"}' \
   --output /tmp/downloaded_file.pdf
 ```
 
@@ -276,23 +315,25 @@ gws gmail messages attachments get <ATTACHMENT_ID> \
 
 ```bash
 # Emails from specific sender in last 7 days
-gws gmail messages list --params '{"q": "from:sender@example.com newer_than:7d"}' --format json
+gws gmail users messages list --params '{"userId":"me","q":"from:sender@example.com newer_than:7d"}' --format json
 
 # Emails with attachments larger than 5MB
-gws gmail messages list --params '{"q": "has:attachment larger:5M"}' --format json
+gws gmail users messages list --params '{"userId":"me","q":"has:attachment larger:5M"}' --format json
 
 # Emails in a specific label
-gws gmail messages list --params '{"q": "label:projects/active", "maxResults": 50}' --format json
+gws gmail users messages list --params '{"userId":"me","q":"label:projects/active","maxResults":50}' --format json
 
 # Emails to me (not CC/BCC)
-gws gmail messages list --params '{"q": "deliveredto:me@gmail.com is:unread"}' --format json
+gws gmail users messages list --params '{"userId":"me","q":"deliveredto:me@gmail.com is:unread"}' --format json
 ```
 
 ### Draft Creation
 
 ```python
-import subprocess, base64
+import shutil, subprocess, base64, json
 from email.mime.text import MIMEText
+
+GWS = shutil.which("gws") or "gws"
 
 msg = MIMEText("Draft content here - will review before sending.")
 msg["Subject"] = "Proposal Draft"
@@ -302,8 +343,9 @@ msg["To"] = "recipient@example.com"
 raw = base64.urlsafe_b64encode(msg.as_bytes()).decode("ascii")
 
 subprocess.run([
-    "gws", "gmail", "drafts", "create",
-    "--json", f'{{"message": {{"raw": "{raw}"}}}}',
+    GWS, "gmail", "users", "drafts", "create",
+    "--params", json.dumps({"userId": "me"}),
+    "--json", json.dumps({"message": {"raw": raw}}),
 ], check=True)
 ```
 
@@ -312,12 +354,14 @@ subprocess.run([
 ## Full Workflow: Generate Report, Compose Email, Send with Attachment
 
 ```python
-import subprocess, base64
+import shutil, subprocess, base64, json
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from email.mime.application import MIMEApplication
 from openpyxl import Workbook
 from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
+
+GWS = shutil.which("gws") or "gws"
 
 # --- Step 1: Generate Excel report ---
 wb = Workbook()
@@ -393,8 +437,9 @@ with open(report_path, "rb") as f:
 raw = base64.urlsafe_b64encode(msg.as_bytes()).decode("ascii")
 
 subprocess.run([
-    "gws", "gmail", "messages", "send",
-    "--json", f'{{"raw": "{raw}"}}',
+    GWS, "gmail", "users", "messages", "send",
+    "--params", json.dumps({"userId": "me"}),
+    "--json", json.dumps({"raw": raw}),
 ], check=True)
 
 print("Report generated and emailed successfully.")

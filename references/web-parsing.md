@@ -233,8 +233,11 @@ for form in doc.forms:
 ```
 
 #### Cleaner
+> Requires: `pip install lxml_html_clean` (separated out of lxml in 5.2+). Alternatively `pip install 'lxml[html_clean]'`.
+
 ```python
-from lxml.html.clean import Cleaner
+from lxml_html_clean import Cleaner        # lxml 5.2+
+# from lxml.html.clean import Cleaner      # still works if lxml_html_clean is installed
 cleaner = Cleaner(
     scripts=True, javascript=True, comments=True,
     style=False, links=False, meta=True,
@@ -258,6 +261,8 @@ annotated = html_annotate([(html1, "v1"), (html2, "v2")])
 ---
 
 ### CSS Selectors
+
+> Requires: `pip install cssselect`. Or use BeautifulSoup's `soup.select(...)` which needs no extra dependency.
 
 ```python
 from lxml.cssselect import CSSSelector

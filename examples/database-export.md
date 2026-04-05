@@ -2,6 +2,8 @@
 
 Working code blocks for MySQL queries via MCP and export to various formats.
 
+> **Optional feature.** These examples assume a MySQL MCP server is configured (exposed as `mcp__mcp_server_mysql__mysql_query`). If you don't have that MCP, substitute a direct connection with `pymysql` / `mysql-connector-python` — the SQL and export logic are unchanged. Check your available MCP tools first.
+
 All queries use the MCP tool `mcp__mcp_server_mysql__mysql_query`. In Python scripts, use `subprocess` to call `gws` or direct library exports.
 
 ---

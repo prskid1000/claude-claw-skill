@@ -2,15 +2,24 @@
 
 End-to-end working code blocks for multi-step data transformations.
 
+> **Windows + subprocess note:** `gws` (and `clickup`) are `.cmd` shims on Windows. `subprocess.run(["gws", ...])` without `shell=True` will raise `FileNotFoundError`. Resolve the full path once at the top of your script:
+> ```python
+> import shutil
+> GWS = shutil.which("gws") or "gws"
+> ```
+> Then use `[GWS, ...]` in every `subprocess.run` call. Also prefer `json.dumps(...)` over f-strings for `--params` / `--json` payloads — it escapes quotes and backslashes safely.
+
 ---
 
 ## CSV to Styled Excel to Google Sheets
 
 ```python
-import csv, subprocess
+import csv, shutil, subprocess, json
 from openpyxl import Workbook
 from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
 from openpyxl.utils import get_column_letter
+
+GWS = shutil.which("gws") or "gws"
 
 # --- Step 1: Read CSV ---
 csv_path = "/tmp/sales_data.csv"
@@ -64,8 +73,8 @@ wb.save(xlsx_path)
 
 # --- Step 3: Upload to Google Sheets ---
 result = subprocess.run([
-    "gws", "drive", "files", "create",
-    "--json", '{"name": "Sales Data Import", "mimeType": "application/vnd.google-apps.spreadsheet"}',
+    GWS, "drive", "files", "create",
+    "--json", json.dumps({"name": "Sales Data Import", "mimeType": "application/vnd.google-apps.spreadsheet"}),
     "--upload", xlsx_path,
     "--upload-content-type", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
 ], capture_output=True, text=True, check=True)
@@ -74,8 +83,9 @@ print(result.stdout)
 # --- Step 4 (optional): Share with anyone who has the link ---
 # Extract file ID from result, then:
 # subprocess.run([
-#     "gws", "drive", "permissions", "create", "<FILE_ID>",
-#     "--json", '{"role": "reader", "type": "anyone"}',
+#     GWS, "drive", "permissions", "create",
+#     "--params", json.dumps({"fileId": "<FILE_ID>"}),
+#     "--json", json.dumps({"role": "reader", "type": "anyone"}),
 # ], check=True)
 ```
 
@@ -130,15 +140,19 @@ print(f"Extracted tables saved to {xlsx_path}")
 ## Google Sheet Download, Modify, Upload Back
 
 ```python
-import subprocess, json
+import shutil, subprocess, json
 from openpyxl import load_workbook
 
+GWS = shutil.which("gws") or "gws"
 SHEET_FILE_ID = "<GOOGLE_SHEET_FILE_ID>"
 
 # --- Step 1: Export Google Sheet as XLSX ---
 subprocess.run([
-    "gws", "drive", "files", "export", SHEET_FILE_ID,
-    "--params", '{"mimeType": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"}',
+    GWS, "drive", "files", "export",
+    "--params", json.dumps({
+        "fileId": SHEET_FILE_ID,
+        "mimeType": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    }),
     "--output", "/tmp/downloaded.xlsx",
 ], check=True)
 
@@ -161,7 +175,8 @@ wb.save("/tmp/modified.xlsx")
 
 # --- Step 3: Upload back (replace content) ---
 subprocess.run([
-    "gws", "drive", "files", "update", SHEET_FILE_ID,
+    GWS, "drive", "files", "update",
+    "--params", json.dumps({"fileId": SHEET_FILE_ID}),
     "--upload", "/tmp/modified.xlsx",
     "--upload-content-type", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
 ], check=True)
@@ -265,7 +280,9 @@ print("Saved /tmp/monthly_report.xlsx")
 ## Database to Google Sheets (Direct)
 
 ```python
-import subprocess, csv
+import shutil, subprocess, csv, json
+
+GWS = shutil.which("gws") or "gws"
 
 # Data from database query
 data = [
@@ -280,8 +297,8 @@ with open(csv_path, "w", newline="") as f:
     csv.writer(f).writerows(data)
 
 result = subprocess.run([
-    "gws", "drive", "files", "create",
-    "--json", '{"name": "DB Export - Revenue", "mimeType": "application/vnd.google-apps.spreadsheet"}',
+    GWS, "drive", "files", "create",
+    "--json", json.dumps({"name": "DB Export - Revenue", "mimeType": "application/vnd.google-apps.spreadsheet"}),
     "--upload", csv_path,
     "--upload-content-type", "text/csv",
 ], capture_output=True, text=True, check=True)
@@ -469,7 +486,7 @@ pandoc /tmp/chapter1.md /tmp/chapter2.md /tmp/chapter3.md -o /tmp/book.pdf --toc
 ## Full Pipeline: DB Query to Process to Excel + PDF to Upload Drive to Email
 
 ```python
-import subprocess, base64, csv, json
+import shutil, subprocess, base64, csv, json
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from email.mime.application import MIMEApplication
@@ -482,6 +499,8 @@ from reportlab.lib import colors
 from reportlab.lib.units import inch
 from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer
 from reportlab.lib.styles import getSampleStyleSheet
+
+GWS = shutil.which("gws") or "gws"
 
 # ============================================================
 # Step 1: Query database (via MCP or simulated data)
@@ -602,7 +621,7 @@ for path, name, mime in [
     (pdf_path, "Regional Sales Report.pdf", "application/pdf"),
 ]:
     result = subprocess.run([
-        "gws", "drive", "files", "create",
+        GWS, "drive", "files", "create",
         "--json", json.dumps({"name": name}),
         "--upload", path,
         "--upload-content-type", mime,
@@ -643,8 +662,9 @@ for path, filename in [
 
 raw = base64.urlsafe_b64encode(msg.as_bytes()).decode("ascii")
 subprocess.run([
-    "gws", "gmail", "messages", "send",
-    "--json", f'{{"raw": "{raw}"}}',
+    GWS, "gmail", "users", "messages", "send",
+    "--params", json.dumps({"userId": "me"}),
+    "--json", json.dumps({"raw": raw}),
 ], check=True)
 
 print("Pipeline complete: Excel + PDF generated, uploaded to Drive, and emailed.")

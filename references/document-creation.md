@@ -164,16 +164,18 @@ Font(
     underline="none",            # "none" | "single" | "double" | "singleAccounting" | "doubleAccounting"
     strike=False,                # Strikethrough (bool)
     vertAlign=None,              # "superscript" | "subscript" | "baseline" | None
-    color="000000",              # Hex RGB string (6 chars, no #)
-    # Or use Color object:
-    color=Color(rgb="FF0000"),       # RGB
-    color=Color(theme=1),            # Theme color index (0-11)
-    color=Color(indexed=8),          # Indexed color (0-63)
-    color=Color(tint=-0.5),          # Tint modifier (-1.0 to 1.0)
+    color="000000",              # Hex RGB string (6 chars, no #) — or a Color() object (see below)
     charset=None,                # Character set (int)
     family=None,                 # Font family (1=Roman, 2=Swiss, 3=Modern, etc.)
     scheme=None,                 # "major" | "minor" | None (theme font scheme)
 )
+
+# `color=` accepts either a 6-char hex string or a Color() object. Pick ONE form:
+#   color="FF0000"                 # hex RGB string
+#   color=Color(rgb="FF0000")      # equivalent via Color()
+#   color=Color(theme=1)           # theme color index (0-11)
+#   color=Color(indexed=8)         # indexed color (0-63)
+#   color=Color(tint=-0.5)         # tint modifier (-1.0 to 1.0)
 ```
 
 ### Fill
@@ -696,9 +698,9 @@ wb.defined_names.add(dn)
 dn = DefinedName("LocalRange", attr_text="Sheet1!$A$1:$B$10", localSheetId=0)
 wb.defined_names.add(dn)
 
-# Read defined names
-for name in wb.defined_names.definedName:
-    print(name.name, name.attr_text)
+# Read defined names (openpyxl 3.1+: defined_names is a DefinedNameDict)
+for name, dn in wb.defined_names.items():
+    print(name, dn.attr_text)
 ```
 
 ## 1.9 Auto-Filter & Sorting

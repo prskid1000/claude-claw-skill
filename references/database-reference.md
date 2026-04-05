@@ -1,11 +1,14 @@
 # Database / MySQL Reference
 
+> **Optional feature.** This reference assumes a MySQL MCP server is installed and configured. Check your active MCP tools — if `mcp__mcp_server_mysql__mysql_query` (or similar) is not listed, this integration is unavailable in your current environment. As a fallback, connect directly from Python using `pymysql` / `mysql-connector-python` with your own credentials; the SQL patterns below still apply.
+
 ---
 
 ## MCP Tool
 
 ### Invocation
 ```python
+# Called from within Claude Code as an MCP tool (not a regular Python import)
 mcp__mcp_server_mysql__mysql_query(query="SELECT * FROM table LIMIT 10")
 ```
 

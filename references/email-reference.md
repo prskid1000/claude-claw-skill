@@ -177,52 +177,86 @@ msg["Subject"] = "Re: Original Subject"
 
 ## Gmail CLI (gws gmail)
 
-### Messages
+All raw Gmail API commands live under `gws gmail users ...` and take `userId` in the `--params` JSON (use `"me"` for the authenticated user). Request bodies go in `--json`. When in doubt, run `gws gmail users <resource> <method> --help`.
+
+> **Windows note:** `gws` is a `.cmd` shim on Windows. When calling it from Python `subprocess.run([...])` without `shell=True`, resolve the full path first: `GWS = shutil.which("gws") or "gws"`. Otherwise you'll get `FileNotFoundError`.
+
+### Convenience helpers (no MIME plumbing required)
+
+For common flows, prefer these helpers over the raw API — they handle RFC 2822 / base64url / threading automatically:
+
+```bash
+# Send a new email
+gws gmail +send --to alice@x.com --subject 'Hi' --body 'Hello'
+gws gmail +send --to alice@x.com --subject 'Hi' --body '<b>Hi</b>' --html
+gws gmail +send --to a@x.com --cc b@x.com --bcc c@x.com --subject S --body B --dry-run
+
+# Triage unread inbox (read-only summary)
+gws gmail +triage
+gws gmail +triage --max 5 --query 'from:boss@x.com' --labels
+gws gmail +triage --format json | jq '.[].subject'
+
+# Reply / reply-all / forward (threading handled automatically)
+gws gmail +reply     --message-id <MESSAGE_ID> --body 'Thanks!'
+gws gmail +reply-all --message-id <MESSAGE_ID> --body 'Sounds good' --remove bob@x.com
+gws gmail +forward   --message-id <MESSAGE_ID> --to dave@x.com --body 'FYI'
+```
+
+For attachments, custom headers, or batch operations, fall through to the raw API below.
+
+---
+
+### Messages (raw API — `gws gmail users messages ...`)
 
 #### List
 ```bash
-gws gmail messages list --query "SEARCH_QUERY" --maxResults 10
-gws gmail messages list --query "from:boss@x.com after:2025/01/01 has:attachment"
-gws gmail messages list --query "is:unread label:INBOX" --maxResults 25
-gws gmail messages list --labelIds INBOX --maxResults 5
+gws gmail users messages list --params '{"userId":"me","q":"is:unread","maxResults":10}' --format json
+gws gmail users messages list --params '{"userId":"me","q":"from:boss@x.com after:2025/01/01 has:attachment"}' --format json
+gws gmail users messages list --params '{"userId":"me","q":"is:unread label:INBOX","maxResults":25}' --format json
+gws gmail users messages list --params '{"userId":"me","labelIds":["INBOX"],"maxResults":5}' --format json
 ```
 
 #### Get
 ```bash
-gws gmail messages get --id MESSAGE_ID
-gws gmail messages get --id MESSAGE_ID --format full
-gws gmail messages get --id MESSAGE_ID --format metadata --metadataHeaders "From,Subject,Date"
-gws gmail messages get --id MESSAGE_ID --format minimal
-gws gmail messages get --id MESSAGE_ID --format raw
+gws gmail users messages get --params '{"userId":"me","id":"<MESSAGE_ID>"}' --format json
+gws gmail users messages get --params '{"userId":"me","id":"<MESSAGE_ID>","format":"full"}' --format json
+gws gmail users messages get --params '{"userId":"me","id":"<MESSAGE_ID>","format":"metadata","metadataHeaders":["From","To","Subject","Date"]}' --format json
+gws gmail users messages get --params '{"userId":"me","id":"<MESSAGE_ID>","format":"minimal"}' --format json
+gws gmail users messages get --params '{"userId":"me","id":"<MESSAGE_ID>","format":"raw"}' --format json
 ```
 
-| Format | Returns |
-|--------|---------|
+| `format` value | Returns |
+|----------------|---------|
 | `full` | Parsed headers + body parts (default) |
-| `metadata` | Headers only (use with `--metadataHeaders`) |
+| `metadata` | Headers only (combine with `metadataHeaders`) |
 | `minimal` | IDs and labels only |
 | `raw` | Full RFC 2822 base64url encoded |
 
-#### Send
+#### Send (raw = base64url of an RFC 2822 MIME message)
 ```bash
-gws gmail messages send --to "a@x.com" --subject "Hello" --body "Message body"
-gws gmail messages send --to "a@x.com" --subject "Report" --body "See attached" --attachments "/tmp/report.pdf"
-gws gmail messages send --to "a@x.com" --cc "b@x.com" --bcc "c@x.com" --subject "S" --body "B"
-gws gmail messages send --to "a@x.com" --subject "Re: Thread" --body "Reply" --threadId THREAD_ID --inReplyTo MESSAGE_ID
-gws gmail messages send --raw BASE64URL_ENCODED_MESSAGE
+# Build the MIME message in Python (see MIME section above), then:
+gws gmail users messages send --params '{"userId":"me"}' --json '{"raw":"<BASE64URL>"}'
+
+# Reply in same thread
+gws gmail users messages send --params '{"userId":"me"}' --json '{"raw":"<BASE64URL>","threadId":"<THREAD_ID>"}'
 ```
+
+For simple sends without attachments, prefer `gws gmail +send` (see Helpers above).
 
 #### Trash / Untrash / Delete
 ```bash
-gws gmail messages trash --id MESSAGE_ID
-gws gmail messages untrash --id MESSAGE_ID
-gws gmail messages delete --id MESSAGE_ID              # permanent delete
+gws gmail users messages trash   --params '{"userId":"me","id":"<MESSAGE_ID>"}'
+gws gmail users messages untrash --params '{"userId":"me","id":"<MESSAGE_ID>"}'
+gws gmail users messages delete  --params '{"userId":"me","id":"<MESSAGE_ID>"}'   # permanent
 ```
 
 #### Modify labels
 ```bash
-gws gmail messages modify --id MESSAGE_ID --addLabelIds "STARRED" --removeLabelIds "UNREAD"
-gws gmail messages batchModify --ids "ID1,ID2,ID3" --addLabelIds "Label_1"
+gws gmail users messages modify --params '{"userId":"me","id":"<MESSAGE_ID>"}' \
+  --json '{"addLabelIds":["STARRED"],"removeLabelIds":["UNREAD"]}'
+
+gws gmail users messages batchModify --params '{"userId":"me"}' \
+  --json '{"ids":["ID1","ID2","ID3"],"addLabelIds":["Label_1"]}'
 ```
 
 ---
@@ -230,12 +264,12 @@ gws gmail messages batchModify --ids "ID1,ID2,ID3" --addLabelIds "Label_1"
 ### Drafts
 
 ```bash
-gws gmail drafts list --maxResults 10
-gws gmail drafts get --id DRAFT_ID
-gws gmail drafts create --to "a@x.com" --subject "Draft" --body "Content"
-gws gmail drafts update --id DRAFT_ID --subject "Updated"
-gws gmail drafts send --id DRAFT_ID
-gws gmail drafts delete --id DRAFT_ID
+gws gmail users drafts list   --params '{"userId":"me","maxResults":10}'
+gws gmail users drafts get    --params '{"userId":"me","id":"<DRAFT_ID>"}'
+gws gmail users drafts create --params '{"userId":"me"}' --json '{"message":{"raw":"<BASE64URL>"}}'
+gws gmail users drafts update --params '{"userId":"me","id":"<DRAFT_ID>"}' --json '{"message":{"raw":"<BASE64URL>"}}'
+gws gmail users drafts send   --params '{"userId":"me"}' --json '{"id":"<DRAFT_ID>"}'
+gws gmail users drafts delete --params '{"userId":"me","id":"<DRAFT_ID>"}'
 ```
 
 ---
@@ -243,11 +277,11 @@ gws gmail drafts delete --id DRAFT_ID
 ### Labels
 
 ```bash
-gws gmail labels list
-gws gmail labels get --id LABEL_ID
-gws gmail labels create --name "Projects/Active"
-gws gmail labels update --id LABEL_ID --name "Projects/Archive"
-gws gmail labels delete --id LABEL_ID
+gws gmail users labels list   --params '{"userId":"me"}'
+gws gmail users labels get    --params '{"userId":"me","id":"<LABEL_ID>"}'
+gws gmail users labels create --params '{"userId":"me"}' --json '{"name":"Projects/Active"}'
+gws gmail users labels update --params '{"userId":"me","id":"<LABEL_ID>"}' --json '{"name":"Projects/Archive"}'
+gws gmail users labels delete --params '{"userId":"me","id":"<LABEL_ID>"}'
 ```
 
 System labels: `INBOX`, `SENT`, `DRAFT`, `TRASH`, `SPAM`, `STARRED`, `UNREAD`, `IMPORTANT`, `CATEGORY_PERSONAL`, `CATEGORY_SOCIAL`, `CATEGORY_PROMOTIONS`, `CATEGORY_UPDATES`, `CATEGORY_FORUMS`
@@ -257,12 +291,12 @@ System labels: `INBOX`, `SENT`, `DRAFT`, `TRASH`, `SPAM`, `STARRED`, `UNREAD`, `
 ### Threads
 
 ```bash
-gws gmail threads list --query "subject:project" --maxResults 10
-gws gmail threads get --id THREAD_ID
-gws gmail threads modify --id THREAD_ID --addLabelIds "STARRED"
-gws gmail threads trash --id THREAD_ID
-gws gmail threads untrash --id THREAD_ID
-gws gmail threads delete --id THREAD_ID
+gws gmail users threads list   --params '{"userId":"me","q":"subject:project","maxResults":10}'
+gws gmail users threads get    --params '{"userId":"me","id":"<THREAD_ID>"}'
+gws gmail users threads modify --params '{"userId":"me","id":"<THREAD_ID>"}' --json '{"addLabelIds":["STARRED"]}'
+gws gmail users threads trash   --params '{"userId":"me","id":"<THREAD_ID>"}'
+gws gmail users threads untrash --params '{"userId":"me","id":"<THREAD_ID>"}'
+gws gmail users threads delete  --params '{"userId":"me","id":"<THREAD_ID>"}'
 ```
 
 ---
@@ -270,7 +304,9 @@ gws gmail threads delete --id THREAD_ID
 ### Attachments
 
 ```bash
-gws gmail attachments get --messageId MESSAGE_ID --id ATTACHMENT_ID --output "/tmp/file.pdf"
+gws gmail users messages attachments get \
+  --params '{"userId":"me","messageId":"<MESSAGE_ID>","id":"<ATTACHMENT_ID>"}' \
+  --output /tmp/file.pdf
 ```
 
 Retrieve attachment ID from message parts: look for `body.attachmentId` in parts with `filename`.
@@ -280,7 +316,7 @@ Retrieve attachment ID from message parts: look for `body.attachmentId` in parts
 ### History
 
 ```bash
-gws gmail history list --startHistoryId HISTORY_ID --historyTypes "messageAdded,labelAdded"
+gws gmail users history list --params '{"userId":"me","startHistoryId":"<HISTORY_ID>","historyTypes":["messageAdded","labelAdded"]}'
 ```
 
 History types: `messageAdded`, `messageDeleted`, `labelAdded`, `labelRemoved`

@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 """
-Claude Claw Self-Test: Verify all tools, packages, MCPs, and services are available.
-Run: python ~/.claude/skills/claude-claw/scripts/healthcheck.py
+Claude Claw Self-Test: Verify all Python packages, CLI tools, and skill files are present.
+Run (bash):       python ~/.claude/skills/claude-claw/scripts/healthcheck.py
+Run (Windows):    python "%USERPROFILE%\\.claude\\skills\\claude-claw\\scripts\\healthcheck.py"
 
 Exit codes: 0 = all pass, 1 = some failures (auto-fix attempted), 2 = critical failures
 """
@@ -120,12 +121,12 @@ else:
 print("\n=== SKILL STRUCTURE ===")
 # ============================================================
 
-cortex_dir = Path.home() / ".claude" / "skills" / "claude-claw"
+skill_dir = Path.home() / ".claude" / "skills" / "claude-claw"
 
-check("Skill: cortex/SKILL.md exists", (cortex_dir / "SKILL.md").exists())
-check("Skill: cortex/scripts/ exists", (cortex_dir / "scripts").is_dir())
-check("Skill: cortex/references/ exists", (cortex_dir / "references").is_dir())
-check("Skill: cortex/examples/ exists", (cortex_dir / "examples").is_dir())
+check("Skill: claude-claw/SKILL.md exists", (skill_dir / "SKILL.md").exists())
+check("Skill: claude-claw/scripts/ exists", (skill_dir / "scripts").is_dir())
+check("Skill: claude-claw/references/ exists", (skill_dir / "references").is_dir())
+check("Skill: claude-claw/examples/ exists", (skill_dir / "examples").is_dir())
 
 # Reference files
 reference_files = [
@@ -137,10 +138,11 @@ reference_files = [
     "web-parsing.md",
     "email-reference.md",
     "database-reference.md",
+    "clickup-cli.md",
     "setup.md",
 ]
 for f in reference_files:
-    p = cortex_dir / "references" / f
+    p = skill_dir / "references" / f
     if p.exists():
         check(f"Reference: {f}", True)
     else:
@@ -159,7 +161,7 @@ example_files = [
     "clickup-workflows.md",
 ]
 for f in example_files:
-    p = cortex_dir / "examples" / f
+    p = skill_dir / "examples" / f
     if p.exists():
         check(f"Example: {f}", True)
     else:
