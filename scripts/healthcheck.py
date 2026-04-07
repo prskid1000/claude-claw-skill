@@ -191,6 +191,25 @@ check("MCP: chrome-devtools (plugin .mcp.json)", cdt_ok)
 if not cdt_ok:
     warn("MCP: chrome-devtools", f"Plugin cache at {plugin_mcp_json} is missing or malformed. Install/reinstall via the Claude Code plugin marketplace (chrome-devtools-plugins).")
 
+# --- Claude Historian MCP (plugin-provided) ---
+installed_plugins_json = Path.home() / ".claude" / "plugins" / "installed_plugins.json"
+historian_plugin_key = "claude-historian@claude-emporium"
+historian_ok = False
+if installed_plugins_json.exists():
+    try:
+        ip = json.loads(installed_plugins_json.read_text(encoding="utf-8"))
+        historian_entries = ip.get("plugins", {}).get(historian_plugin_key, [])
+        if historian_entries:
+            historian_path = Path(historian_entries[0].get("installPath", ""))
+            if historian_path.exists():
+                historian_ok = True
+    except Exception as e:
+        warn("MCP: claude-historian", f"Could not parse installed_plugins.json: {e}")
+
+check("MCP: claude-historian (plugin claude-emporium)", historian_ok)
+if not historian_ok:
+    warn("MCP: claude-historian", "Install via: /plugin marketplace add Vvkmnn/claude-emporium && /plugin install claude-historian@claude-emporium")
+
 # ============================================================
 print("\n=== CONTEXT-MODE PLUGIN ===")
 # ============================================================
@@ -317,6 +336,7 @@ reference_files = [
     "database-reference.md",
     "clickup-cli.md",
     "code-review-graph.md",
+    "claude-historian.md",
     "setup.md",
 ]
 for f in reference_files:
