@@ -2,6 +2,32 @@
 
 ---
 
+## CRITICAL RULES
+
+1. **For simple emails, use `gws gmail +send`** — don't build MIME manually unless you need attachments or inline images.
+2. **MIME composition is Python code** — NOT a CLI command. Build the message in Python, then send via Gmail API.
+3. **Gmail API send requires base64url encoding** — use `base64.urlsafe_b64encode(msg.as_bytes()).decode("ascii")`.
+4. **Content-ID for inline images** must match the `cid:` reference in HTML exactly (including angle brackets in the header).
+5. **Always set `"utf-8"` charset** on MIMEText to avoid encoding issues with non-ASCII characters.
+
+### Common Mistakes
+
+```
+WRONG: MIMEText("Hello")                              # Missing subtype and charset
+WRONG: MIMEText("Hello", "text")                       # Subtype is "plain" not "text"
+WRONG: base64.b64encode(msg.as_bytes())                # Gmail needs urlsafe, not standard
+WRONG: img.add_header("Content-ID", "logo_id")         # Missing angle brackets
+WRONG: gws gmail users messages send ... --body "Hi"   # --body is for +send helper only
+
+RIGHT: MIMEText("Hello", "plain", "utf-8")
+RIGHT: MIMEText("<b>Hi</b>", "html", "utf-8")
+RIGHT: base64.urlsafe_b64encode(msg.as_bytes()).decode("ascii")
+RIGHT: img.add_header("Content-ID", "<logo_id>")       # Angle brackets required
+RIGHT: gws gmail +send --to user@x.com --subject 'Hi' --body 'Hello'
+```
+
+---
+
 ## Python MIME (email.mime)
 
 ### Imports
@@ -17,7 +43,14 @@ import base64
 
 ---
 
-### MIMEText
+### MIMEText — Create a text message part
+
+**Constructor:**
+| Param | Type | Required | Default | Description |
+|-------|------|----------|---------|-------------|
+| `_text` | string | YES | — | The text content |
+| `_subtype` | string | no | `"plain"` | `"plain"` or `"html"` |
+| `_charset` | string | no | `"us-ascii"` | Always use `"utf-8"` |
 
 ```python
 # Plain text
@@ -29,13 +62,19 @@ msg = MIMEText("<h1>Hello</h1><p>World</p>", "html", "utf-8")
 
 ---
 
-### MIMEMultipart
+### MIMEMultipart — Create a container for multiple parts
 
-| Subtype | Purpose |
-|---------|---------|
-| `mixed` | Attachments alongside text body |
-| `alternative` | Multiple representations (plain + HTML) |
-| `related` | HTML with inline images (Content-ID references) |
+**Constructor:**
+| Param | Type | Required | Default | Description |
+|-------|------|----------|---------|-------------|
+| `_subtype` | string | no | `"mixed"` | Container type (see table below) |
+
+**Subtype values (choose the RIGHT one):**
+| Subtype | Purpose | When to use |
+|---------|---------|-------------|
+| `"mixed"` | Attachments alongside text body | Email with file attachments |
+| `"alternative"` | Multiple representations (plain + HTML) | Email with both plain text and HTML versions |
+| `"related"` | HTML with inline images (Content-ID refs) | HTML email with embedded images |
 
 ```python
 # Mixed (text + attachments)

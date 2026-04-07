@@ -6,10 +6,22 @@
 
 ## MCP Tool
 
+### Tool Name
+`mcp__mcp_server_mysql__mysql_query`
+
+### Parameters
+
+| Param | Type | Required | Description |
+|-------|------|----------|-------------|
+| `sql` | string | YES | The SQL query to execute |
+
+> **IMPORTANT**: The parameter is named `sql`, NOT `query`.
+
 ### Invocation
-```python
-# Called from within Claude Code as an MCP tool (not a regular Python import)
-mcp__mcp_server_mysql__mysql_query(query="SELECT * FROM table LIMIT 10")
+
+```
+WRONG: mcp__mcp_server_mysql__mysql_query(query="SELECT * FROM table LIMIT 10")
+RIGHT: mcp__mcp_server_mysql__mysql_query(sql="SELECT * FROM table LIMIT 10")
 ```
 
 ### Return format
@@ -21,6 +33,17 @@ mcp__mcp_server_mysql__mysql_query(query="SELECT * FROM table LIMIT 10")
     [2, "Bob", "bob@example.com"]
   ]
 }
+```
+
+### Common Mistakes
+
+```
+WRONG: mcp__mcp_server_mysql__mysql_query(query="SELECT ...")     # param is 'sql' not 'query'
+WRONG: mcp__mcp_server_mysql__mysql_query(sql="SELECT *")         # missing LIMIT
+WRONG: mcp__mcp_server_mysql__mysql_query(sql="DELETE FROM ...")   # validate with SELECT first!
+
+RIGHT: mcp__mcp_server_mysql__mysql_query(sql="SELECT id, name FROM users LIMIT 100")
+RIGHT: mcp__mcp_server_mysql__mysql_query(sql="SELECT COUNT(*) FROM orders WHERE status = 'pending'")
 ```
 
 ---
@@ -395,8 +418,14 @@ with open("/tmp/export.csv", "w", newline="", encoding="utf-8") as f:
 
 ### Google Sheets
 ```bash
-# Upload CSV then convert
-gws drive files create --upload "/tmp/export.csv" --name "Export" --mimeType "application/vnd.google-apps.spreadsheet"
+# Option 1: Use +upload helper (simple)
+gws drive +upload /tmp/export.csv
+
+# Option 2: Upload with explicit name and MIME type via --json (NOT --name / --mimeType flags)
+gws drive files create --json '{"name": "Export", "mimeType": "application/vnd.google-apps.spreadsheet"}' --upload "/tmp/export.csv" --upload-content-type "text/csv"
+
+# WRONG — these flags do NOT exist:
+# gws drive files create --upload "/tmp/export.csv" --name "Export" --mimeType "..."
 ```
 
 ### JSON
