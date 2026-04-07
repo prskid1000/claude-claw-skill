@@ -39,13 +39,6 @@ Re-run the patcher — updates overwrite the binary. Backup is preserved.
 node ~/.claude/skills/claude-claw/scripts/claude-patcher.js --all
 ```
 
-## Recommended Env Vars (set alongside patches)
-
-```bash
-export ANTHROPIC_BASE_URL="https://your-custom-endpoint"
-export CLAUDE_CODE_MAX_OUTPUT_TOKENS=128000
-```
-
 ## How It Works
 
 - Pattern-matches minified JS inside the PE binary (not hardcoded offsets)
