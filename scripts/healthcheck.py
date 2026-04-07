@@ -155,6 +155,27 @@ check("MCP: mysql (~/.claude.json -> mcpServers.mcp_server_mysql)", mysql_ok)
 if not mysql_ok:
     warn("MCP: mysql", "Add to ~/.claude.json under mcpServers. See references/setup.md -> 'MySQL' for the exact JSON block. Restart Claude Code after editing.")
 
+# --- Code Review Graph MCP ---
+crg_ok = False
+if claude_json.exists():
+    try:
+        cfg = json.loads(claude_json.read_text(encoding="utf-8"))
+        entry = cfg.get("mcpServers", {}).get("code-review-graph")
+        if entry and entry.get("command") in ("code-review-graph", "uvx") and "serve" in entry.get("args", []):
+            crg_ok = True
+    except Exception as e:
+        warn("MCP: code-review-graph", f"Could not parse ~/.claude.json: {e}")
+
+# Also check CLI availability
+if not crg_ok:
+    crg_cli_ok, _ = run_cmd("code-review-graph --version")
+    if crg_cli_ok:
+        warn("MCP: code-review-graph", "CLI installed but MCP not configured in ~/.claude.json. Run: code-review-graph install --platform claude-code")
+    else:
+        warn("MCP: code-review-graph", "Not installed. Run: pip install code-review-graph && code-review-graph install")
+
+check("MCP: code-review-graph (~/.claude.json -> mcpServers.code-review-graph)", crg_ok)
+
 # --- Chrome DevTools MCP (plugin-provided) ---
 cdt_ok = False
 if plugin_mcp_json.exists():
@@ -295,6 +316,7 @@ reference_files = [
     "email-reference.md",
     "database-reference.md",
     "clickup-cli.md",
+    "code-review-graph.md",
     "setup.md",
 ]
 for f in reference_files:

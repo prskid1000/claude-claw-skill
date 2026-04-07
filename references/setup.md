@@ -106,6 +106,44 @@ mcp__mcp_server_mysql__mysql_query(query="SELECT 1 AS test")
 
 ---
 
+### Code Review Graph (Code Analysis)
+
+Builds a structural knowledge graph of your codebase using Tree-sitter AST parsing. 22 MCP tools for blast radius, reviews, refactoring, and architecture analysis. Full docs: `references/code-review-graph.md`.
+
+#### Install
+```bash
+pip install code-review-graph
+code-review-graph install --platform claude-code
+code-review-graph build   # in your project directory
+```
+
+Requires Python 3.10+. Auto-configures MCP in `~/.claude.json`.
+
+#### ~/.claude.json entry (auto-created by install)
+```json
+{
+  "mcpServers": {
+    "code-review-graph": {
+      "type": "stdio",
+      "command": "code-review-graph",
+      "args": ["serve"]
+    }
+  }
+}
+```
+
+#### Verify
+```bash
+code-review-graph status   # in a project directory after build
+```
+
+#### Update
+```bash
+pip install --upgrade code-review-graph
+```
+
+---
+
 ### Chrome DevTools
 
 Installed via the `chrome-devtools-plugins` plugin marketplace, not via manual `mcpServers` config. The plugin ships its own `.mcp.json` at:
@@ -203,6 +241,9 @@ gws --account work drive files list
 | MCP config change not picked up | Edited `.mcp.json` or `~/.claude.json`, tool still uses old behavior | `.mcp.json` is read once at Claude Code startup. Fully quit Claude Code (including background `node.exe` processes for the MCP server), then relaunch |
 | `cmd /c` warning on an mcpServers entry | Config linter flags "Windows requires 'cmd /c' wrapper" | Ignore it — Claude Code auto-wraps `npx` on Windows (`cmd.exe /d /s /c "npx ..."`). Adding a manual wrapper causes double-wrapping |
 | Chrome DevTools MCP launches Chrome instead of a custom browser | `-e` / `--executablePath` flag is ignored | Puppeteer validates the binary and falls back to bundled Chrome silently. Use `--browserUrl` against a manually started browser instead (see the "Connect to an existing browser" section above) |
+| code-review-graph not found | `command not found` | `pip install code-review-graph` (requires Python 3.10+) |
+| code-review-graph MCP not connecting | Tool calls fail | Check `~/.claude.json` has the entry; restart Claude Code |
+| code-review-graph empty graph | No results from tools | Run `code-review-graph build` in the project directory first |
 | npm global install fails | EACCES permission error | Run terminal as Administrator, or use `npx` instead of global install |
 | PATH not updated | Tool installed but not found | Restart shell/terminal after installing CLI tools |
 | Pandoc PDF fails | `pdflatex not found` | Install a LaTeX distribution (`winget install MiKTeX.MiKTeX`) or use `--pdf-engine=weasyprint` |

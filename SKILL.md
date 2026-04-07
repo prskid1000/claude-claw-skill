@@ -11,6 +11,8 @@ description: >
   database query, SQL, MySQL, data export, data pipeline,
   file conversion, pandoc, HTML to PDF, markdown to docx,
   ClickUp tasks, sprint, time tracking,
+  code review, blast radius, impact analysis, dead code, refactor, code graph, architecture,
+  callers, callees, dependencies, test coverage, complexity, communities, wiki,
   openpyxl, python-docx, python-pptx, reportlab, Pillow, ImageMagick.
 priority: critical
 ---
@@ -48,6 +50,7 @@ Detailed tool capabilities, commands, and API surfaces. Load when working with a
 | Email / MIME | [references/email-reference.md](references/email-reference.md) |
 | Database / MySQL | [references/database-reference.md](references/database-reference.md) |
 | ClickUp CLI | [references/clickup-cli.md](references/clickup-cli.md) |
+| Code Review Graph (code analysis) | [references/code-review-graph.md](references/code-review-graph.md) |
 | Install / troubleshoot | [references/setup.md](references/setup.md) |
 
 ## Examples
@@ -88,6 +91,24 @@ Working code blocks for common tasks. Load when executing a specific workflow.
 | Document conversion | `pandoc` |
 | PDF page screenshots | `pymupdf` (fitz) |
 | Web screenshots / browser automation | Chrome DevTools MCP (`mcp__plugin_chrome-devtools-mcp_chrome-devtools__*`) — provisioned by the claude-claw bootstrap |
+
+### Code Analysis & Review
+| Task | Tool |
+|------|------|
+| Build/update code graph | `build_or_update_graph_tool` — parse codebase into AST graph |
+| Blast radius analysis | `get_impact_radius_tool` — trace callers, dependents, tests affected by changes |
+| Review context | `get_review_context_tool` — token-optimised structural summary for reviews |
+| Query graph | `query_graph_tool` — callers, callees, tests, imports, inheritance |
+| Semantic code search | `semantic_search_nodes_tool` — search code entities by name or meaning |
+| Change impact | `detect_changes_tool` — risk-scored change impact analysis |
+| Architecture overview | `get_architecture_overview_tool` — community-based architecture map |
+| Find large functions | `find_large_functions_tool` — functions/classes exceeding line threshold |
+| Execution flows | `list_flows_tool` / `get_flow_tool` / `get_affected_flows_tool` — trace execution paths |
+| Refactoring | `refactor_tool` / `apply_refactor_tool` — rename preview, dead code, suggestions |
+| Communities | `list_communities_tool` / `get_community_tool` — detected code communities |
+| Wiki generation | `generate_wiki_tool` / `get_wiki_page_tool` — markdown docs from graph |
+| Multi-repo | `list_repos_tool` / `cross_repo_search_tool` — search across registered repos |
+| Graph health | `list_graph_stats_tool` — graph size and stats |
 
 ### Data & Integration
 | Task | Tool |
