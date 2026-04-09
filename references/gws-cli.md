@@ -6,6 +6,12 @@ Complete command reference for the `gws` CLI tool (version **0.16.0**). Covers D
 
 ## CRITICAL RULES (READ FIRST — VIOLATIONS CAUSE ERRORS)
 
+### Rule 0: Prefer Helper Commands When Possible
+
+When using the `gws` CLI, prefer the `+helper` commands (like `+write`, `+append`, `+send`) for simpler syntax, and only use the raw API commands when you need fine-grained control over the request structure.
+
+---
+
 ### Rule 1: NO positional arguments. ALL IDs go inside `--params` JSON.
 
 `gws` does NOT accept file IDs, document IDs, or any resource IDs as positional arguments.
