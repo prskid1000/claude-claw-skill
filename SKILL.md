@@ -302,8 +302,9 @@ run("clickup", "task", "view", "ABC-123")
 
 ## Templates
 
-- Reference: [references/_TEMPLATE.md](references/_TEMPLATE.md) — Critical Rules → API sections → Quick Reference
+- Reference: [references/_TEMPLATE.md](references/_TEMPLATE.md) — Critical Rules → numbered API sections → Quick Reference
 - Example: [examples/_TEMPLATE.md](examples/_TEMPLATE.md) — Numbered workflows (Basic → Styled → Pipeline)
+- Script: [scripts/_TEMPLATE.py](scripts/_TEMPLATE.py) — exit codes, status prefixes, cross-platform conventions
 - To add: copy template → fill placeholders → add to File Map above → update healthcheck + setup.md
 
 ## Scripts
