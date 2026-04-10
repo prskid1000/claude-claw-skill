@@ -1,6 +1,6 @@
 # Claude Claw — User Instructions
 
-> Loaded automatically by `~/.claude/CLAUDE.md` via the `~/.claude/skills/*/CLAUDE.md` glob loader — do not copy-paste.
+> Loaded automatically by `~/.claude/CLAUDE.md` via a direct path reference — do not copy-paste this file's contents.
 
 - [Auto-Load Skill](#auto-load-skill) · [LSP-First Navigation](#lsp-first-navigation)
 

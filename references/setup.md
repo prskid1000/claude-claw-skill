@@ -211,10 +211,10 @@ LSP hover on a .kt file    → function signature
 To enable auto-loading of SKILL.md on every conversation and LSP-first code navigation, add this one line to your `~/.claude/CLAUDE.md`:
 
 ```markdown
-**First action of every conversation:** read `~/.claude/skills/*/CLAUDE.md` (all skill-provided user instructions) for guidance that should apply across all tasks.
+**First action of every conversation:** read `~/.claude/skills/claude-claw/CLAUDE.md` for user-level instructions (auto-load SKILL.md, LSP-first code navigation).
 ```
 
-The skill's `CLAUDE.md` (at `~/.claude/skills/claude-claw/CLAUDE.md`) is the canonical source — don't copy-paste its contents. The one-line loader above makes Claude read it (and any other skill's CLAUDE.md) automatically. Edits to the skill's CLAUDE.md take effect immediately, with no sync step.
+The skill's `CLAUDE.md` (at `~/.claude/skills/claude-claw/CLAUDE.md`) is the canonical source — don't copy-paste its contents. The one-line loader above makes Claude read it automatically, and edits take effect immediately with no sync step.
 
 ---
 
