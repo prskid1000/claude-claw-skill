@@ -4,23 +4,6 @@
 
 **Related:** [examples/clickup-workflows.md](../examples/clickup-workflows.md) | [setup.md](setup.md)
 
-## Contents
-- [Conventions (important)](#conventions-important)
-- [Setup](#setup)
-- [Output Flags (most commands)](#output-flags-most-commands)
-- [Task Management](#task-management)
-- [Status Management](#status-management)
-- [Sprint Management](#sprint-management)
-- [Comments](#comments)
-- [Time Tracking](#time-tracking)
-- [Custom Fields](#custom-fields)
-- [Git Integration](#git-integration)
-- [Checklists, Dependencies, Tags (on tasks)](#checklists-dependencies-tags-on-tasks)
-- [Workspace](#workspace)
-- [More](#more)
-
----
-
 ## Conventions (important)
 
 - **Task IDs are positional**, not a `--task` flag. `clickup task view <id>`, `clickup comment add <id> "body"`, `clickup task edit <id> --name ...`. If you omit the ID, most commands auto-detect it from the current git branch name (e.g. `f/CU-86abc123-foo`).

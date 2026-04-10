@@ -2,13 +2,6 @@
 
 Working code blocks for Python email composition and Gmail via `gws` CLI.
 
-## Contents
-- [Python Email Composition (MIME)](#python-email-composition-mime)
-- [Gmail via `gws` CLI](#gmail-via-gws-cli)
-- [Full Workflow: Generate Report, Compose Email, Send with Attachment](#full-workflow-generate-report-compose-email-send-with-attachment)
-
----
-
 ## Python Email Composition (MIME)
 
 ### Plain Text Email

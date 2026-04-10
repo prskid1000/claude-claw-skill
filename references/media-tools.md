@@ -2,50 +2,6 @@
 
 Comprehensive API and command reference for Pillow (PIL), ImageMagick, and FFmpeg.
 
-## Contents
-- **1. Pillow (PIL) -- Python Image Manipulation**
-  - [1.1 Supported Formats](#11-supported-formats)
-  - [1.2 Image Modes](#12-image-modes)
-  - [1.3 Image Class -- All Methods and Properties](#13-image-class----all-methods-and-properties)
-  - [1.4 ImageDraw](#14-imagedraw)
-  - [1.5 ImageFont](#15-imagefont)
-  - [1.6 ImageFilter](#16-imagefilter)
-  - [1.7 ImageEnhance](#17-imageenhance)
-  - [1.8 ImageOps](#18-imageops)
-  - [1.9 ImageChops (Channel Operations)](#19-imagechops-channel-operations)
-  - [1.10 Other Modules](#110-other-modules)
-- **2. ImageMagick (magick CLI)**
-  - [2.1 Core CLI Tools](#21-core-cli-tools)
-  - [2.2 Geometry Syntax](#22-geometry-syntax)
-  - [2.3 Resize Filters](#23-resize-filters)
-  - [2.4 Format Conversion](#24-format-conversion)
-  - [2.5 Color Operations](#25-color-operations)
-  - [2.6 Drawing and Text](#26-drawing-and-text)
-  - [2.7 Effects and Filters](#27-effects-and-filters)
-  - [2.8 Compositing](#28-compositing)
-  - [2.9 Distortions](#29-distortions)
-  - [2.10 Morphology](#210-morphology)
-  - [2.11 Montage and Batch Processing](#211-montage-and-batch-processing)
-  - [2.12 Animation](#212-animation)
-  - [2.13 Image Comparison](#213-image-comparison)
-  - [2.14 PDF Operations](#214-pdf-operations)
-  - [2.15 Metadata](#215-metadata)
-  - [2.16 Miscellaneous Operators](#216-miscellaneous-operators)
-- **3. FFmpeg -- Audio/Video/Multimedia**
-  - [3.1 Video Codecs](#31-video-codecs)
-  - [3.2 Audio Codecs](#32-audio-codecs)
-  - [3.3 Container Formats](#33-container-formats)
-  - [3.4 Rate Control](#34-rate-control)
-  - [3.5 Video Filters](#35-video-filters--vf---filterv)
-  - [3.6 Audio Filters](#36-audio-filters--af---filtera)
-  - [3.7 Device Capture](#37-device-capture)
-  - [3.8 Subtitles](#38-subtitles)
-  - [3.9 Image Operations](#39-image-operations)
-  - [3.10 Advanced Features](#310-advanced-features)
-  - [3.11 ffprobe](#311-ffprobe)
-
----
-
 # 1. Pillow (PIL) -- Python Image Manipulation
 
 ```python

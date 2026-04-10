@@ -38,100 +38,69 @@ gws = shutil.which("gws")
 subprocess.run([gws, "drive", "files", "list"], capture_output=True, text=True)
 ```
 
-Alternatively, call `node` with the JS entry point directly.
-
 ## References
 
 ### [gws-cli.md](references/gws-cli.md) — Google Workspace CLI
 
-| Section | Topics |
-|---------|--------|
-| Critical Rules | Params vs JSON, positional args, Gmail users path |
-| General Syntax / Global Flags | Command structure, output formats |
-| Ergonomic `+helper` Commands | `+send`, `+triage`, `+reply` shortcuts |
-| Auth | Login, status, refresh, multiple accounts |
-| Drive | Files, folders, upload, download, permissions, sharing |
-| Sheets | Read, write, append, formatting, named ranges |
-| Docs | Create, read, update, insert, export |
-| Slides | Create, pages, shapes, text, images |
-| Gmail | Messages, drafts, labels, threads, search operators |
-| Calendar | Events, list, create, update, attendees |
-| Tasks | Task lists, tasks, create, complete |
+- [Critical Rules](references/gws-cli.md#critical-rules-read-first--violations-cause-errors)
+- [General Syntax](references/gws-cli.md#general-syntax)
+- [Global CLI Flags](references/gws-cli.md#global-cli-flags)
+- [`+helper` Commands](references/gws-cli.md#ergonomic-helper-commands)
+- [Auth](references/gws-cli.md#auth)
+- [Drive](references/gws-cli.md#drive)
+- [Sheets](references/gws-cli.md#sheets)
+- [Docs](references/gws-cli.md#docs)
+- [Slides](references/gws-cli.md#slides)
+- [Gmail](references/gws-cli.md#gmail)
+- [Calendar](references/gws-cli.md#calendar)
+- [Tasks](references/gws-cli.md#tasks)
 
 ### [document-creation.md](references/document-creation.md) — Excel / Word / PowerPoint
 
-| Section | Topics |
-|---------|--------|
-| **openpyxl** (1.1–1.14) | Workbook, cells, styling, conditional formatting, charts, tables, images, print, formulas, protection |
-| **python-docx** (2.1–2.12) | Document, paragraphs, tables, styles, images, headers/footers, page layout, sections |
-| **python-pptx** (3.1–3.11) | Presentation, slides, shapes, text, tables, charts, images, layouts, masters |
+- **openpyxl:** [Workbook](references/document-creation.md#11-workbook--worksheet-operations) · [Cells](references/document-creation.md#12-cell-operations) · [Styling](references/document-creation.md#13-styling--formatting) · [Conditional Fmt](references/document-creation.md#14-conditional-formatting) · [Validation](references/document-creation.md#15-data-validation) · [Charts](references/document-creation.md#16-charts) · [Tables](references/document-creation.md#17-tables) · [Named Ranges](references/document-creation.md#18-defined-names--named-ranges) · [Filters](references/document-creation.md#19-auto-filter--sorting) · [Images](references/document-creation.md#110-images) · [Print](references/document-creation.md#111-print-settings) · [Formulas](references/document-creation.md#112-formula-reference) · [Protection](references/document-creation.md#113-protection) · [Comments](references/document-creation.md#114-comments)
+- **python-docx:** [Document](references/document-creation.md#21-document-operations) · [Paragraphs](references/document-creation.md#22-paragraphs--runs) · [Tables](references/document-creation.md#23-tables) · [Styles](references/document-creation.md#24-styles) · [Images](references/document-creation.md#25-images) · [Headers/Footers](references/document-creation.md#26-headersfooters) · [Page Layout](references/document-creation.md#27-page-layout) · [Sections](references/document-creation.md#28-sections) · [Lists](references/document-creation.md#29-lists) · [Hyperlinks](references/document-creation.md#210-hyperlinks) · [TOC](references/document-creation.md#211-table-of-contents) · [Fields](references/document-creation.md#212-fields)
+- **python-pptx:** [Presentation](references/document-creation.md#31-presentation-operations) · [Slides](references/document-creation.md#32-slides) · [Shapes](references/document-creation.md#33-shapes) · [Text](references/document-creation.md#34-text-frames--paragraphs) · [Tables](references/document-creation.md#35-tables) · [Charts](references/document-creation.md#36-charts) · [Images](references/document-creation.md#37-images) · [Layouts](references/document-creation.md#38-slide-layouts) · [Masters](references/document-creation.md#39-slide-masters) · [Placeholders](references/document-creation.md#310-placeholders) · [Animations](references/document-creation.md#311-notes--properties)
 
 ### [pdf-tools.md](references/pdf-tools.md) — PDF Read / Edit / Generate
 
-| Section | Topics |
-|---------|--------|
-| PyMuPDF (fitz) | Document, pages, text extraction, rendering, annotations, forms, merge, split, redaction |
-| PyPDF2 | Merge, split, rotate, encrypt/decrypt, metadata, bookmarks |
-| pdfplumber | Table extraction, text with positional data, visual debugging |
-| reportlab | Canvas, PLATYPUS, SimpleDocTemplate, tables, paragraphs, styles, charts |
-| Quick Selection Guide | Which tool for which task |
+- [PyMuPDF (fitz)](references/pdf-tools.md#1-pymupdf-fitz----pdf-read--edit--render)
+- [PyPDF2](references/pdf-tools.md#2-pypdf2----pdf-merge--split--transform)
+- [pdfplumber](references/pdf-tools.md#3-pdfplumber----pdf-data-extraction)
+- [reportlab](references/pdf-tools.md#4-reportlab----pdf-generation)
+- [Quick Selection Guide](references/pdf-tools.md#quick-selection-guide)
 
 ### [media-tools.md](references/media-tools.md) — Images / Video / Audio
 
-| Section | Topics |
-|---------|--------|
-| **Pillow** (1.1–1.10) | Formats, modes, Image class, ImageDraw, ImageFont, ImageFilter, ImageEnhance, ImageOps, ImageChops |
-| **ImageMagick** (2.1–2.16) | Resize, crop, rotate, format convert, composite, effects, batch, montage |
-| **FFmpeg** (3.1–3.11) | Convert, extract, trim, merge, compress, stream, filters, subtitles |
+- **Pillow:** [Formats](references/media-tools.md#11-supported-formats) · [Modes](references/media-tools.md#12-image-modes) · [Image Class](references/media-tools.md#13-image-class----all-methods-and-properties) · [ImageDraw](references/media-tools.md#14-imagedraw) · [ImageFont](references/media-tools.md#15-imagefont) · [ImageFilter](references/media-tools.md#16-imagefilter) · [ImageEnhance](references/media-tools.md#17-imageenhance) · [ImageOps](references/media-tools.md#18-imageops) · [ImageChops](references/media-tools.md#19-imagechops-channel-operations)
+- **ImageMagick:** [CLI Reference](references/media-tools.md#21-identify) (2.1–2.16)
+- **FFmpeg:** [CLI Reference](references/media-tools.md#31-basic-conversion) (3.1–3.11)
 
 ### [conversion-tools.md](references/conversion-tools.md) — Pandoc
 
-| Section | Topics |
-|---------|--------|
-| Command Syntax | Input/output formats (~45 in, ~60+ out) |
-| Templates / TOC / Bibliography | Custom styling, citations, math rendering |
-| Filters / PDF Engines / Slides | Lua filters, weasyprint/wkhtmltopdf, reveal.js/beamer |
+- [Command Syntax](references/conversion-tools.md#command-syntax) · [Input Formats](references/conversion-tools.md#input-formats-45) · [Output Formats](references/conversion-tools.md#output-formats-60) · [Templates](references/conversion-tools.md#templates) · [TOC](references/conversion-tools.md#table-of-contents) · [Bibliography](references/conversion-tools.md#bibliography--citations) · [Math](references/conversion-tools.md#math-rendering) · [Filters](references/conversion-tools.md#filters) · [PDF Engines](references/conversion-tools.md#pdf-engines) · [Slides](references/conversion-tools.md#slide-shows) · [EPUB](references/conversion-tools.md#epub-creation) · [Metadata](references/conversion-tools.md#metadata)
 
 ### [web-parsing.md](references/web-parsing.md) — HTML / XML
 
-| Section | Topics |
-|---------|--------|
-| lxml | ElementTree API, XPath, XSLT, validation (XSD, RelaxNG) |
-| BeautifulSoup4 | CSS selectors, tree navigation, modification, encoding |
+- [lxml](references/web-parsing.md#lxml) (ElementTree, XPath, XSLT, validation)
+- [BeautifulSoup4](references/web-parsing.md#beautifulsoup4) (CSS selectors, tree navigation)
 
 ### [email-reference.md](references/email-reference.md) — Email / MIME
 
-| Section | Topics |
-|---------|--------|
-| Critical Rules | MIME encoding, Content-ID, Gmail API gotchas |
-| Python MIME | MIMEText, MIMEMultipart, attachments, inline images, reply threading |
-| Gmail CLI | `+send`, `+triage`, `+reply` helpers (full API → gws-cli.md) |
+- [Critical Rules](references/email-reference.md#critical-rules)
+- [Python MIME](references/email-reference.md#python-mime-emailmime) (MIMEText, MIMEMultipart, attachments, inline images, threading)
+- [Gmail CLI](references/email-reference.md#gmail-cli-gws-gmail) (`+send`, `+triage`, `+reply` — full API → gws-cli.md)
 
 ### [clickup-cli.md](references/clickup-cli.md) — ClickUp CLI
 
-| Section | Topics |
-|---------|--------|
-| Conventions / Setup | Task IDs positional, priority integers, date formats |
-| Task / Status / Sprint | View, create, edit, search, status transitions |
-| Comments / Time / Custom Fields | Add, list, log time, set fields |
-| Git Integration | Branch auto-detection, commit linking |
+- [Conventions](references/clickup-cli.md#conventions-important) · [Setup](references/clickup-cli.md#setup) · [Output Flags](references/clickup-cli.md#output-flags-most-commands) · [Tasks](references/clickup-cli.md#task-management) · [Status](references/clickup-cli.md#status-management) · [Sprint](references/clickup-cli.md#sprint-management) · [Comments](references/clickup-cli.md#comments) · [Time](references/clickup-cli.md#time-tracking) · [Custom Fields](references/clickup-cli.md#custom-fields) · [Git](references/clickup-cli.md#git-integration)
 
 ### [setup.md](references/setup.md) — Installation Guide
 
-| Section | Topics |
-|---------|--------|
-| Python Packages | 10 pip packages (openpyxl, pymupdf, reportlab, etc.) |
-| CLI Tools | gws, clickup, git, ffmpeg, pandoc, magick, node |
-| GWS Auth | Login, verify, token refresh, multiple accounts |
-| MCP Servers | MySQL, Chrome DevTools, ClickUp |
-| LSP Plugins | Pyright, TypeScript, jdtls, JetBrains kotlin-lsp + Windows fix |
+- [Python Packages](references/setup.md#1-python-packages) · [CLI Tools](references/setup.md#2-cli-tools) · [GWS Auth](references/setup.md#3-google-workspace-gws-auth) · [MCP Servers](references/setup.md#4-mcp-servers) · [LSP Plugins](references/setup.md#5-lsp-plugins) · [Notes](references/setup.md#6-notes)
 
 ### [claude-patcher.md](references/claude-patcher.md) — Binary Patcher
 
-| Section | Topics |
-|---------|--------|
-| Patchable Constants | Context window, max output, autocompact, summary max |
-| Usage / Limitations | Scan, patch, restore; re-run after Claude Code updates |
+- [What It Does](references/claude-patcher.md#what-it-does) · [Constants](references/claude-patcher.md#patchable-constants) · [Usage](references/claude-patcher.md#usage) · [How It Works](references/claude-patcher.md#how-it-works) · [Limitations](references/claude-patcher.md#limitations)
 
 ---
 
@@ -139,107 +108,66 @@ Alternatively, call `node` with the JS entry point directly.
 
 ### [office-documents.md](examples/office-documents.md) — Excel / Word / PowerPoint
 
-| Section | What it builds |
-|---------|---------------|
-| Excel (openpyxl) | Basic workbook, styled report, conditional formatting, charts |
-| Word (python-docx) | Document with tables, styles, images, headers |
-| PowerPoint (python-pptx) | Presentation with slides, shapes, charts |
+- [Excel (openpyxl)](examples/office-documents.md#excel-openpyxl) · [Word (python-docx)](examples/office-documents.md#word-python-docx) · [PowerPoint (python-pptx)](examples/office-documents.md#powerpoint-python-pptx)
 
 ### [pdf-workflows.md](examples/pdf-workflows.md) — PDF Workflows
 
-| Section | What it builds |
-|---------|---------------|
-| reportlab | Simple PDF, styled report, tables |
-| PyMuPDF (fitz) | Text extraction, splitting, merging, annotations |
-| PyPDF2/pypdf | Merge, split, transform |
-| pdfplumber | Table extraction to data |
+- [reportlab](examples/pdf-workflows.md#reportlab--generate-pdfs-from-scratch) · [PyMuPDF](examples/pdf-workflows.md#pymupdf-fitz--readeditmanipulate) · [PyPDF2](examples/pdf-workflows.md#pypdf2pypdf----mergesplittransform) · [pdfplumber](examples/pdf-workflows.md#pdfplumber----extract-data)
 
 ### [google-workspace.md](examples/google-workspace.md) — GWS CLI
 
-| Section | What it builds |
-|---------|---------------|
-| Google Docs | Create and populate via gws CLI |
+- [Google Docs](examples/google-workspace.md#google-docs-gws-cli)
 
 ### [image-processing.md](examples/image-processing.md) — Image Processing
 
-| Section | What it builds |
-|---------|---------------|
-| Pillow | Resize, crop, rotate, filters, watermark, logo overlay, enhancement |
-| ImageMagick | CLI batch processing, compositing |
+- [Pillow](examples/image-processing.md#pillow-python) · [ImageMagick](examples/image-processing.md#imagemagick-magick-cli)
 
 ### [video-audio.md](examples/video-audio.md) — Video / Audio
 
-| Section | What it builds |
-|---------|---------------|
-| Video | Conversion, extraction, trimming, merging, compression |
-| Effects | Overlays, speed changes, thumbnails, GIF creation |
+- [Conversion](examples/video-audio.md#video-conversion) · [Extraction](examples/video-audio.md#extraction--trimming) · [Merging](examples/video-audio.md#merging--concatenation) · [Thumbnails](examples/video-audio.md#thumbnails--frames) · [GIF](examples/video-audio.md#gif--animated-formats) · [Compression](examples/video-audio.md#compression--scaling) · [Overlays](examples/video-audio.md#overlays--effects) · [Speed](examples/video-audio.md#speed--direction) · [Audio](examples/video-audio.md#audio-operations) · [Advanced](examples/video-audio.md#advanced)
 
 ### [email-workflows.md](examples/email-workflows.md) — Email
 
-| Section | What it builds |
-|---------|---------------|
-| Python MIME | Plain text, HTML, attachments, inline images, reply threading |
-| Gmail CLI | Sending, reading, complex workflows |
-| Full Workflow | Generate report → compose email → send with attachment |
+- [Python MIME](examples/email-workflows.md#python-email-composition-mime) · [Gmail CLI](examples/email-workflows.md#gmail-via-gws-cli) · [Full Workflow](examples/email-workflows.md#full-workflow-generate-report-compose-email-send-with-attachment)
 
 ### [data-pipelines.md](examples/data-pipelines.md) — Data Pipelines
 
-| Section | What it builds |
-|---------|---------------|
-| CSV → Excel → Sheets | Styled Excel upload to Google Sheets |
-| PDF → Tables → Excel | Extract PDF tables to spreadsheet |
-| Sheets ↔ Local | Download, modify, re-upload |
-| DB → Excel/Sheets | Database query to styled report |
-| JSON/HTML → Excel | Parse and convert to spreadsheet |
+- [CSV→Excel→Sheets](examples/data-pipelines.md#csv-to-styled-excel-to-google-sheets) · [PDF→Tables→Excel](examples/data-pipelines.md#pdf-to-extract-tables-to-excel) · [Sheets↔Local](examples/data-pipelines.md#google-sheet-download-modify-upload-back) · [DB→Excel](examples/data-pipelines.md#database-to-excel-report-styled) · [DB→Sheets](examples/data-pipelines.md#database-to-google-sheets-direct) · [JSON→Excel](examples/data-pipelines.md#json-to-excel) · [HTML→Excel](examples/data-pipelines.md#html-table-to-excel-beautifulsoup) · [Excel→PDF](examples/data-pipelines.md#excel-to-pdf-reportlab-table) · [MD→PDF](examples/data-pipelines.md#markdown-to-pdf-pandoc) · [Full Pipeline](examples/data-pipelines.md#full-pipeline-db-query-to-process-to-excel--pdf-to-upload-drive-to-email)
 
 ### [document-conversion.md](examples/document-conversion.md) — Pandoc Conversions
 
-| Section | What it builds |
-|---------|---------------|
-| Basic Conversions | Markdown ↔ Word ↔ PDF ↔ HTML ↔ PowerPoint |
-| Advanced | TOC, custom styling, bibliography, math, multi-file, metadata, filters |
+- [Basic](examples/document-conversion.md#basic-conversions) · [TOC](examples/document-conversion.md#table-of-contents) · [Styling](examples/document-conversion.md#custom-styling) · [Bibliography](examples/document-conversion.md#bibliography-and-citations) · [Math](examples/document-conversion.md#math-support) · [Multi-File](examples/document-conversion.md#multi-file-input) · [Metadata](examples/document-conversion.md#metadata) · [Filters](examples/document-conversion.md#filters) · [Slides](examples/document-conversion.md#slide-shows) · [EPUB](examples/document-conversion.md#epub-creation) · [Python](examples/document-conversion.md#python-integration) · [PyMuPDF PDF](examples/document-conversion.md#pymupdf-as-pdf-alternative-no-latex-required)
 
 ### [clickup-workflows.md](examples/clickup-workflows.md) — ClickUp
 
-| Section | What it builds |
-|---------|---------------|
-| Task CRUD | Read, search, list, create, update status |
-| Sprint / Comments / Time | Sprint view, add comments, log time |
-| Git Integration | Branch workflow, commit linking |
+- [Read](examples/clickup-workflows.md#read-a-task) · [Search](examples/clickup-workflows.md#search-tasks) · [List](examples/clickup-workflows.md#list-tasks-in-a-list) · [Create](examples/clickup-workflows.md#create-a-task) · [Update](examples/clickup-workflows.md#update-task-status) · [Sprint](examples/clickup-workflows.md#sprint-view) · [Comments](examples/clickup-workflows.md#comments) · [Time](examples/clickup-workflows.md#time-tracking) · [Fields](examples/clickup-workflows.md#custom-fields) · [Git](examples/clickup-workflows.md#git-integration) · [Workspace](examples/clickup-workflows.md#workspace) · [Dev Workflow](examples/clickup-workflows.md#development-workflow-pattern)
 
 ---
 
 ## Templates
 
-Use these when adding new reference or example files to the skill.
-
 | Template | Location | Structure |
 |----------|----------|-----------|
-| Reference | [references/_TEMPLATE.md](references/_TEMPLATE.md) | TOC → Critical Rules → API sections (tabular) → Quick Reference cheatsheet |
-| Example | [examples/_TEMPLATE.md](examples/_TEMPLATE.md) | TOC → Numbered workflows (Basic → Styled → Pipeline), each copy-paste runnable |
+| Reference | [references/_TEMPLATE.md](references/_TEMPLATE.md) | TOC → Critical Rules → API sections (tabular) → Quick Reference |
+| Example | [examples/_TEMPLATE.md](examples/_TEMPLATE.md) | TOC → Numbered workflows (Basic → Styled → Pipeline) |
 
-**To add a new file:**
-
-1. Copy the template → `references/[topic].md` or `examples/[topic].md`
-2. Replace all `[bracketed]` placeholders
-3. Add the file to the matching section above (with section index table)
-4. If it needs a new pip/npm package, add to `scripts/healthcheck.py` and `references/setup.md`
+**To add a new file:** copy template → fill placeholders → add section links here → update healthcheck + setup.md if needed.
 
 ## Scripts
 
 | Script | Purpose |
 |--------|---------|
-| [scripts/healthcheck.py](scripts/healthcheck.py) | Verify packages, CLI tools, MCP servers, LSP plugins; auto-fix Windows LSP patches |
+| [scripts/healthcheck.py](scripts/healthcheck.py) | Verify packages, CLI tools, MCP servers, LSP plugins; auto-fix Windows patches |
 | [scripts/claude-patcher.js](scripts/claude-patcher.js) | Claude Code binary patcher (context window, output limits) |
 
 ## Quick Decision Tree
 
-- **CREATE a document?** → [document-creation.md](references/document-creation.md) (Excel/Word/PPT) or [pdf-tools.md](references/pdf-tools.md) (PDF)
-- **CONVERT between formats?** → [conversion-tools.md](references/conversion-tools.md) (Pandoc)
-- **SEND email?** → [email-reference.md](references/email-reference.md) (MIME + Gmail)
-- **USE Google Drive/Sheets/Docs?** → [gws-cli.md](references/gws-cli.md)
-- **PROCESS images?** → [media-tools.md](references/media-tools.md) (Pillow section)
-- **PROCESS video/audio?** → [media-tools.md](references/media-tools.md) (FFmpeg section)
+- **CREATE a document?** → [document-creation.md](references/document-creation.md) / [pdf-tools.md](references/pdf-tools.md)
+- **CONVERT formats?** → [conversion-tools.md](references/conversion-tools.md)
+- **SEND email?** → [email-reference.md](references/email-reference.md)
+- **Google Drive/Sheets/Docs?** → [gws-cli.md](references/gws-cli.md)
+- **PROCESS images?** → [media-tools.md](references/media-tools.md#11-supported-formats)
+- **PROCESS video/audio?** → [media-tools.md](references/media-tools.md#31-basic-conversion)
 - **PARSE HTML/XML?** → [web-parsing.md](references/web-parsing.md)
 - **MANAGE tasks?** → [clickup-cli.md](references/clickup-cli.md)
-- **Need WORKING CODE?** → `examples/` folder (matching topic name)
+- **Working code?** → `examples/` (matching topic)

@@ -2,41 +2,6 @@
 
 Complete, runnable code blocks for Excel (openpyxl), Word (python-docx), and PowerPoint (python-pptx).
 
-## Contents
-- [Excel (openpyxl)](#excel-openpyxl)
-  - [Basic Workbook](#basic-workbook)
-  - [Styled Report](#styled-report)
-  - [Conditional Formatting](#conditional-formatting)
-  - [Data Validation](#data-validation)
-  - [Charts](#charts)
-  - [Rich Text in Cells](#rich-text-in-cells)
-  - [Tables](#tables)
-  - [Freeze Panes & Auto-Filter](#freeze-panes--auto-filter)
-  - [Images](#images)
-  - [Page Setup for Printing](#page-setup-for-printing)
-  - [Large File (Write-Only Mode)](#large-file-write-only-mode)
-  - [Read Existing File](#read-existing-file)
-- [Word (python-docx)](#word-python-docx)
-  - [Basic Document](#basic-document)
-  - [Styled Document](#styled-document)
-  - [Tables](#tables-1)
-  - [Document with Images](#document-with-images)
-  - [Headers & Footers](#headers--footers)
-  - [Sections & Page Layout](#sections--page-layout)
-  - [Lists](#lists)
-  - [Hyperlinks](#hyperlinks)
-  - [Full Report Template](#full-report-template)
-- [PowerPoint (python-pptx)](#powerpoint-python-pptx)
-  - [Basic Presentation](#basic-presentation)
-  - [Styled Slides](#styled-slides)
-  - [Charts in Slides](#charts-in-slides)
-  - [Tables in Slides](#tables-in-slides)
-  - [Images & Shapes](#images--shapes)
-  - [Slide Notes](#slide-notes)
-  - [Multi-Slide Deck (Complete Presentation)](#multi-slide-deck-complete-presentation)
-
----
-
 ## Excel (openpyxl)
 
 ### Basic Workbook

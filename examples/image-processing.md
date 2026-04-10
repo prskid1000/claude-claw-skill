@@ -2,38 +2,6 @@
 
 Working code blocks for Pillow (Python) and ImageMagick (CLI).
 
-## Contents
-- [Pillow (Python)](#pillow-python)
-  - [Open, Resize, Save in Different Format](#open-resize-save-in-different-format)
-  - [Crop, Rotate, Flip](#crop-rotate-flip)
-  - [Text Watermark](#text-watermark)
-  - [Logo Overlay (Paste with Alpha)](#logo-overlay-paste-with-alpha)
-  - [Filters: Blur, Sharpen, Edge Detect](#filters-blur-sharpen-edge-detect)
-  - [Enhance: Brightness, Contrast, Color, Sharpness](#enhance-brightness-contrast-color-sharpness)
-  - [ImageOps: Autocontrast, Equalize, Posterize, Pad/Contain/Cover](#imageops-autocontrast-equalize-posterize-padcontaincover)
-  - [Create Diagram from Scratch](#create-diagram-from-scratch)
-  - [Batch Resize (Process Directory)](#batch-resize-process-directory)
-  - [Animated GIF Creation from Frames](#animated-gif-creation-from-frames)
-  - [EXIF Data Reading and Auto-Rotation](#exif-data-reading-and-auto-rotation)
-  - [Color Channel Operations](#color-channel-operations)
-  - [Thumbnail Generation](#thumbnail-generation)
-  - [Format Conversion (PNG to JPEG, WebP, etc.)](#format-conversion-png-to-jpeg-webp-etc)
-- [ImageMagick (`magick` CLI)](#imagemagick-magick-cli)
-  - [Resize, Crop, Rotate](#resize-crop-rotate)
-  - [Format Conversion (including PDF to PNG)](#format-conversion-including-pdf-to-png)
-  - [Add Border, Trim Whitespace](#add-border-trim-whitespace)
-  - [Text Annotation](#text-annotation)
-  - [Composite / Overlay Images](#composite--overlay-images)
-  - [Montage (Grid of Images)](#montage-grid-of-images)
-  - [Batch Convert (mogrify)](#batch-convert-mogrify)
-  - [Color Adjustments](#color-adjustments)
-  - [Effects](#effects)
-  - [Compare Two Images](#compare-two-images)
-  - [Strip Metadata, Add ICC Profile](#strip-metadata-add-icc-profile)
-  - [Create Animated GIF from Images](#create-animated-gif-from-images)
-
----
-
 ## Pillow (Python)
 
 ### Open, Resize, Save in Different Format

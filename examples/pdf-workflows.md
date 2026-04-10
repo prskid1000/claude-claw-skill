@@ -2,51 +2,6 @@
 
 Complete, runnable code blocks for PDF generation, editing, extraction, and manipulation.
 
-## Contents
-- [reportlab — Generate PDFs from Scratch](#reportlab--generate-pdfs-from-scratch)
-  - [Simple PDF (Canvas)](#simple-pdf-canvas)
-  - [Styled Report (PLATYPUS)](#styled-report-platypus)
-  - [PDF with Custom Fonts](#pdf-with-custom-fonts)
-  - [PDF with Charts](#pdf-with-charts)
-  - [PDF with Barcodes](#pdf-with-barcodes)
-  - [PDF with Headers/Footers/Page Numbers](#pdf-with-headersfooterspage-numbers)
-  - [PDF with Table of Contents](#pdf-with-table-of-contents)
-  - [Multi-Column Layout](#multi-column-layout)
-  - [Interactive Form (AcroForm)](#interactive-form-acroform)
-  - [Encrypted PDF](#encrypted-pdf)
-- [PyMuPDF (fitz) — Read/Edit/Manipulate](#pymupdf-fitz--readeditmanipulate)
-  - [Render Page to Image (Screenshot)](#render-page-to-image-screenshot)
-  - [Extract Text (All Modes)](#extract-text-all-modes)
-  - [Search Text in PDF](#search-text-in-pdf)
-  - [Extract Tables](#extract-tables)
-  - [Extract Images](#extract-images)
-  - [Add Annotations](#add-annotations)
-  - [Redact Content](#redact-content)
-  - [Merge PDFs](#merge-pdfs)
-  - [Split PDF](#split-pdf)
-  - [Add Watermark](#add-watermark)
-  - [Rotate and Crop Pages](#rotate-and-crop-pages)
-  - [Fill Form Fields](#fill-form-fields)
-  - [Insert Text and Drawings](#insert-text-and-drawings)
-  - [TOC/Bookmarks](#tocbookmarks)
-  - [HTML to PDF (Story)](#html-to-pdf-story)
-  - [Metadata and Encryption](#metadata-and-encryption)
-- [PyPDF2/pypdf -- Merge/Split/Transform](#pypdf2pypdf----mergesplittransform)
-  - [Merge Multiple PDFs](#merge-multiple-pdfs)
-  - [Add Watermark](#add-watermark-1)
-  - [Encrypt/Decrypt](#encryptdecrypt)
-  - [Extract Text](#extract-text)
-  - [Add Bookmarks](#add-bookmarks)
-  - [Fill Form Fields](#fill-form-fields-1)
-- [pdfplumber -- Extract Data](#pdfplumber----extract-data)
-  - [Extract Text with Layout](#extract-text-with-layout)
-  - [Extract Tables](#extract-tables-1)
-  - [Visual Debugging](#visual-debugging)
-  - [Extract from Specific Region](#extract-from-specific-region)
-  - [Search Text with Position](#search-text-with-position)
-
----
-
 ## reportlab — Generate PDFs from Scratch
 
 ### Simple PDF (Canvas)

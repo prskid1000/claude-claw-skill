@@ -1,11 +1,5 @@
 # Web Parsing Reference (lxml + BeautifulSoup4)
 
-## Contents
-- [lxml](#lxml)
-- [BeautifulSoup4](#beautifulsoup4)
-
----
-
 ## lxml
 
 ### Installation

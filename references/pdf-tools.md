@@ -2,52 +2,6 @@
 
 Comprehensive API reference for PyMuPDF (fitz), PyPDF2/pypdf, pdfplumber, and reportlab.
 
-## Contents
-- [1. PyMuPDF (fitz) -- PDF Read / Edit / Render](#1-pymupdf-fitz----pdf-read--edit--render)
-  - [1.1 Document Operations](#11-document-operations)
-  - [1.2 Page Rendering](#12-page-rendering)
-  - [1.3 Text Extraction](#13-text-extraction)
-  - [1.4 Table Extraction](#14-table-extraction)
-  - [1.5 Image Extraction](#15-image-extraction)
-  - [1.6 Annotations](#16-annotations)
-  - [1.7 Redaction](#17-redaction)
-  - [1.8 Page Manipulation](#18-page-manipulation)
-  - [1.9 Merge / Split](#19-merge--split)
-  - [1.10 Watermarks & Overlays](#110-watermarks--overlays)
-  - [1.11 Forms (Widgets)](#111-forms-widgets)
-  - [1.12 TOC / Bookmarks / Links](#112-toc--bookmarks--links)
-  - [1.13 Metadata & Encryption](#113-metadata--encryption)
-  - [1.14 Drawing (Shape Class)](#114-drawing-shape-class)
-  - [1.15 TextWriter & Story](#115-textwriter--story)
-  - [1.16 Font Handling](#116-font-handling)
-  - [1.17 Optional Content (Layers / OCG)](#117-optional-content-layers--ocg)
-  - [1.18 OCR (Tesseract Integration)](#118-ocr-tesseract-integration)
-- [2. PyPDF2 -- PDF Merge / Split / Transform](#2-pypdf2----pdf-merge--split--transform)
-  - [2.1 Core Operations](#21-core-operations)
-  - [2.2 Page Transforms](#22-page-transforms)
-  - [2.3 Text & Image Extraction](#23-text--image-extraction)
-  - [2.4 Metadata & Security](#24-metadata--security)
-  - [2.5 Bookmarks & Annotations](#25-bookmarks--annotations)
-  - [2.6 Forms & Attachments](#26-forms--attachments)
-  - [2.7 Viewer Preferences](#27-viewer-preferences)
-- [3. pdfplumber -- PDF Data Extraction](#3-pdfplumber----pdf-data-extraction)
-  - [3.1 Open & Page Properties](#31-open--page-properties)
-  - [3.2 Page Objects](#32-page-objects)
-  - [3.3 Text Extraction](#33-text-extraction)
-  - [3.4 Table Extraction](#34-table-extraction)
-  - [3.5 Visual Debugging](#35-visual-debugging)
-  - [3.6 Crop & Filter](#36-crop--filter)
-- [4. reportlab -- PDF Generation](#4-reportlab----pdf-generation)
-  - [4.1 Canvas Drawing](#41-canvas-drawing)
-  - [4.2 PLATYPUS](#42-platypus-page-layout-and-typography-using-scripts)
-  - [4.3 Fonts](#43-fonts)
-  - [4.4 Charts (reportlab.graphics)](#44-charts-reportlabgraphics)
-  - [4.5 Barcodes](#45-barcodes)
-  - [4.6 Other Features](#46-other-features)
-- [Quick Selection Guide](#quick-selection-guide)
-
----
-
 ## 1. PyMuPDF (fitz) -- PDF Read / Edit / Render
 
 ```python

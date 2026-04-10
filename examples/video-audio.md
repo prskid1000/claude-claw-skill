@@ -2,20 +2,6 @@
 
 Working code blocks for FFmpeg CLI.
 
-## Contents
-- [Video Conversion](#video-conversion)
-- [Extraction & Trimming](#extraction--trimming)
-- [Merging & Concatenation](#merging--concatenation)
-- [Thumbnails & Frames](#thumbnails--frames)
-- [GIF & Animated Formats](#gif--animated-formats)
-- [Compression & Scaling](#compression--scaling)
-- [Overlays & Effects](#overlays--effects)
-- [Speed & Direction](#speed--direction)
-- [Audio Operations](#audio-operations)
-- [Advanced](#advanced)
-
----
-
 ## Video Conversion
 
 ### Convert Video (MP4 to MKV, Codec Change)

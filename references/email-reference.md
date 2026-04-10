@@ -1,12 +1,5 @@
 # Email / MIME Composition + Gmail CLI Reference
 
-## Contents
-- [CRITICAL RULES](#critical-rules)
-- [Python MIME (email.mime)](#python-mime-emailmime)
-- [Gmail CLI (gws gmail)](#gmail-cli-gws-gmail)
-
----
-
 ## CRITICAL RULES
 
 1. **For simple emails, use `gws gmail +send`** — don't build MIME manually unless you need attachments or inline images.
