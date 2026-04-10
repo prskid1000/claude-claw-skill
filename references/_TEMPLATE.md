@@ -5,11 +5,17 @@ TEMPLATE — How to add a new reference file:
 
 1. Copy this file → references/[your-topic].md
 2. Replace all [bracketed] placeholders
-3. Structure: TOC → Critical Rules → API sections → Quick Reference table
+3. Structure: Critical Rules → numbered API sections (## 1.1, ## 1.2, ...) → Quick Reference table
 4. Keep it agent-friendly: tabular data, code blocks, no prose paragraphs
-5. Add the new file to skill.md References table
-6. Add the tool's pip/npm package to healthcheck.py if needed
-7. Add an install entry to references/setup.md
+5. Update SKILL.md File Map:
+     - Pick the matching task category (CREATE / READ / EDIT / etc.) or add a new one
+     - Add the file with one sub-bullet per H2 section in this format:
+         - Ref:
+           - [Descriptive label of section](references/your-topic.md#anchor)
+           - ... (one bullet per ## heading)
+     - Anchor format: lowercase, spaces → hyphens, strip special chars
+6. Add tool's pip / npm package to scripts/healthcheck.py PACKAGES or CLI_TOOLS dict
+7. Add an install entry to references/setup.md (matching numbered section)
 
 Naming convention: lowercase-kebab-case.md (e.g. pdf-tools.md, gws-cli.md)
 -->
