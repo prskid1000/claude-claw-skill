@@ -2,6 +2,14 @@
 
 Script: `~/.claude/skills/claude-claw/scripts/claude-patcher.js`
 
+## Contents
+- [What It Does](#what-it-does)
+- [Patchable Constants](#patchable-constants)
+- [Usage](#usage)
+- [After Claude Code Updates](#after-claude-code-updates)
+- [How It Works](#how-it-works)
+- [Limitations](#limitations)
+
 ## What It Does
 
 Patches the compiled Claude Code binary to override hardcoded limits. Finds constants by **value + structural context** (not minified variable names), so it survives version updates.

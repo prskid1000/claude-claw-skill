@@ -4,6 +4,20 @@
 
 **Reference:** [references/clickup-cli.md](../references/clickup-cli.md)
 
+## Contents
+- [Read a Task](#read-a-task)
+- [Search Tasks](#search-tasks)
+- [List Tasks in a List](#list-tasks-in-a-list)
+- [Create a Task](#create-a-task)
+- [Update Task Status](#update-task-status)
+- [Sprint View](#sprint-view)
+- [Comments](#comments)
+- [Time Tracking](#time-tracking)
+- [Custom Fields](#custom-fields)
+- [Git Integration](#git-integration)
+- [Workspace](#workspace)
+- [Development Workflow Pattern](#development-workflow-pattern)
+
 ---
 
 ## Read a Task

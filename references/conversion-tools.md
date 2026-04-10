@@ -1,5 +1,26 @@
 # Pandoc Conversion Reference
 
+## Contents
+- [Command Syntax](#command-syntax)
+- [Input Formats (~45)](#input-formats-45)
+- [Output Formats (~60+)](#output-formats-60)
+- [Templates](#templates)
+- [Reference Documents](#reference-documents)
+- [Table of Contents](#table-of-contents)
+- [Bibliography / Citations](#bibliography--citations)
+- [Math Rendering](#math-rendering)
+- [Syntax Highlighting](#syntax-highlighting)
+- [Filters](#filters)
+- [PDF Engines](#pdf-engines)
+- [Slide Shows](#slide-shows)
+- [EPUB Creation](#epub-creation)
+- [Key CLI Flags](#key-cli-flags)
+- [Extensions System](#extensions-system)
+- [Custom Readers / Writers](#custom-readers--writers)
+- [Metadata](#metadata)
+- [Include Files](#include-files)
+- [Defaults Files](#defaults-files)
+
 ## Command Syntax
 
 ```

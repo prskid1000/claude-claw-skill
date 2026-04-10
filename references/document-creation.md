@@ -2,6 +2,48 @@
 
 Comprehensive API reference for `openpyxl`, `python-docx`, and `python-pptx`.
 
+## Contents
+- **1. openpyxl (Excel .xlsx)**
+  - [1.1 Workbook & Worksheet Operations](#11-workbook--worksheet-operations)
+  - [1.2 Cell Operations](#12-cell-operations)
+  - [1.3 Styling & Formatting](#13-styling--formatting)
+  - [1.4 Conditional Formatting](#14-conditional-formatting)
+  - [1.5 Data Validation](#15-data-validation)
+  - [1.6 Charts](#16-charts)
+  - [1.7 Tables](#17-tables)
+  - [1.8 Defined Names / Named Ranges](#18-defined-names--named-ranges)
+  - [1.9 Auto-Filter & Sorting](#19-auto-filter--sorting)
+  - [1.10 Images](#110-images)
+  - [1.11 Page Setup & Print](#111-page-setup--print)
+  - [1.12 Worksheet Protection](#112-worksheet-protection)
+  - [1.13 Freeze Panes](#113-freeze-panes)
+  - [1.14 Column Width & Row Height](#114-column-width--row-height)
+- **2. python-docx (Word .docx)**
+  - [2.1 Document Operations](#21-document-operations)
+  - [2.2 Paragraphs & Runs](#22-paragraphs--runs)
+  - [2.3 Headings & Lists](#23-headings--lists)
+  - [2.4 Tables](#24-tables)
+  - [2.5 Images](#25-images)
+  - [2.6 Sections & Page Layout](#26-sections--page-layout)
+  - [2.7 Headers & Footers](#27-headers--footers)
+  - [2.8 Breaks](#28-breaks)
+  - [2.9 Hyperlinks](#29-hyperlinks)
+  - [2.10 Styles](#210-styles)
+  - [2.11 Core Properties](#211-core-properties)
+  - [2.12 Length Units](#212-length-units)
+- **3. python-pptx (PowerPoint .pptx)**
+  - [3.1 Presentation & Slides](#31-presentation--slides)
+  - [3.2 Shapes](#32-shapes)
+  - [3.3 Text Frames & Formatting](#33-text-frames--formatting)
+  - [3.4 Charts](#34-charts)
+  - [3.5 Fill & Line Formatting](#35-fill--line-formatting)
+  - [3.6 Placeholders](#36-placeholders)
+  - [3.7 Slide Background](#37-slide-background)
+  - [3.8 Hyperlinks & Click Actions](#38-hyperlinks--click-actions)
+  - [3.9 OLE Embedding & Media](#39-ole-embedding--media)
+  - [3.10 Core Properties](#310-core-properties)
+  - [3.11 Length Units](#311-length-units)
+
 ---
 
 # 1. openpyxl (Excel .xlsx)

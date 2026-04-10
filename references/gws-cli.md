@@ -2,6 +2,63 @@
 
 Complete command reference for the `gws` CLI tool (version **0.16.0**). Covers Drive, Sheets, Docs, Slides, Gmail, Calendar, and Tasks.
 
+## Contents
+- [CRITICAL RULES (READ FIRST -- VIOLATIONS CAUSE ERRORS)](#critical-rules-read-first--violations-cause-errors)
+  - [Rule 0: Prefer Helper Commands When Possible](#rule-0-prefer-helper-commands-when-possible)
+  - [Rule 1: NO positional arguments](#rule-1-no-positional-arguments-all-ids-go-inside---params-json)
+  - [Rule 2: --params vs --json](#rule-2---params-vs---json--when-to-use-which)
+  - [Rule 3: Gmail requires users sub-resource](#rule-3-gmail-requires-users-sub-resource)
+  - [Rule 4: Sheets values path](#rule-4-sheets-values-path-is-sheets-spreadsheets-values)
+  - [Rule 5: There is NO convert subcommand](#rule-5-there-is-no-convert-subcommand)
+  - [Rule 6: Param names follow Google Discovery API exactly](#rule-6-param-names-follow-google-discovery-api-exactly)
+  - [Rule 7: drive.comments and drive.replies require fields](#rule-7-drivecomments-and-drivereplies-require-fields---in-params)
+  - [Rule 8: calendar events update requires FULL start/end in body](#rule-8-calendar-events-update-requires-full-startend-in-body)
+- [General Syntax](#general-syntax)
+  - [Multiline Commands](#multiline-commands)
+  - [Windows / Python note](#windows--python-note)
+- [Global CLI Flags](#global-cli-flags)
+- [Ergonomic +helper Commands](#ergonomic-helper-commands)
+- [Auth](#auth)
+- [Drive](#drive)
+  - [files](#files)
+  - [permissions](#permissions)
+  - [comments](#comments)
+  - [replies](#replies)
+  - [revisions](#revisions)
+  - [drives (Shared Drives)](#drives-shared-drives)
+- [Sheets](#sheets)
+  - [spreadsheets](#spreadsheets)
+  - [spreadsheets values](#spreadsheets-values)
+  - [spreadsheets sheets](#spreadsheets-sheets)
+- [Docs](#docs)
+  - [documents](#documents)
+- [Slides](#slides)
+  - [presentations](#presentations)
+  - [presentations pages](#presentations-pages)
+- [Gmail](#gmail)
+  - [users messages](#users-messages)
+  - [users drafts](#users-drafts)
+  - [users labels](#users-labels)
+  - [users threads](#users-threads)
+  - [users history](#users-history)
+  - [Gmail Search Operators](#gmail-search-operators)
+- [Calendar](#calendar)
+  - [events](#events)
+  - [calendarList](#calendarlist)
+  - [settings](#settings)
+  - [freebusy](#freebusy)
+- [Tasks](#tasks)
+  - [tasklists](#tasklists)
+  - [tasks](#tasks-1)
+- [Common MIME Types](#common-mime-types)
+  - [Google Native Formats](#google-native-formats-for-files-create-with---json)
+  - [Export MIME Types](#export-mime-types-for-files-export-mimetype-param)
+  - [Upload MIME Types](#upload-mime-types-for---upload-content-type)
+- [Sharing Patterns](#sharing-patterns)
+  - [Make file publicly viewable](#make-file-publicly-viewable)
+  - [Share with specific user](#share-with-specific-user)
+  - [Transfer ownership](#transfer-ownership)
+
 ---
 
 ## CRITICAL RULES (READ FIRST — VIOLATIONS CAUSE ERRORS)
@@ -1276,25 +1333,3 @@ gws drive permissions create --params '{"fileId": "<FILE_ID>", "transferOwnershi
 
 ---
 
-## Quick Decision Tree
-
-**"I want to create a Google Doc/Sheet/Slides"**
--> Use `gws <service> <resource> create --json '{"title/properties.title": "..."}'`
-
-**"I want to upload a local file to Drive"**
--> Use `gws drive +upload ./file.pdf` (simple) or `gws drive files create --json '{"name": "..."}' --upload /path --upload-content-type "..."` (full control)
-
-**"I want to write text into a Google Doc"**
--> Use `gws docs +write --document <DOC_ID> --text 'content'` (simple) or `gws docs documents batchUpdate` with `insertText` request (full control)
-
-**"I want to read/write spreadsheet cells"**
--> Use `gws sheets +read`/`+append` (simple) or `gws sheets spreadsheets values get/update/append` (full control)
-
-**"I want to send an email"**
--> Use `gws gmail +send --to ... --subject ... --body ...`
-
-**"I want to create a calendar event"**
--> Use `gws calendar +insert --summary ... --start ... --end ...` (simple) or `gws calendar events insert` (full control)
-
-**"I want to download/export a Google file"**
--> Use `gws drive files export --params '{"fileId": "...", "mimeType": "..."}' --output /tmp/file.ext`

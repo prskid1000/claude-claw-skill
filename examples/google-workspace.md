@@ -2,6 +2,9 @@
 
 Complete, runnable code blocks for Google Docs, Sheets, Slides, Gmail, and Calendar via `gws` CLI.
 
+## Contents
+- [Google Docs (gws CLI)](#google-docs-gws-cli)
+
 ---
 
 ## Google Docs (gws CLI)

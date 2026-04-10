@@ -2,12 +2,19 @@
 
 End-to-end working code blocks for multi-step data transformations.
 
-> **Windows + subprocess note:** `gws` (and `clickup`) are `.cmd` shims on Windows. `subprocess.run(["gws", ...])` without `shell=True` will raise `FileNotFoundError`. Resolve the full path once at the top of your script:
-> ```python
-> import shutil
-> GWS = shutil.which("gws") or "gws"
-> ```
-> Then use `[GWS, ...]` in every `subprocess.run` call. Also prefer `json.dumps(...)` over f-strings for `--params` / `--json` payloads — it escapes quotes and backslashes safely.
+> **Windows:** See [skill.md § Windows Notes](../skill.md#windows-notes) for subprocess setup.
+
+## Contents
+- [CSV to Styled Excel to Google Sheets](#csv-to-styled-excel-to-google-sheets)
+- [PDF to Extract Tables to Excel](#pdf-to-extract-tables-to-excel)
+- [Google Sheet Download, Modify, Upload Back](#google-sheet-download-modify-upload-back)
+- [Database to Excel Report (Styled)](#database-to-excel-report-styled)
+- [Database to Google Sheets (Direct)](#database-to-google-sheets-direct)
+- [JSON to Excel](#json-to-excel)
+- [HTML Table to Excel (BeautifulSoup)](#html-table-to-excel-beautifulsoup)
+- [Excel to PDF (reportlab Table)](#excel-to-pdf-reportlab-table)
+- [Markdown to PDF (pandoc)](#markdown-to-pdf-pandoc)
+- [Full Pipeline: DB Query to Process to Excel + PDF to Upload Drive to Email](#full-pipeline-db-query-to-process-to-excel--pdf-to-upload-drive-to-email)
 
 ---
 

@@ -2,6 +2,11 @@
 
 Working code blocks for Python email composition and Gmail via `gws` CLI.
 
+## Contents
+- [Python Email Composition (MIME)](#python-email-composition-mime)
+- [Gmail via `gws` CLI](#gmail-via-gws-cli)
+- [Full Workflow: Generate Report, Compose Email, Send with Attachment](#full-workflow-generate-report-compose-email-send-with-attachment)
+
 ---
 
 ## Python Email Composition (MIME)
@@ -160,12 +165,7 @@ with open("/tmp/chart.png", "rb") as f:
 
 ## Gmail via `gws` CLI
 
-> **Windows + subprocess:** `gws` is a `.cmd` shim on Windows, so `subprocess.run(["gws", ...])` without `shell=True` raises `FileNotFoundError`. Resolve it once at the top of your script:
-> ```python
-> import shutil
-> GWS = shutil.which("gws") or "gws"
-> ```
-> Then use `[GWS, "gmail", ...]` in every `subprocess.run` call. All Python examples below assume `GWS` has been defined.
+> **Windows:** See [skill.md § Windows Notes](../skill.md#windows-notes) for subprocess setup.
 >
 > **Tip:** For everyday sending / triage / replies, the `gws gmail +send`, `+triage`, `+reply`, `+reply-all`, `+forward` helpers are simpler than the raw API — no MIME plumbing required. Drop to the raw API (shown below) only when you need attachments, custom headers, or batch operations.
 
