@@ -4,23 +4,13 @@ Copy these sections into your `~/.claude/CLAUDE.md` to always auto-load the clau
 
 ---
 
-## Claude Claw — Always Available
+## Claude Claw — Always Load First
 
-The `claude-claw` skill at `~/.claude/skills/claude-claw/SKILL.md` is the canonical reference for documents (Excel, Word, PowerPoint, PDF), images, video/audio, Google Workspace, ClickUp, MIME/email composition, and Pandoc conversion.
+**At the start of every conversation, before doing anything else, read `~/.claude/skills/claude-claw/SKILL.md`.**
 
-**Always read [SKILL.md](skills/claude-claw/SKILL.md) at the start of any task involving:**
+This is unconditional — read it on every message regardless of the task, even for simple greetings. SKILL.md is small (the File Map only) and gives you the index needed to find detailed reference and example files when relevant.
 
-- Creating, reading, editing, or converting documents (`.xlsx`, `.docx`, `.pptx`, `.pdf`, Markdown, HTML, EPUB)
-- Image processing (Pillow, ImageMagick)
-- Video / audio processing (FFmpeg)
-- Google Workspace operations (Drive, Sheets, Docs, Slides, Gmail, Calendar, Tasks)
-- Composing or sending email (MIME, Gmail)
-- ClickUp task management
-- Querying MySQL via MCP
-- Pandoc document conversion
-- Web scraping or HTML/XML parsing (lxml, BeautifulSoup4)
-
-SKILL.md contains a File Map with direct links to every section in every reference and example file. Follow links to load only the sections you need — avoid reading whole reference files (some are 60KB+).
+After loading SKILL.md, follow links inside it to load only the specific sections you need — never read whole reference files (some are 60KB+).
 
 ---
 
