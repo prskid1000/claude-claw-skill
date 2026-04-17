@@ -49,36 +49,38 @@ from email import encoders
 import base64
 ```
 
-### MIMEText — Create a text message part
+### MIMEText
 
 | Param | Type | Required | Default | Description |
 |-------|------|----------|---------|-------------|
 | `_text` | string | YES | — | The text content |
-| `_subtype` | string | no | `"plain"` | `"plain"` or `"html"` |
-| `_charset` | string | no | `"us-ascii"` | Always use `"utf-8"` |
+| `_subtype` | string | no | `"plain"` | `"plain"` / `"html"` |
+| `_charset` | string | no | `"us-ascii"` | Always set to `"utf-8"` |
 
-```python
-msg = MIMEText("Hello", "plain", "utf-8")
-msg = MIMEText("<h1>Hello</h1>", "html", "utf-8")
-```
-
-### MIMEMultipart — container subtypes
+### MIMEMultipart subtypes
 
 | Subtype | Purpose | When to use |
 |---------|---------|-------------|
 | `"mixed"` | Attachments alongside text body | Email with file attachments |
-| `"alternative"` | Multiple representations (plain + HTML) | Email with both plain text and HTML versions |
+| `"alternative"` | Multiple representations (plain + HTML) | Plain-text fallback + HTML |
 | `"related"` | HTML with inline images (Content-ID refs) | HTML email with embedded images |
 
 ### Attachments
 
-`MIMEBase` + `encoders.encode_base64` is the general form; `MIMEApplication` is the shortcut for the common case.
+> `claw email send --attach @PATH` wraps the common case — see [claw/email.md](claw/email.md).
+
+Library primitives: `MIMEBase` + `encoders.encode_base64` (general form); `MIMEApplication` (shortcut for binary payloads). Required header: `Content-Disposition: attachment; filename="<name>"`.
+
+### Multiple attachments pattern
+
+Repeat the attachment block per file before the final send. Used for bulk mail-merge (recipe #2) that can't express many attachments via the CLI flag.
 
 ```python
-with open("report.xlsx", "rb") as f:
-    part = MIMEApplication(f.read(), Name="report.xlsx")
-    part["Content-Disposition"] = 'attachment; filename="report.xlsx"'
-    msg.attach(part)
+for path in ["report.xlsx", "cover.pdf"]:
+    with open(path, "rb") as f:
+        part = MIMEApplication(f.read(), Name=os.path.basename(path))
+        part["Content-Disposition"] = f'attachment; filename="{os.path.basename(path)}"'
+        msg.attach(part)
 ```
 
 ### Headers
@@ -96,37 +98,24 @@ with open("report.xlsx", "rb") as f:
 | `Date` | Send date | `msg["Date"] = email.utils.formatdate(localtime=True)` |
 | `Message-ID` | Unique message ID | `msg["Message-ID"] = email.utils.make_msgid()` |
 
-### Gmail API Raw Format (base64url)
+### Gmail API raw encoding
 
-```python
-raw = base64.urlsafe_b64encode(msg.as_bytes()).decode("ascii")
-# {"raw": raw} in Gmail API send
-```
+Gmail requires `base64.urlsafe_b64encode(msg.as_bytes()).decode("ascii")` — **not** standard base64. Pass as `{"raw": encoded}` to `users().messages().send()`.
 
 ### Inline image pattern (Content-ID)
 
-The `cid:` in the HTML must exactly match the `Content-ID` header (angle-bracket-wrapped).
+> `claw email send --html FILE --inline CID=PATH` wraps this — see [claw/email.md](claw/email.md). Below: the Content-ID invariant the CLI enforces under the hood.
 
-```python
-msg = MIMEMultipart("related")
-msg.attach(MIMEText('<img src="cid:chart_img">', "html"))
-with open("chart.png", "rb") as f:
-    img = MIMEImage(f.read(), _subtype="png")
-    img.add_header("Content-ID", "<chart_img>")
-    img.add_header("Content-Disposition", "inline", filename="chart.png")
-    msg.attach(img)
-```
+The `cid:` in the HTML must exactly match the `Content-ID` header **including angle brackets**. Container must be `multipart/related`. Image part needs `Content-Disposition: inline; filename="<name>"`.
 
 ### Reply threading
 
-For Gmail API, set `threadId` in the send request **and** set `In-Reply-To` + `References`:
+> `claw email reply` / `claw email forward` compute these for you from the parent message ID — see [claw/email.md](claw/email.md). Below: the invariants.
 
-```python
-msg["In-Reply-To"] = original_message_id        # "<original-id@mail.gmail.com>"
-msg["References"] = f"{original_references} {original_message_id}"
-msg["Subject"] = "Re: Original Subject"
-# Gmail API: {"raw": raw, "threadId": "thread_id_here"}
-```
+- `msg["In-Reply-To"] = "<original-message-id@mail.gmail.com>"` (with angle brackets)
+- `msg["References"] = f"{original_references} {original_message_id}"` (space-separated chain)
+- `msg["Subject"] = "Re: Original Subject"`
+- Gmail API send body must also include `"threadId": "<thread_id>"` alongside `"raw"`.
 
 ---
 

@@ -35,13 +35,9 @@ import lxml.html
 
 ### ElementTree API
 
-```python
-tree = etree.parse("file.xml")                       # from file
-tree = etree.parse(StringIO(xml_string))              # from string IO
-root = etree.fromstring(xml_bytes)                    # from bytes -> Element
-root = etree.XML("<root><child/></root>")             # from string literal
-doc  = etree.ElementTree(root)                        # wrap Element in tree
-```
+> `claw xml xpath | fmt | canonicalize | to-json` cover the common read / serialize path — see [claw/xml.md](claw/xml.md). Below: API reference for in-code use.
+
+Parse: `etree.parse(path_or_stream)` → ElementTree · `etree.fromstring(bytes)` → Element · `etree.XML("<root/>")` · wrap: `etree.ElementTree(elem)`.
 
 | Method | Purpose |
 |---|---|
@@ -55,7 +51,7 @@ doc  = etree.ElementTree(root)                        # wrap Element in tree
 | `elem.iter(*tags)` | All descendants (optionally filtered) |
 | `elem.iterchildren/itersiblings/iterancestors/iterdescendants/itertext` | Axis iterators |
 
-#### E-factory (declarative construction)
+E-factory (declarative construction):
 
 ```python
 from lxml.builder import E
@@ -63,52 +59,43 @@ html = E.html(E.head(E.title("Page")),
               E.body(E.p("Paragraph", {"class": "intro"})))
 ```
 
-#### Serialize
-
-```python
-etree.tostring(root, pretty_print=True, encoding="unicode")
-etree.tostring(root, method="html", encoding="utf-8")        # bytes
-etree.tostring(root, xml_declaration=True, encoding="UTF-8")
-etree.indent(root, space="  ")                                # in-place indent
-tree.write("out.xml", pretty_print=True, xml_declaration=True, encoding="UTF-8")
-etree.tostring(root, method="c14n")                           # C14N canonical
-etree.tostring(root, method="c14n2")                          # C14N 2.0
-```
+Serialize: `etree.tostring(root, pretty_print=True, encoding="unicode"|"utf-8", method="xml"|"html"|"c14n"|"c14n2", xml_declaration=True)` · `etree.indent(root, space="  ")` (in-place) · `tree.write(path, pretty_print, xml_declaration, encoding)`.
 
 ---
 
 ### XPath 1.0
 
-```python
-root.xpath("//div")                               # all div elements
-root.xpath("//div[@class='main']")                # attribute filter
-root.xpath("//div/p/text()")                      # text content
-root.xpath("//a/@href")                           # attribute values
-root.xpath("count(//p)")                          # count (returns float)
-root.xpath("//p[position()>2]")                   # positional
-root.xpath("//p[last()]")                         # last element
-root.xpath("//div[contains(@class,'item')]")      # contains
-root.xpath("//div[starts-with(@id,'sec')]")       # starts-with
-root.xpath("//h1 | //h2 | //h3")                 # union
-root.xpath("//div[not(@hidden)]")                 # negation
-root.xpath("normalize-space(//title)")            # normalize whitespace
-root.xpath("string(//title)")                     # string value
-```
+> `claw xml xpath` runs XPath 1.0 with namespace + regex support — see [claw/xml.md](claw/xml.md). Below: syntax crib, compiled / parameterized queries, EXSLT.
 
-XPath axes: `self`, `child`, `parent`, `ancestor`, `ancestor-or-self`, `descendant`, `descendant-or-self`, `following`, `following-sibling`, `preceding`, `preceding-sibling`, `attribute`, `namespace`.
+Common syntax:
 
-#### Compiled / parameterized XPath
+| Expression | Purpose |
+|---|---|
+| `//div` | All `div` descendants |
+| `//div[@class='main']` | Attribute filter |
+| `//div/p/text()` | Text content |
+| `//a/@href` | Attribute values |
+| `count(//p)` | Count (float) |
+| `//p[position()>2]` | Positional |
+| `//p[last()]` | Last |
+| `//div[contains(@class,'item')]` | contains |
+| `//div[starts-with(@id,'sec')]` | starts-with |
+| `//h1 \| //h2 \| //h3` | Union |
+| `//div[not(@hidden)]` | Negation |
+| `normalize-space(//title)` | Normalize whitespace |
+| `string(//title)` | String value |
+
+Axes: `self`, `child`, `parent`, `ancestor`, `ancestor-or-self`, `descendant`, `descendant-or-self`, `following`, `following-sibling`, `preceding`, `preceding-sibling`, `attribute`, `namespace`.
+
+Compiled / parameterized (escape hatch — `claw` accepts literal expressions only):
 
 ```python
 find = etree.XPath("//div[@class=$cls]")
-results = find(root, cls="main")                  # parameterized
-evaluator = etree.XPathEvaluator(root)
-find = etree.ETXPath("//{http://ns.example.com}tag")  # namespace-aware
+results = find(root, cls="main")
+find = etree.ETXPath("//{http://ns.example.com}tag")   # namespace-aware
 ```
 
-#### EXSLT extensions
-
-Supported namespaces: `regexp`, `set`, `math`, `string`, `date`.
+EXSLT namespaces: `regexp`, `set`, `math`, `string`, `date`.
 
 ```python
 ns = {"re": "http://exslt.org/regular-expressions"}
@@ -142,78 +129,32 @@ transform = etree.XSLT(xslt_tree, access_control=ac)
 
 ### Validation
 
-> Use `claw xml validate` for XSD. RelaxNG, Schematron, and DTD stay in the library.
+> `claw xml validate` covers XSD — see [claw/xml.md](claw/xml.md). RelaxNG, Schematron, and DTD stay in the library.
 
-#### XML Schema (XSD) — covered by `claw xml validate`
+| Schema type | Constructor | Notes |
+|---|---|---|
+| XSD | `etree.XMLSchema(etree.parse("schema.xsd"))` | Covered by `claw xml validate` |
+| RelaxNG | `etree.RelaxNG(etree.parse("schema.rng"))` | Compact syntax via `RelaxNG.from_rnc_string(...)` |
+| Schematron | `etree.Schematron(etree.parse("rules.sch"))` | `validation_report` returns SVRL XML |
+| DTD | `etree.DTD("schema.dtd")` | — |
 
-```python
-schema = etree.XMLSchema(etree.parse("schema.xsd"))
-schema.validate(doc)                  # returns bool
-schema.assertValid(doc)               # raises on invalid
-schema.error_log                      # validation errors
-parser = etree.XMLParser(schema=schema)   # validate during parse
-```
-
-#### RelaxNG
-
-```python
-rng = etree.RelaxNG(etree.parse("schema.rng"))
-rng.validate(doc)
-rng.error_log
-# Compact syntax:
-rng = etree.RelaxNG.from_rnc_string("element root { text }")
-```
-
-#### Schematron
-
-```python
-schematron = etree.Schematron(etree.parse("rules.sch"))
-schematron.validate(doc)
-report = schematron.validation_report     # SVRL XML report
-```
-
-#### DTD
-
-```python
-dtd = etree.DTD("schema.dtd")
-dtd.validate(doc)
-dtd.error_log
-```
+All four share the same `.validate(doc)` (→ bool), `.assertValid(doc)` (raises), `.error_log` surface. Parse-time validation: `etree.XMLParser(schema=XMLSchema_instance)`.
 
 ---
 
 ### lxml.html
 
-```python
-import lxml.html
-doc = lxml.html.fromstring(html_string)
-doc = lxml.html.parse("http://example.com")        # URL or file
-doc = lxml.html.document_fromstring(html_string)    # full document
-doc = lxml.html.fragment_fromstring(html_string)    # fragment
-elements = lxml.html.fragments_fromstring(html_str) # multiple fragments
-```
+> `claw html select | text | strip | sanitize | absolutize | rewrite` wrap the common HTML surface — see [claw/html.md](claw/html.md). Below: API signatures for escape-hatch use.
 
-#### Element methods
+Parsers: `lxml.html.fromstring(html)` · `.parse(url_or_path)` · `.document_fromstring(html)` · `.fragment_fromstring(html)` · `.fragments_fromstring(html)`.
 
-```python
-elem.text_content()        # all text (recursive)
-elem.drop_tree()           # remove element and children
-elem.drop_tag()            # remove tag, keep children/text
-elem.classes                # set of CSS classes
-elem.base_url              # resolved base URL
-```
+Element methods: `.text_content()` (recursive) · `.drop_tree()` · `.drop_tag()` (keep children) · `.classes` (set) · `.base_url`.
 
-#### Links (covered by `claw html absolutize` / `claw html rewrite`)
-
-```python
-doc.make_links_absolute("http://base.url/")
-doc.resolve_base_href()
-for element, attribute, link, pos in doc.iterlinks():
-    pass
-doc.rewrite_links(lambda href: href.replace("old", "new"))
-```
+Links: `doc.make_links_absolute(base_url)` · `doc.resolve_base_href()` · `for element, attribute, link, pos in doc.iterlinks(): ...` · `doc.rewrite_links(lambda href: ...)`.
 
 #### Forms
+
+Escape hatch — not wrapped by `claw html`.
 
 ```python
 for form in doc.forms:
@@ -221,12 +162,12 @@ for form in doc.forms:
     form.fields["input_name"] = "value"
 ```
 
-#### Cleaner (covered by `claw html sanitize`)
+#### Cleaner
 
-> Requires `pip install lxml_html_clean` (separated out of lxml in 5.2+). Alternatively `pip install 'lxml[html_clean]'`.
+Covered by `claw html sanitize`; requires `pip install lxml_html_clean` (separated from lxml in 5.2+).
 
 ```python
-from lxml_html_clean import Cleaner        # lxml 5.2+
+from lxml_html_clean import Cleaner
 cleaner = Cleaner(
     scripts=True, javascript=True, comments=True,
     style=False, links=False, meta=True,
@@ -242,6 +183,8 @@ clean_html = cleaner.clean_html(html_string)
 
 #### HTML diff
 
+Escape hatch — not wrapped.
+
 ```python
 from lxml.html.diff import htmldiff, html_annotate
 diff = htmldiff(old_html, new_html)
@@ -252,12 +195,11 @@ annotated = html_annotate([(html1, "v1"), (html2, "v2")])
 
 ### CSS Selectors
 
-> Requires `pip install cssselect`. For simple cases `claw html select` and BeautifulSoup's `soup.select(...)` both work without this dep.
+> `claw html select` wraps CSS selection for the common path — see [claw/html.md](claw/html.md). Requires `pip install cssselect` for the library API. `soup.select(...)` also works in BeautifulSoup without cssselect.
 
 ```python
 from lxml.cssselect import CSSSelector
-sel = CSSSelector("div.main > p.intro")
-results = sel(root)
+sel = CSSSelector("div.main > p.intro"); results = sel(root)
 root.cssselect("div.main > p.intro")
 ```
 
@@ -405,47 +347,35 @@ Up: `.parent`, `.parents`.
 Sideways: `.next_sibling`, `.previous_sibling`, `.next_siblings`, `.previous_siblings`.
 Parse order: `.next_element`, `.previous_element`, `.next_elements`, `.previous_elements`.
 
-### Search (covered by `claw html select`)
+### Search
 
-```python
-soup.find("div"); soup.find_all("div")
-soup.find("div", class_="main"); soup.find("div", id="content")
-soup.find("div", attrs={"data-id": "5"})
-soup.find_all(["h1", "h2", "h3"])
-soup.find_all(True)                           # all tags
-soup.find_all(string=re.compile("pattern"))   # regex on text
-soup("div")                                   # shortcut for find_all
-```
+> `claw html select` wraps all common `find` / `find_all` / CSS-select calls — see [claw/html.md](claw/html.md). Below: API surface for escape-hatch use (complex predicates, relative searches).
 
-Filter types: string (exact), regex, list, `True` (any), function predicate (`lambda tag: tag.has_attr("id")`).
+Core: `soup.find(tag, ...)` / `soup.find_all(tag, ...)` / `soup("div")` (shortcut).
 
-Relative search: `find_parent(s)`, `find_next_sibling(s)`, `find_previous_sibling(s)`, `find_next`, `find_all_next`, `find_previous`, `find_all_previous`.
+Filter types: string (exact), regex (`re.compile(...)`), list (`["h1","h2"]`), `True` (any), predicate (`lambda tag: tag.has_attr("id")`).
 
-CSS selectors: `soup.select("div.main > p.intro")`, `soup.select_one(...)`, supports `[attr]`, `:nth-of-type()`, `h1, h2, h3`, etc.
+Relative search methods: `find_parent(s)`, `find_next_sibling(s)`, `find_previous_sibling(s)`, `find_next`, `find_all_next`, `find_previous`, `find_all_previous`.
+
+CSS selectors (no `cssselect` needed): `soup.select("div.main > p.intro")` · `soup.select_one(...)`. Same selector grammar as §CSS Selectors above.
 
 ### Tree modification
 
-```python
-new_tag = soup.new_tag("a", href="http://example.com", class_="link")
-tag.append(new_tag); tag.extend([t1, t2]); tag.insert(0, new_tag)
-tag.insert_before(new_tag); tag.insert_after(new_tag)
-tag.clear(); tag.extract(); tag.decompose()
-tag.replace_with(new_tag); tag.wrap(soup.new_tag("div")); tag.unwrap()
-tag.smooth()                        # merge adjacent NavigableStrings
-```
+> `claw html unwrap | wrap | replace` cover common edits — see [claw/html.md](claw/html.md). Below: full API surface.
+
+- Construct: `soup.new_tag("a", href="...", class_="link")`.
+- Insert: `tag.append(child)` · `extend([c1, c2])` · `insert(pos, child)` · `insert_before(child)` · `insert_after(child)`.
+- Remove: `tag.clear()` · `tag.extract()` (returns tag) · `tag.decompose()`.
+- Replace / wrap: `tag.replace_with(new)` · `tag.wrap(soup.new_tag("div"))` · `tag.unwrap()`.
+- Merge adjacent text: `tag.smooth()`.
 
 ### Output
 
-```python
-str(soup)                           # full HTML
-soup.prettify()                     # indented
-soup.prettify(formatter="html5")    # HTML5 void elements
-tag.decode_contents()               # inner HTML string
-tag.encode_contents()               # inner HTML bytes
-tag.get_text(separator=" ", strip=True)
-```
+> `claw html fmt` covers pretty-print — see [claw/html.md](claw/html.md).
 
-Custom formatter:
+`str(soup)` · `soup.prettify(formatter="html5")` · `tag.decode_contents()` / `tag.encode_contents()` (inner HTML) · `tag.get_text(separator=" ", strip=True)`.
+
+Custom formatter (escape hatch):
 
 ```python
 from bs4.formatter import HTMLFormatter

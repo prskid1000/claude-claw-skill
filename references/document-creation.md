@@ -1,52 +1,21 @@
 # Document Creation Libraries Reference
 
-> **TL;DR: use `claw xlsx`, `claw docx`, `claw pptx` for common tasks.** See [references/claw/xlsx.md](claw/xlsx.md), [references/claw/docx.md](claw/docx.md), [references/claw/pptx.md](claw/pptx.md). This reference documents the full Python library APIs (`openpyxl`, `python-docx`, `python-pptx`) for escape-hatch / advanced workflows not covered by `claw` — combo / dual-axis charts, rich-text runs, overlapping conditional-formatting stacks with `stopIfTrue` ordering, bespoke `python-pptx` dashboards, run-level hyperlink XML, section-scoped headers, custom NamedStyles with inheritance, and VBA preservation.
+> **TL;DR: use `claw xlsx`, `claw docx`, `claw pptx` for everything in this file's covered branches.** See [references/claw/xlsx.md](claw/xlsx.md), [references/claw/docx.md](claw/docx.md), [references/claw/pptx.md](claw/pptx.md). This reference keeps the Python library API (`openpyxl`, `python-docx`, `python-pptx`) **only** for the escape-hatch surface `claw` deliberately doesn't wrap: parameter tables, enum / constant listings, length-unit helpers, and the Escape-hatch recipes at the end.
 
 ## Contents
 
 - **CREATE / EDIT Excel (.xlsx)** — `openpyxl`
-  - [Workbook & worksheet operations](#11-workbook--worksheet-operations) *(covered by `claw xlsx new/read`)*
-  - [Cell read / write / iterate](#12-cell-operations) *(covered by `claw xlsx read/append`)*
-  - [Fonts, borders, fills, alignment](#13-styling--formatting) *(basic runs covered by `claw xlsx style/format`; rich text + NamedStyle escape-hatch)*
-  - [Conditional formatting rules](#14-conditional-formatting) *(single-rule cases covered by `claw xlsx conditional`; overlapping stacks with `stopIfTrue` stay here)*
-  - [Data validation dropdowns](#15-data-validation) *(covered by `claw xlsx validate`)*
-  - [Bar / line / pie / scatter charts](#16-charts) *(basic charts covered by `claw xlsx chart`; combo/dual-axis, trendlines, error bars escape-hatch)*
-  - [Excel tables with built-in styles](#17-tables) *(covered by `claw xlsx table`)*
-  - [Named ranges & defined names](#18-defined-names--named-ranges) *(covered by `claw xlsx name add`)*
-  - [Auto-filter & sorting](#19-auto-filter--sorting) *(covered by `claw xlsx filter`)*
-  - [Embed images in cells](#110-images) *(covered by `claw xlsx image add`)*
-  - [Page setup, margins, print area](#111-page-setup--print) *(covered by `claw xlsx print-setup`)*
-  - [Worksheet protection & passwords](#112-worksheet-protection) *(covered by `claw xlsx protect`)*
-  - [Freeze panes](#113-freeze-panes) *(covered by `claw xlsx freeze`)*
-  - [Column width / row height](#114-column-width--row-height) *(escape-hatch — not wrapped)*
+  - [Workbook & worksheet operations](#11-workbook--worksheet-operations) · [Cell operations](#12-cell-operations) · [Styling & formatting](#13-styling--formatting) · [Conditional formatting](#14-conditional-formatting) · [Data validation](#15-data-validation) · [Charts](#16-charts) · [Tables](#17-tables) · [Named ranges](#18-defined-names--named-ranges) · [Auto-filter](#19-auto-filter--sorting) · [Images](#110-images) · [Page setup](#111-page-setup--print) · [Worksheet protection](#112-worksheet-protection) · [Freeze panes](#113-freeze-panes) · [Col width / row height](#114-column-width--row-height)
 - **CREATE / EDIT Word (.docx)** — `python-docx`
-  - [Open / save / create documents](#21-document-operations) *(covered by `claw docx new/from-md`)*
-  - [Paragraphs & runs (text formatting)](#22-paragraphs--runs) *(basic covered by `claw docx add-paragraph`)*
-  - [Headings & numbered / bulleted lists](#23-headings--lists) *(covered by `claw docx add-heading`)*
-  - [Table rows, cells, styling](#24-tables) *(basic covered by `claw docx add-table/table fit`; nested tables + XML-level border/shading escape-hatch)*
-  - [Inline images](#25-images) *(covered by `claw docx add-image`)*
-  - [Sections, margins, orientation](#26-sections--page-layout) *(covered by `claw docx section add`)*
-  - [Headers & footers per section](#27-headers--footers) *(basic covered by `claw docx header set/footer set`)*
-  - [Page / column / section breaks](#28-breaks) *(page break covered by `claw docx insert pagebreak`)*
-  - [Hyperlinks (run-level XML)](#29-hyperlinks) *(basic covered by `claw docx hyperlink add`; the XML helper stays here)*
-  - [Built-in & custom styles](#210-styles) *(basic covered by `claw docx style define/apply`)*
-  - [Core document properties](#211-core-properties) *(covered by `claw docx meta get/set`)*
-  - [Length unit helpers (Pt, Inches, Cm)](#212-length-units)
+  - [Document operations](#21-document-operations) · [Paragraphs & runs](#22-paragraphs--runs) · [Headings & lists](#23-headings--lists) · [Tables](#24-tables) · [Images](#25-images) · [Sections & page layout](#26-sections--page-layout) · [Headers & footers](#27-headers--footers) · [Breaks](#28-breaks) · [Hyperlinks](#29-hyperlinks) · [Styles](#210-styles) · [Core properties](#211-core-properties) · [Length units](#212-length-units)
 - **CREATE / EDIT PowerPoint (.pptx)** — `python-pptx`
-  - [Presentation & slide creation](#31-presentation--slides) *(covered by `claw pptx new/add-slide/from-outline`)*
-  - [Shape geometry (rect / oval / line / connector)](#32-shapes) *(basic shapes covered by `claw pptx add-shape`; freeform / group / connector stay here)*
-  - [Text frame formatting](#33-text-frames--formatting) *(basic covered by `claw pptx fill`)*
-  - [Bar / line / pie charts in slides](#34-charts) *(basic covered by `claw pptx add-chart/chart refresh`)*
-  - [Fill colors, gradients, line styles](#35-fill--line-formatting) *(solid/brand covered by `claw pptx brand`; gradients, pattern fills stay here)*
-  - [Layout placeholders](#36-placeholders) *(covered by `claw pptx fill --placeholder`)*
-  - [Slide background fill / image](#37-slide-background)
-  - [Hyperlinks & click actions](#38-hyperlinks--click-actions) *(covered by `claw pptx link add`)*
-  - [OLE objects, video / audio embed](#39-ole-embedding--media) *(escape-hatch — XML-level only)*
-  - [Core deck properties](#310-core-properties) *(covered by `claw pptx meta`)*
-  - [Length unit helpers (Emu, Pt, Inches)](#311-length-units)
-- **Escape-hatch recipes** — [combo chart, pivot-as-template, rich text, KPI dashboard, section-scoped header, VBA preserve](#escape-hatch-recipes)
+  - [Presentation & slides](#31-presentation--slides) · [Shapes](#32-shapes) · [Text frames & formatting](#33-text-frames--formatting) · [Charts](#34-charts) · [Fill & line formatting](#35-fill--line-formatting) · [Placeholders](#36-placeholders) · [Slide background](#37-slide-background) · [Hyperlinks & click actions](#38-hyperlinks--click-actions) · [OLE embedding & media](#39-ole-embedding--media) · [Core properties](#310-core-properties) · [Length units](#311-length-units)
+- **Quick Reference: Import Cheat Sheet** — [imports](#quick-reference-import-cheat-sheet)
+- **Escape-hatch recipes** — [combo chart, overlapping conditional rules, rich text runs, KPI dashboard, section-scoped headers, VBA preserve](#escape-hatch-recipes)
 
-Examples: [examples/office-documents.md](../examples/office-documents.md) · Cross-tool pipelines (CSV → Excel → Sheets, etc.): [examples/data-pipelines.md](../examples/data-pipelines.md).
+Examples: [examples/office-documents.md](../examples/office-documents.md) · Cross-tool pipelines: [examples/data-pipelines.md](../examples/data-pipelines.md).
+
+---
 
 # 1. openpyxl (Excel .xlsx)
 
@@ -56,248 +25,106 @@ from openpyxl import Workbook, load_workbook
 
 ## 1.1 Workbook & Worksheet Operations
 
-### Create & Open
+> `claw xlsx new|read|append|meta` covers create / open / save / sheet CRUD — see [claw/xlsx.md](claw/xlsx.md). Below: API reference for the escape hatches (`read_only=True`, `data_only=True`, `keep_vba=True`, `keep_links=True`, `Workbook(write_only=True)` streaming, sheet tab colors, hidden / veryHidden sheet states).
 
-```python
-wb = Workbook()                              # Create new workbook
-wb = load_workbook("file.xlsx")              # Open existing
-wb = load_workbook("file.xlsx", read_only=True)   # Read-only mode (large files)
-wb = load_workbook("file.xlsx", data_only=True)   # Read cached formula values
-wb = load_workbook("file.xlsx", keep_vba=True)    # Preserve VBA macros
-wb = load_workbook("file.xlsx", keep_links=True)  # Preserve external links
-```
+`load_workbook` keyword args:
 
-### Save
+| Arg | Purpose |
+|---|---|
+| `read_only=True` | Streaming read for large files |
+| `data_only=True` | Return cached formula values instead of formulas |
+| `keep_vba=True` | Preserve VBA macros on round-trip (required for `.xlsm`) |
+| `keep_links=True` | Preserve external workbook links |
 
-```python
-wb.save("output.xlsx")
-wb.template = True                           # Save as template
-wb.save("output.xltx")
-```
+`Workbook(write_only=True)` — streaming write; only `ws.append(...)` is available.
 
-### Sheet Operations
+Sheet-state values: `"visible"` · `"hidden"` · `"veryHidden"` (can't be unhidden from Excel UI).
 
-```python
-ws = wb.active                               # Get active sheet
-ws = wb["SheetName"]                         # Get sheet by name
-ws = wb.create_sheet("Name")                 # Append new sheet
-ws = wb.create_sheet("Name", 0)              # Insert at position
-wb.sheetnames                                # List all sheet names -> list[str]
-wb.worksheets                                # List all worksheet objects
-
-wb.copy_worksheet(ws)                        # Copy worksheet (within same workbook)
-wb.move_sheet("Name", offset=2)              # Move sheet right by 2
-wb.move_sheet("Name", offset=-1)             # Move sheet left by 1
-wb.remove(ws)                                # Delete sheet
-del wb["SheetName"]                          # Delete sheet by name
-
-ws.title = "NewName"                         # Rename sheet
-ws.sheet_properties.tabColor = "FF0000"      # Tab color (hex RGB, no #)
-ws.sheet_state = "visible"                   # "visible" | "hidden" | "veryHidden"
-```
-
-### Write-Only Mode (Streaming Large Files)
-
-```python
-wb = Workbook(write_only=True)
-ws = wb.create_sheet()
-ws.append([1, 2, 3])                        # Only append() is available
-wb.save("large.xlsx")
-```
+Tab color: `ws.sheet_properties.tabColor = "FF0000"` (hex RGB, no `#`).
 
 ## 1.2 Cell Operations
 
-### Read & Write
+> `claw xlsx read|append` covers read / write / iterate / append — see [claw/xlsx.md](claw/xlsx.md). Below: data-type codes, merged-cell API, hyperlink + comment API the CLI doesn't wrap.
+
+`cell.data_type` codes:
+
+| Code | Meaning |
+|---|---|
+| `"s"` | string |
+| `"n"` | number |
+| `"d"` | date |
+| `"b"` | bool |
+| `"f"` | formula |
+| `"e"` | error |
+
+Range access: `ws["A1":"C3"]` tuple-of-tuples · `ws["A"]` whole column · `ws[1]` whole row · `ws.iter_rows(..., values_only=True|False)` · `ws.iter_cols(...)`.
+
+Merged cells: `ws.merge_cells("A1:D1")` / `ws.unmerge_cells("A1:D1")` · read via `ws.merged_cells.ranges`.
+
+Hyperlinks:
 
 ```python
-ws["A1"] = "Hello"                           # Write by coordinate
-ws["A1"].value                               # Read value
-ws.cell(row=1, column=1, value="Hello")      # Write by row/col index (1-based)
-cell = ws.cell(row=1, column=1)              # Get cell object
-cell.value                                   # Read value
-cell.data_type                               # "s"=string, "n"=number, "d"=date, "b"=bool, "f"=formula, "e"=error
-cell.coordinate                              # "A1"
-cell.row                                     # 1
-cell.column                                  # 1
-cell.column_letter                           # "A"
-```
-
-### Ranges
-
-```python
-ws["A1":"C3"]                                # Tuple of row tuples
-ws["A"]                                      # Entire column A
-ws["A:C"]                                    # Columns A through C
-ws[1]                                        # Entire row 1
-ws[1:3]                                      # Rows 1 through 3
-
-# Iterate rows (returns tuples of cells)
-for row in ws.iter_rows(min_row=1, max_row=10, min_col=1, max_col=5, values_only=False):
-    for cell in row:
-        pass
-
-# Iterate columns
-for col in ws.iter_cols(min_row=1, max_row=10, min_col=1, max_col=5, values_only=True):
-    pass
-
-# values_only=True returns raw values instead of cell objects
-```
-
-### Append Rows
-
-```python
-ws.append([1, 2, 3])                         # Append list as row
-ws.append({"A": 1, "C": 3})                  # Append dict (column letter keys)
-```
-
-### Formulas
-
-```python
-ws["A1"] = "=SUM(B1:B10)"                   # Write formula
-# load_workbook("f.xlsx", data_only=True) to read cached formula results
-```
-
-### Merged Cells
-
-```python
-ws.merge_cells("A1:D1")                      # Merge range
-ws.merge_cells(start_row=1, start_column=1, end_row=1, end_column=4)
-ws.unmerge_cells("A1:D1")                    # Unmerge
-ws.merged_cells.ranges                        # List merged ranges
-```
-
-### Hyperlinks
-
-```python
-ws["A1"].hyperlink = "https://example.com"
-ws["A1"].value = "Click here"
-ws["A1"].style = "Hyperlink"
-
-# Internal link
 from openpyxl.worksheet.hyperlink import Hyperlink
 ws["A1"].hyperlink = Hyperlink(ref="A1", location="'Sheet2'!A1", display="Go to Sheet2")
+ws["A1"].style = "Hyperlink"
 ```
 
-### Comments
-
-```python
-from openpyxl.comments import Comment
-ws["A1"].comment = Comment("Comment text", "Author Name")
-ws["A1"].comment.width = 300                 # Comment box width (pixels)
-ws["A1"].comment.height = 150                # Comment box height (pixels)
-```
+Comments: `ws["A1"].comment = Comment("text", "Author")` · `.width` / `.height` in pixels.
 
 ## 1.3 Styling & Formatting
 
+> `claw xlsx style|format` covers single-cell / range styling — see [claw/xlsx.md](claw/xlsx.md). Below: full `Font` / `PatternFill` / `GradientFill` / `Border` / `Alignment` / `NamedStyle` / `CellRichText` parameter surface.
+
 ```python
-from openpyxl.styles import (
-    Font, PatternFill, GradientFill, Border, Side,
-    Alignment, Protection, NamedStyle, numbers
-)
+from openpyxl.styles import Font, PatternFill, GradientFill, Border, Side, Alignment, Protection, NamedStyle, numbers
 from openpyxl.styles.colors import Color
 ```
 
 ### Font
 
-```python
-Font(
-    name="Calibri",              # Font family name
-    size=11,                     # Point size (float)
-    bold=False,                  # bool
-    italic=False,                # bool
-    underline="none",            # "none" | "single" | "double" | "singleAccounting" | "doubleAccounting"
-    strike=False,                # Strikethrough (bool)
-    vertAlign=None,              # "superscript" | "subscript" | "baseline" | None
-    color="000000",              # Hex RGB string (6 chars, no #) — or a Color() object (see below)
-    charset=None,                # Character set (int)
-    family=None,                 # Font family (1=Roman, 2=Swiss, 3=Modern, etc.)
-    scheme=None,                 # "major" | "minor" | None (theme font scheme)
-)
+| Param | Type / Values |
+|---|---|
+| `name` | Font family name (e.g. `"Calibri"`) |
+| `size` | Point size (float) |
+| `bold` / `italic` / `strike` | bool |
+| `underline` | `"none"` / `"single"` / `"double"` / `"singleAccounting"` / `"doubleAccounting"` |
+| `vertAlign` | `"superscript"` / `"subscript"` / `"baseline"` / `None` |
+| `color` | 6-char hex RGB string, or `Color()` object |
+| `family` | 1=Roman, 2=Swiss, 3=Modern, 4=Script, 5=Decorative |
+| `scheme` | `"major"` / `"minor"` / `None` |
 
-# `color=` accepts either a 6-char hex string or a Color() object. Pick ONE form:
-#   color="FF0000"                 # hex RGB string
-#   color=Color(rgb="FF0000")      # equivalent via Color()
-#   color=Color(theme=1)           # theme color index (0-11)
-#   color=Color(indexed=8)         # indexed color (0-63)
-#   color=Color(tint=-0.5)         # tint modifier (-1.0 to 1.0)
-```
+`Color()` forms: `Color(rgb="FF0000")` · `Color(theme=1)` (theme index 0-11) · `Color(indexed=8)` (0-63) · `Color(tint=-0.5)` (-1.0 to 1.0).
 
-### Fill
+### PatternFill
 
-#### PatternFill
+`patternType` values (18): `"none"`, `"solid"`, `"darkDown"`, `"darkGray"`, `"darkGrid"`, `"darkHorizontal"`, `"darkTrellis"`, `"darkUp"`, `"darkVertical"`, `"gray0625"`, `"gray125"`, `"lightDown"`, `"lightGray"`, `"lightGrid"`, `"lightHorizontal"`, `"lightTrellis"`, `"lightUp"`, `"lightVertical"`, `"mediumGray"`.
 
-```python
-PatternFill(
-    patternType="solid",         # Fill pattern (see below)
-    fgColor="FFFF00",           # Foreground color (hex RGB)
-    bgColor="000000",           # Background color (for patterns)
-)
-# patternType values (18 patterns):
-# "none", "solid", "darkDown", "darkGray", "darkGrid", "darkHorizontal",
-# "darkTrellis", "darkUp", "darkVertical", "gray0625", "gray125",
-# "lightDown", "lightGray", "lightGrid", "lightHorizontal", "lightTrellis",
-# "lightUp", "lightVertical", "mediumGray"
-```
+### GradientFill
 
-#### GradientFill
+Params: `type="linear"|"path"`, `degree` (angle for linear), `left` / `right` / `top` / `bottom` (0.0-1.0 focal for path), `stop=[Color, ...]`.
 
-```python
-GradientFill(
-    type="linear",               # "linear" | "path"
-    degree=0,                    # Angle for linear (0=left-to-right, 90=top-to-bottom)
-    left=0, right=0,             # For "path" type: focal point (0.0-1.0)
-    top=0, bottom=0,             # For "path" type: focal point (0.0-1.0)
-    stop=[                       # Color stops (list of Color or hex strings)
-        Color(rgb="FF0000"),
-        Color(rgb="0000FF"),
-    ]
-)
-```
+### Border / Side
 
-### Border
+`Side.border_style` values (14): `None`, `"thin"`, `"medium"`, `"thick"`, `"double"`, `"hair"`, `"dotted"`, `"dashed"`, `"mediumDashed"`, `"dashDot"`, `"mediumDashDot"`, `"dashDotDot"`, `"mediumDashDotDot"`, `"slantDashDot"`.
 
-```python
-Border(
-    left=Side(border_style="thin", color="000000"),
-    right=Side(border_style="thin", color="000000"),
-    top=Side(border_style="thin", color="000000"),
-    bottom=Side(border_style="thin", color="000000"),
-    diagonal=Side(border_style="thin", color="000000"),
-    diagonalDown=False,          # bool - diagonal line top-left to bottom-right
-    diagonalUp=False,            # bool - diagonal line bottom-left to top-right
-)
-
-# Side border_style values (14 styles):
-# None, "thin", "medium", "thick", "double",
-# "hair", "dotted", "dashed", "mediumDashed",
-# "dashDot", "mediumDashDot", "dashDotDot", "mediumDashDotDot",
-# "slantDashDot"
-```
+`Border` accepts `left`, `right`, `top`, `bottom`, `diagonal` (each a `Side`) plus `diagonalDown` / `diagonalUp` bools.
 
 ### Alignment
 
-```python
-Alignment(
-    horizontal="general",        # "general" | "left" | "center" | "right" | "fill"
-                                 #   | "justify" | "centerContinuous" | "distributed"
-    vertical="bottom",           # "top" | "center" | "bottom" | "justify" | "distributed"
-    textRotation=0,              # 0-180 (degrees); 255 = vertical stacked text
-    wrapText=False,              # bool - wrap text in cell
-    shrinkToFit=False,           # bool - shrink font to fit cell
-    indent=0,                    # int - indent level (0+)
-    relativeIndent=0,            # int - relative indent change
-    justifyLastLine=None,        # bool
-    readingOrder=0,              # 0=context, 1=LTR, 2=RTL
-)
-```
+| Param | Values |
+|---|---|
+| `horizontal` | `"general"` / `"left"` / `"center"` / `"right"` / `"fill"` / `"justify"` / `"centerContinuous"` / `"distributed"` |
+| `vertical` | `"top"` / `"center"` / `"bottom"` / `"justify"` / `"distributed"` |
+| `textRotation` | 0-180 (degrees); 255 = vertical stacked |
+| `wrapText` / `shrinkToFit` / `justifyLastLine` | bool |
+| `indent` / `relativeIndent` | int |
+| `readingOrder` | 0=context, 1=LTR, 2=RTL |
 
 ### Number Formats
 
-Common format strings: `"0.00"`, `"#,##0"`, `"#,##0.00"`, `"0%"`, `"$#,##0.00"`, `"yyyy-mm-dd"`, `"hh:mm:ss"`, `"0.00E+00"`, `"@"` (force text), `"[Red]0.00;[Blue]-0.00"` (conditional colors). Constants live in `openpyxl.styles.numbers` (`FORMAT_PERCENTAGE`, `FORMAT_DATE_DATETIME`, `FORMAT_NUMBER_COMMA_SEPARATED1`, `FORMAT_CURRENCY_USD_SIMPLE`, ...). `claw xlsx format` wraps the single-cell case.
+Common strings: `"0.00"`, `"#,##0"`, `"#,##0.00"`, `"0%"`, `"$#,##0.00"`, `"yyyy-mm-dd"`, `"hh:mm:ss"`, `"0.00E+00"`, `"@"` (force text), `"[Red]0.00;[Blue]-0.00"` (conditional colors).
 
-### Applying Styles
-
-Assign `Font`, `PatternFill`, `Border`, `Alignment`, `Protection`, or `cell.number_format` directly to the cell attribute. `claw xlsx style` wraps the common combo.
+Constants: `openpyxl.styles.numbers.FORMAT_PERCENTAGE`, `FORMAT_DATE_DATETIME`, `FORMAT_NUMBER_COMMA_SEPARATED1`, `FORMAT_CURRENCY_USD_SIMPLE`, etc.
 
 ### Named Styles
 
@@ -306,177 +133,74 @@ style = NamedStyle(name="highlight")
 style.font = Font(bold=True, size=14, color="FFFFFF")
 style.fill = PatternFill(patternType="solid", fgColor="4472C4")
 style.alignment = Alignment(horizontal="center")
-style.border = Border(
-    bottom=Side(border_style="thin", color="000000")
-)
 style.number_format = "#,##0.00"
-
-wb.add_named_style(style)                   # Register once per workbook
-cell.style = "highlight"                     # Apply by name (string)
+wb.add_named_style(style)
+cell.style = "highlight"
 ```
 
-### Rich Text (Mixed Formatting in One Cell)
+### Rich Text (escape hatch — see recipe #3)
 
-```python
-from openpyxl.cell.rich_text import CellRichText, TextBlock
-from openpyxl.cell.text import InlineFont
-
-rich = CellRichText(
-    "Normal text, ",
-    TextBlock(InlineFont(b=True, sz=14), "bold large, "),
-    TextBlock(InlineFont(i=True, color="FF0000"), "italic red"),
-)
-ws["A1"].value = rich
-# InlineFont params: rFont (name), charset, family, b, i, strike, outline,
-#   shadow, condense, extend, color, sz, u, vertAlign, scheme
-```
+`CellRichText` + `TextBlock(InlineFont(...), "text")`. `InlineFont` fields: `rFont`, `charset`, `family`, `b`, `i`, `strike`, `outline`, `shadow`, `condense`, `extend`, `color`, `sz`, `u`, `vertAlign`, `scheme`.
 
 ## 1.4 Conditional Formatting
 
+> Single-rule cases covered by `claw xlsx conditional` — see [claw/xlsx.md](claw/xlsx.md). Below: rule-class parameter surface. Overlapping stacks with `stopIfTrue` sequencing is escape-hatch — see recipe #2.
+
 ```python
-from openpyxl.formatting.rule import (
-    CellIsRule, FormulaRule, ColorScaleRule, DataBarRule, IconSetRule
-)
+from openpyxl.formatting.rule import CellIsRule, FormulaRule, ColorScaleRule, DataBarRule, IconSetRule
 ```
 
 ### CellIsRule
 
-```python
-ws.conditional_formatting.add(
-    "A1:A100",
-    CellIsRule(
-        operator="greaterThan",       # "between" | "notBetween" | "equal" | "notEqual"
-                                      # "greaterThan" | "lessThan" | "greaterThanOrEqual"
-                                      # "lessThanOrEqual"
-        formula=["50"],               # List of values (2 for between/notBetween)
-        fill=PatternFill(bgColor="FFC7CE"),
-        font=Font(color="9C0006"),
-        border=Border(...),
-        stopIfTrue=True,
-    )
-)
-```
+- `operator`: `"between"` / `"notBetween"` / `"equal"` / `"notEqual"` / `"greaterThan"` / `"lessThan"` / `"greaterThanOrEqual"` / `"lessThanOrEqual"`.
+- `formula`: list of values (2 for between/notBetween, else 1).
+- `fill` / `font` / `border`: openpyxl style objects.
+- `stopIfTrue`: bool — halt rule stack when this rule matches.
 
 ### FormulaRule
 
-```python
-ws.conditional_formatting.add(
-    "A1:A100",
-    FormulaRule(
-        formula=["ISBLANK(A1)"],      # Formula (must return TRUE/FALSE)
-        fill=PatternFill(bgColor="FFFF00"),
-        font=Font(bold=True),
-        stopIfTrue=False,
-    )
-)
-```
+- `formula`: list with one formula that returns `TRUE` / `FALSE`.
+- `fill` / `font` / `border` / `stopIfTrue` as above.
 
 ### ColorScaleRule
 
-```python
-# 2-color scale
-ws.conditional_formatting.add(
-    "A1:A100",
-    ColorScaleRule(
-        start_type="min",            # "min" | "max" | "num" | "percent" | "percentile" | "formula"
-        start_value=None,            # Value (required if type is num/percent/percentile/formula)
-        start_color="F8696B",        # Hex RGB
-        end_type="max",
-        end_value=None,
-        end_color="63BE7B",
-    )
-)
+2-color: `start_type` / `start_value` / `start_color` + `end_*`.
+3-color: add `mid_type` / `mid_value` / `mid_color`.
 
-# 3-color scale
-ColorScaleRule(
-    start_type="min", start_color="F8696B",
-    mid_type="percentile", mid_value=50, mid_color="FFEB84",
-    end_type="max", end_color="63BE7B",
-)
-```
+`*_type` values: `"min"` / `"max"` / `"num"` / `"percent"` / `"percentile"` / `"formula"`.
 
 ### DataBarRule
 
-```python
-ws.conditional_formatting.add(
-    "A1:A100",
-    DataBarRule(
-        start_type="min",
-        start_value=None,
-        end_type="max",
-        end_value=None,
-        color="638EC6",              # Bar color
-        showValue=True,              # Show cell value alongside bar
-        minLength=None,              # Min bar length (percent)
-        maxLength=None,              # Max bar length (percent)
-    )
-)
-```
+Params: `start_type`, `start_value`, `end_type`, `end_value`, `color` (bar color), `showValue` (bool), `minLength` / `maxLength` (percent).
 
 ### IconSetRule
 
-```python
-ws.conditional_formatting.add(
-    "A1:A100",
-    IconSetRule(
-        icon_style="3TrafficLights1",  # Icon set name (see below)
-        type="percent",                # "percent" | "num" | "percentile" | "formula"
-        values=[0, 33, 67],           # Threshold values
-        showValue=True,               # Show cell value alongside icon
-        reverse=False,                # Reverse icon order
-    )
-)
-# icon_style values:
-# "3Arrows", "3ArrowsGray", "3Flags", "3Signs", "3Stars",
-# "3Symbols", "3Symbols2", "3TrafficLights1", "3TrafficLights2", "3Triangles",
-# "4Arrows", "4ArrowsGray", "4Rating", "4RedToBlack", "4TrafficLights",
-# "5Arrows", "5ArrowsGray", "5Quarters", "5Rating"
-```
+`icon_style` values: `"3Arrows"`, `"3ArrowsGray"`, `"3Flags"`, `"3Signs"`, `"3Stars"`, `"3Symbols"`, `"3Symbols2"`, `"3TrafficLights1"`, `"3TrafficLights2"`, `"3Triangles"`, `"4Arrows"`, `"4ArrowsGray"`, `"4Rating"`, `"4RedToBlack"`, `"4TrafficLights"`, `"5Arrows"`, `"5ArrowsGray"`, `"5Quarters"`, `"5Rating"`.
+
+Other params: `type` (`"percent"` / `"num"` / `"percentile"` / `"formula"`), `values` (threshold list), `showValue`, `reverse`.
 
 ## 1.5 Data Validation
 
-```python
-from openpyxl.worksheet.datavalidation import DataValidation
-```
+> `claw xlsx validate` covers list / range / text-length validations — see [claw/xlsx.md](claw/xlsx.md). Below: full `DataValidation` parameter surface.
 
-```python
-dv = DataValidation(
-    type="list",                     # "whole" | "decimal" | "list" | "date" | "time"
-                                     #   | "textLength" | "custom"
-    operator="between",              # "between" | "notBetween" | "equal" | "notEqual"
-                                     #   | "greaterThan" | "lessThan" | "greaterThanOrEqual"
-                                     #   | "lessThanOrEqual"
-                                     # (not used for "list" or "custom")
-    formula1='"Option1,Option2,Option3"',   # First value / formula / list
-    formula2=None,                   # Second value (for between/notBetween)
-    allow_blank=True,                # Allow empty cells (bool)
-    showDropDown=False,              # NOTE: False=SHOW dropdown for lists (counterintuitive)
-    showInputMessage=True,           # Show input message on cell select
-    showErrorMessage=True,           # Show error on invalid input
-    errorTitle="Invalid",            # Error dialog title
-    error="Please select a valid option",   # Error dialog message
-    errorStyle="stop",               # "stop" | "warning" | "information"
-    promptTitle="Select",            # Input prompt title
-    prompt="Choose from list",       # Input prompt message
-)
+| Param | Values / Purpose |
+|---|---|
+| `type` | `"whole"` / `"decimal"` / `"list"` / `"date"` / `"time"` / `"textLength"` / `"custom"` |
+| `operator` | `"between"` / `"notBetween"` / `"equal"` / `"notEqual"` / `"greaterThan"` / `"lessThan"` / `"greaterThanOrEqual"` / `"lessThanOrEqual"` (not used for list / custom) |
+| `formula1` | First value / formula / list string |
+| `formula2` | Second value (for between / notBetween) |
+| `allow_blank` | bool |
+| `showDropDown` | bool — **`False` SHOWS** the dropdown (counterintuitive) |
+| `showInputMessage` / `showErrorMessage` | bool |
+| `errorTitle` / `error` | Error dialog text |
+| `errorStyle` | `"stop"` / `"warning"` / `"information"` |
+| `promptTitle` / `prompt` | Input hint text |
 
-dv.add("A1:A100")                           # Apply to range
-ws.add_data_validation(dv)                   # Register on worksheet
-
-# List from cell range
-dv = DataValidation(type="list", formula1="=Sheet2!$A$1:$A$10")
-
-# Whole number between 1 and 100
-dv = DataValidation(type="whole", operator="between", formula1=1, formula2=100)
-
-# Text length
-dv = DataValidation(type="textLength", operator="lessThanOrEqual", formula1=50)
-
-# Custom formula
-dv = DataValidation(type="custom", formula1="=AND(A1>0,A1<100)")
-```
+Apply with `dv.add("A1:A100")` then `ws.add_data_validation(dv)`.
 
 ## 1.6 Charts
+
+> `claw xlsx chart` wraps single-plot bar / line / pie / scatter / doughnut / area — see [claw/xlsx.md](claw/xlsx.md). Combo charts, dual axes, trendlines, error bars, custom markers, per-series graphicalProperties stay in the library — see recipe #1.
 
 ```python
 from openpyxl.chart import (
@@ -484,351 +208,135 @@ from openpyxl.chart import (
     LineChart, LineChart3D, PieChart, PieChart3D,
     DoughnutChart, ScatterChart, BubbleChart,
     RadarChart, StockChart, SurfaceChart, SurfaceChart3D,
-    Reference, Series
+    Reference, Series,
 )
 ```
 
-### Create a Chart (General Pattern)
+### Chart-type specific notes
 
-```python
-chart = BarChart()                           # Instantiate chart type
-chart.type = "col"                           # "col" (vertical) | "bar" (horizontal)
-chart.grouping = "clustered"                 # "clustered" | "stacked" | "percentStacked" | "standard"
-chart.style = 10                             # Built-in style number (1-48)
-chart.title = "Sales Report"                 # Chart title (str or None)
-chart.y_axis.title = "Amount"               # Y-axis title
-chart.x_axis.title = "Month"                # X-axis title
-chart.width = 20                             # Chart width (cm)
-chart.height = 15                            # Chart height (cm)
+| Class | Key properties |
+|---|---|
+| `AreaChart` / `AreaChart3D` | `grouping`: `"standard"` / `"stacked"` / `"percentStacked"` |
+| `BarChart` / `BarChart3D` | `type="col"` (vertical) / `"bar"` (horizontal); `grouping`; `overlap` (-100..100); `gapWidth` (0-500) |
+| `LineChart` / `LineChart3D` | `grouping` |
+| `PieChart` / `PieChart3D` | No axes; single data series |
+| `DoughnutChart` | `hole_size` 10-90 (default 50) |
+| `ScatterChart` | `style`: `"line"` / `"lineMarker"` / `"marker"` / `"smooth"` / `"smoothMarker"` |
+| `BubbleChart` | Each series needs x, y, size references |
+| `RadarChart` | `type`: `"standard"` / `"filled"` / `"marker"` |
+| `StockChart` | Requires 3-5 series (HLC, OHLC, Volume-*) |
+| `SurfaceChart` / `SurfaceChart3D` | 3D surface |
 
-# Data references
-data = Reference(ws, min_col=2, max_col=4, min_row=1, max_row=10)   # Data series
-cats = Reference(ws, min_col=1, min_row=2, max_row=10)              # Category labels
-
-chart.add_data(data, titles_from_data=True)  # Add data (first row = series names)
-chart.set_categories(cats)                   # Set category axis labels
-chart.shape = 4                              # Bar shape (0-7 for 3D)
-
-ws.add_chart(chart, "E1")                    # Place chart at anchor cell
-```
-
-### Chart Types & Specific Properties
-
-```python
-# ---- Area ----
-AreaChart()                  # type not needed; grouping: "standard" | "stacked" | "percentStacked"
-AreaChart3D()
-
-# ---- Bar / Column ----
-BarChart()                   # type="col" (columns) | type="bar" (horizontal bars)
-BarChart3D()                 # grouping: "clustered" | "stacked" | "percentStacked"
-chart.overlap = 50           # Bar overlap percentage (-100 to 100, bar/col only)
-chart.gapWidth = 150         # Gap between bars (percent, 0-500)
-
-# ---- Line ----
-LineChart()                  # grouping: "standard" | "stacked" | "percentStacked"
-LineChart3D()
-
-# ---- Pie / Doughnut ----
-PieChart()                   # No axis; single data series only
-PieChart3D()
-DoughnutChart()              # hole_size attribute (10-90, default 50)
-
-# ---- Scatter / Bubble ----
-ScatterChart()               # style: "line" | "lineMarker" | "marker" | "smooth" | "smoothMarker"
-BubbleChart()                # Each series needs x, y, size references
-
-# ---- Radar ----
-RadarChart()                 # type: "standard" | "filled" | "marker"
-
-# ---- Stock ----
-StockChart()                 # Requires 3-5 series (High-Low-Close, Open-High-Low-Close, Volume-...)
-
-# ---- Surface ----
-SurfaceChart()
-SurfaceChart3D()
-```
+Chart-wide props: `style` (1-48), `title`, `x_axis.title`, `y_axis.title`, `width` / `height` in cm.
 
 ### Axes
 
-```python
-from openpyxl.chart.axis import TextAxis, NumericAxis, DateAxis, SeriesAxis
+Numeric-axis props: `scaling.min` / `scaling.max` / `scaling.logBase` · `majorUnit` / `minorUnit` · `majorGridlines = None` to hide · `tickLblPos` (`"high"` / `"low"` / `"nextTo"` / `None`) · `numFmt` · `delete = True` to hide axis · `crosses` (`"min"` / `"max"` / `"autoZero"`) · `crossesAt`.
 
-chart.x_axis                                 # Category axis (TextAxis or DateAxis)
-chart.y_axis                                 # Value axis (NumericAxis)
+Text-axis props: `tickLblPos`, `lblOffset` (percent), `tickLblSkip` (every Nth), `tickMarkSkip`.
 
-# Numeric axis properties
-chart.y_axis.scaling.min = 0                 # Minimum value
-chart.y_axis.scaling.max = 100               # Maximum value
-chart.y_axis.scaling.logBase = 10            # Logarithmic scale base
-chart.y_axis.majorUnit = 10                  # Major gridline interval
-chart.y_axis.minorUnit = 5                   # Minor gridline interval
-chart.y_axis.majorGridlines = None           # Remove major gridlines (set to object to show)
-chart.y_axis.minorGridlines = None           # Remove minor gridlines
-chart.y_axis.tickLblPos = "low"              # "high" | "low" | "nextTo" | None
-chart.y_axis.numFmt = "#,##0.00"             # Number format for labels
-chart.y_axis.delete = False                  # True to hide axis entirely
-chart.y_axis.crosses = "min"                 # "min" | "max" | "autoZero"
-chart.y_axis.crossesAt = 0                   # Custom cross value
-
-# Text axis (category)
-chart.x_axis.tickLblPos = "low"
-chart.x_axis.lblOffset = 100                 # Label offset (percent)
-chart.x_axis.tickLblSkip = 1                 # Show every Nth label
-chart.x_axis.tickMarkSkip = 1                # Show every Nth tick
-
-# Date axis
-from openpyxl.chart.axis import DateAxis
-chart.x_axis = DateAxis()
-chart.x_axis.baseTimeUnit = "months"         # "days" | "months" | "years"
-chart.x_axis.majorUnit = 1
-chart.x_axis.majorTimeUnit = "months"
-```
-
-### Combination / Dual-Axis Charts
-
-```python
-from copy import deepcopy
-
-c1 = BarChart()
-c1.add_data(data1, titles_from_data=True)
-c1.y_axis.title = "Bars"
-
-c2 = LineChart()
-c2.add_data(data2, titles_from_data=True)
-c2.y_axis.title = "Lines"
-c2.y_axis.axId = 200                         # Unique axis ID for secondary axis
-c2.y_axis.crosses = "max"                    # Position secondary axis on right
-
-c1 += c2                                     # Combine charts
-ws.add_chart(c1, "E1")
-```
+Date-axis: set `chart.x_axis = DateAxis()` then `baseTimeUnit` / `majorUnit` / `majorTimeUnit` in `"days"` / `"months"` / `"years"`.
 
 ### Legend
 
-```python
-from openpyxl.chart.legend import Legend
-chart.legend = Legend()
-chart.legend.position = "b"                  # "b" (bottom) | "t" | "l" | "r" | "tr"
-chart.legend = None                          # Remove legend
-```
+`chart.legend = Legend()` · `position` in `"b"` / `"t"` / `"l"` / `"r"` / `"tr"` · `chart.legend = None` removes it.
 
-### Data Labels
+### Data labels
 
-```python
-from openpyxl.chart.label import DataLabelList
-chart.dataLabels = DataLabelList()
-chart.dataLabels.showVal = True              # Show value
-chart.dataLabels.showCatName = True          # Show category name
-chart.dataLabels.showSerName = False         # Show series name
-chart.dataLabels.showPercent = True          # Show percentage (pie/doughnut)
-chart.dataLabels.showLeaderLines = True      # Leader lines (pie)
-chart.dataLabels.numFmt = "0.0%"             # Number format
-```
+`chart.dataLabels = DataLabelList()` — bool flags: `showVal`, `showCatName`, `showSerName`, `showPercent`, `showLeaderLines`; plus `numFmt`.
 
-### Series Formatting
+### Series graphical properties
 
-```python
-from openpyxl.chart.series import SeriesLabel
-from openpyxl.drawing.line import LineProperties, LineEndProperties
-from openpyxl.chart.marker import Marker
+`series.graphicalProperties.solidFill` / `.line.solidFill` / `.line.width` (EMU) / `.line.dashStyle` (`"solid"` / `"dash"` / `"dot"` / `"dashDot"` / `"lgDash"`, ...).
 
-series = chart.series[0]
-series.graphicalProperties.solidFill = "FF0000"    # Fill color
-series.graphicalProperties.line.solidFill = "0000FF"  # Line/border color
-series.graphicalProperties.line.width = 25000      # Line width (EMU)
-series.graphicalProperties.line.dashStyle = "dash"  # "solid"|"dash"|"dot"|"dashDot"|"lgDash" etc.
-series.smooth = True                                # Smooth line (line/scatter)
-
-# Markers (line/scatter)
-series.marker = Marker()
-series.marker.symbol = "circle"              # "circle"|"dash"|"diamond"|"dot"|"plus"|"square"|"star"|"triangle"|"x"|"auto"
-series.marker.size = 7                       # Marker size (2-72)
-series.marker.graphicalProperties.solidFill = "FF0000"
-```
+Marker symbols (line/scatter): `"circle"` / `"dash"` / `"diamond"` / `"dot"` / `"plus"` / `"square"` / `"star"` / `"triangle"` / `"x"` / `"auto"`. Size 2-72.
 
 ### Trendlines
 
-```python
-from openpyxl.chart.trendline import Trendline
-series.trendline = Trendline(
-    trendlineType="linear",                  # "linear"|"log"|"exp"|"power"|"poly"|"movingAvg"
-    order=2,                                 # Polynomial order (2-6, for "poly")
-    period=3,                                # Moving average period (for "movingAvg")
-    forward=2,                               # Forecast forward periods
-    backward=1,                              # Forecast backward periods
-    dispEq=True,                             # Display equation
-    dispRSqr=True,                           # Display R-squared
-    intercept=0,                             # Set intercept value
-)
-```
+`series.trendline = Trendline(...)` — `trendlineType`: `"linear"` / `"log"` / `"exp"` / `"power"` / `"poly"` / `"movingAvg"`; `order` (2-6 for poly); `period` (movingAvg); `forward` / `backward`; `dispEq` / `dispRSqr` (bool); `intercept`.
 
-### Error Bars
+### Error bars
 
-```python
-from openpyxl.chart.error_bar import ErrorBars
-series.errBars = ErrorBars(
-    errBarType="both",                       # "both" | "plus" | "minus"
-    errValType="fixedVal",                   # "fixedVal"|"percentage"|"stdDev"|"stdErr"|"cust"
-    val=5,                                   # Fixed value or percentage
-)
-```
+`series.errBars = ErrorBars(errBarType="both"|"plus"|"minus", errValType="fixedVal"|"percentage"|"stdDev"|"stdErr"|"cust", val=N)`.
 
 ## 1.7 Tables
 
-```python
-from openpyxl.worksheet.table import Table, TableStyleInfo
-```
+> `claw xlsx table` wraps creation + built-in styles — see [claw/xlsx.md](claw/xlsx.md). Below: built-in style names and `totalsRowCount` API.
 
-```python
-tab = Table(
-    displayName="SalesTable",                # Unique table name (no spaces)
-    ref="A1:D10",                            # Table range (string)
-)
-style = TableStyleInfo(
-    name="TableStyleMedium9",                # Built-in style name (TableStyleLight1-28, Medium1-28, Dark1-11)
-    showFirstColumn=False,
-    showLastColumn=False,
-    showRowStripes=True,
-    showColumnStripes=False,
-)
-tab.tableStyleInfo = style
+Built-in table style names: `TableStyleLight1`–`TableStyleLight28` · `TableStyleMedium1`–`TableStyleMedium28` · `TableStyleDark1`–`TableStyleDark11`.
 
-ws.add_table(tab)
+`TableStyleInfo` bool flags: `showFirstColumn`, `showLastColumn`, `showRowStripes`, `showColumnStripes`.
 
-# Auto-filter (tables include auto-filter by default)
-tab.autoFilter.ref = "A1:D10"
-
-# Totals row
-tab.totalsRowCount = 1                       # Enable totals row
-# Configure totals per column via column objects
-```
+Totals row: `tab.totalsRowCount = 1` then configure per-column via table column objects.
 
 ## 1.8 Defined Names / Named Ranges
 
+> `claw xlsx name add` covers workbook-scoped names — see [claw/xlsx.md](claw/xlsx.md). Below: sheet-scoped names.
+
 ```python
 from openpyxl.workbook.defined_name import DefinedName
-
-# Workbook-scoped
-dn = DefinedName("MyRange", attr_text="Sheet1!$A$1:$B$10")
+dn = DefinedName("LocalRange", attr_text="Sheet1!$A$1:$B$10", localSheetId=0)  # sheet-scoped
 wb.defined_names.add(dn)
-
-# Sheet-scoped (localSheetId = sheet index)
-dn = DefinedName("LocalRange", attr_text="Sheet1!$A$1:$B$10", localSheetId=0)
-wb.defined_names.add(dn)
-
-# Read defined names (openpyxl 3.1+: defined_names is a DefinedNameDict)
-for name, dn in wb.defined_names.items():
-    print(name, dn.attr_text)
 ```
+
+Read: `for name, dn in wb.defined_names.items(): ...` (openpyxl 3.1+ is a `DefinedNameDict`).
 
 ## 1.9 Auto-Filter & Sorting
 
-```python
-ws.auto_filter.ref = "A1:D100"               # Enable auto-filter on range
-ws.auto_filter.add_filter_column(0, ["Value1", "Value2"])  # Filter column index 0
-ws.auto_filter.add_sort_condition("B1:B100")  # Sort by column
-```
+> `claw xlsx filter` wraps auto-filter + sort — see [claw/xlsx.md](claw/xlsx.md).
+
+Programmatic API: `ws.auto_filter.ref = "A1:D100"` · `ws.auto_filter.add_filter_column(0, ["Value1", "Value2"])` · `ws.auto_filter.add_sort_condition("B1:B100")`.
 
 ## 1.10 Images
 
-```python
-from openpyxl.drawing.image import Image
+> `claw xlsx image add` wraps image placement — see [claw/xlsx.md](claw/xlsx.md).
 
-img = Image("logo.png")
-img.width = 200                              # Pixels
-img.height = 100                             # Pixels
-ws.add_image(img, "A1")                      # Anchor at cell
-```
+Library: `from openpyxl.drawing.image import Image` then `Image("logo.png")`, set `.width` / `.height` in pixels, `ws.add_image(img, "A1")`.
 
 ## 1.11 Page Setup & Print
 
+> `claw xlsx print-setup` wraps orientation, paper, fit-to, margins, print-area, print-titles — see [claw/xlsx.md](claw/xlsx.md). Below: header-footer escape codes and page-break API.
+
+Orientation: `"portrait"` / `"landscape"`.
+Paper size constants: `ws.PAPERSIZE_LETTER`, `ws.PAPERSIZE_A4`, `ws.PAPERSIZE_A3`, etc.
+
+Header-footer escape codes: `&P` page number · `&N` total pages · `&D` date · `&T` time · `&F` filename · `&A` sheet name.
+
+Header-footer sections: `.oddHeader.{left,center,right}.text` / `.evenHeader.*` / `.firstHeader.*` (same for footer). Each section supports `.font`, `.size`, `.color`.
+
+Page breaks:
+
 ```python
-ws.page_setup.orientation = "landscape"      # "portrait" | "landscape"
-ws.page_setup.paperSize = ws.PAPERSIZE_A4    # PAPERSIZE_LETTER, PAPERSIZE_A4, PAPERSIZE_A3, etc.
-ws.page_setup.fitToWidth = 1                 # Fit to N pages wide
-ws.page_setup.fitToHeight = 0                # 0 = unlimited height (fit width only)
-ws.page_setup.scale = 85                     # Print scale percentage
-
-# Margins (inches)
-ws.page_margins.left = 0.7
-ws.page_margins.right = 0.7
-ws.page_margins.top = 0.75
-ws.page_margins.bottom = 0.75
-ws.page_margins.header = 0.3
-ws.page_margins.footer = 0.3
-
-# Headers & Footers
-ws.oddHeader.center.text = "Report Title"
-ws.oddFooter.center.text = "Page &P of &N"  # &P=page number, &N=total pages
-ws.oddHeader.left.text = "&D"                # &D=date, &T=time, &F=filename, &A=sheet name
-ws.oddHeader.left.font = "Arial,Bold"
-ws.oddHeader.left.size = 14
-ws.oddHeader.left.color = "FF0000"
-ws.evenHeader.center.text = "Even Page Header"
-ws.firstHeader.center.text = "First Page Header"
-
-# Print area & page breaks
-ws.print_area = "A1:G50"                     # Print area
-ws.print_title_rows = "1:2"                  # Repeat rows at top
-ws.print_title_cols = "A:B"                  # Repeat columns at left
-ws.page_breaks.append(Break(id=20))          # Horizontal page break after row 20
-
 from openpyxl.worksheet.pagebreak import Break, RowBreak, ColBreak
-ws.row_breaks.append(Break(id=20))           # Row break
-ws.col_breaks.append(Break(id=5))            # Column break
+ws.row_breaks.append(Break(id=20))     # horizontal break after row 20
+ws.col_breaks.append(Break(id=5))      # vertical break after col 5
 ```
 
 ## 1.12 Worksheet Protection
 
-```python
-ws.protection.sheet = True                   # Enable protection
-ws.protection.password = "secret"            # Set password
-ws.protection.enable()                       # Shorthand
-ws.protection.disable()
+> `claw xlsx protect` wraps sheet / workbook passwords and common bool flags — see [claw/xlsx.md](claw/xlsx.md). Below: full per-permission surface.
 
-# Granular permissions
-ws.protection.formatCells = False            # Allow format cells
-ws.protection.formatColumns = False          # Allow format columns
-ws.protection.formatRows = False             # Allow format rows
-ws.protection.insertColumns = False          # Allow insert columns
-ws.protection.insertRows = False             # Allow insert rows
-ws.protection.insertHyperlinks = False       # Allow insert hyperlinks
-ws.protection.deleteColumns = False          # Allow delete columns
-ws.protection.deleteRows = False             # Allow delete rows
-ws.protection.sort = False                   # Allow sorting
-ws.protection.autoFilter = False             # Allow auto-filter
-ws.protection.pivotTables = False            # Allow pivot tables
-ws.protection.objects = False                # Allow editing objects
-ws.protection.scenarios = False              # Allow editing scenarios
+Granular bool permissions on `ws.protection`: `formatCells`, `formatColumns`, `formatRows`, `insertColumns`, `insertRows`, `insertHyperlinks`, `deleteColumns`, `deleteRows`, `sort`, `autoFilter`, `pivotTables`, `objects`, `scenarios`.
 
-# Cell-level protection
-from openpyxl.styles import Protection
-cell.protection = Protection(locked=True, hidden=False)
-```
+Cell-level: `cell.protection = Protection(locked=True, hidden=False)` — takes effect only when sheet protection is enabled.
 
 ## 1.13 Freeze Panes
 
-```python
-ws.freeze_panes = "B2"                       # Freeze row 1 and column A
-ws.freeze_panes = "A2"                       # Freeze row 1 only
-ws.freeze_panes = "B1"                       # Freeze column A only
-ws.freeze_panes = None                       # Unfreeze
-```
+> `claw xlsx freeze` wraps this — see [claw/xlsx.md](claw/xlsx.md).
+
+Quick reference: `ws.freeze_panes = "B2"` freezes row 1 + col A · `"A2"` row 1 only · `"B1"` col A only · `None` unfreezes.
 
 ## 1.14 Column Width & Row Height
 
-```python
-ws.column_dimensions["A"].width = 25         # Character width units
-ws.column_dimensions["A"].bestFit = True     # Auto-fit flag (hint only)
-ws.column_dimensions["A"].auto_size = True   # Auto-size flag (hint only)
-ws.row_dimensions[1].height = 30             # Points
+Escape-hatch — not wrapped by `claw`.
 
-# Hide rows/columns
+```python
+ws.column_dimensions["A"].width = 25        # character-width units
+ws.column_dimensions["A"].bestFit = True    # auto-fit hint only
+ws.row_dimensions[1].height = 30            # points
 ws.column_dimensions["C"].hidden = True
 ws.row_dimensions[5].hidden = True
-
-# Group rows/columns (outline)
+# Outline grouping
 ws.column_dimensions.group("A", "D", outline_level=1, hidden=False)
 ws.row_dimensions.group(1, 10, outline_level=1, hidden=False)
 ```
@@ -840,10 +348,7 @@ ws.row_dimensions.group(1, 10, outline_level=1, hidden=False)
 ```python
 from docx import Document
 from docx.shared import Inches, Cm, Mm, Pt, Emu, Twips, RGBColor
-from docx.enum.text import (
-    WD_ALIGN_PARAGRAPH, WD_LINE_SPACING, WD_TAB_ALIGNMENT,
-    WD_TAB_LEADER, WD_UNDERLINE
-)
+from docx.enum.text import WD_ALIGN_PARAGRAPH, WD_LINE_SPACING, WD_TAB_ALIGNMENT, WD_TAB_LEADER, WD_UNDERLINE
 from docx.enum.table import WD_TABLE_ALIGNMENT, WD_ALIGN_VERTICAL, WD_ROW_HEIGHT_RULE
 from docx.enum.section import WD_ORIENT, WD_SECTION
 from docx.enum.style import WD_STYLE_TYPE
@@ -851,203 +356,80 @@ from docx.enum.style import WD_STYLE_TYPE
 
 ## 2.1 Document Operations
 
-```python
-doc = Document()                             # Create new (default template)
-doc = Document("template.docx")              # Open existing / use as template
-doc.save("output.docx")                      # Save to file
+> `claw docx new|from-md` covers create / open / save — see [claw/docx.md](claw/docx.md).
 
-# Save to stream (BytesIO)
-from io import BytesIO
-stream = BytesIO()
-doc.save(stream)
-stream.seek(0)
-```
+API: `Document()` (default template) · `Document("template.docx")` (open / use as template) · `doc.save("out.docx")` · `doc.save(BytesIO())` for in-memory.
 
 ## 2.2 Paragraphs & Runs
 
-### Add Paragraphs
+> `claw docx add-paragraph` covers common text + style + alignment — see [claw/docx.md](claw/docx.md). Below: full paragraph-format and font-property surface (escape hatch for tabs, line-spacing rules, underline styles, theme colors, highlight indices).
 
-```python
-p = doc.add_paragraph("Text content")        # Add paragraph
-p = doc.add_paragraph("Text", style="BodyText")  # With named style
-p = doc.add_paragraph()                       # Empty paragraph
+### Paragraph format (`p.paragraph_format`)
 
-# Append text as run within paragraph
-run = p.add_run("additional text")
-run = p.add_run("bold text")
-run.bold = True
-```
+| Property | Purpose |
+|---|---|
+| `alignment` | `WD_ALIGN_PARAGRAPH.{LEFT,CENTER,RIGHT,JUSTIFY,DISTRIBUTE}` |
+| `left_indent` / `right_indent` / `first_line_indent` | `Inches(...)` (negative = hanging) |
+| `space_before` / `space_after` | `Pt(...)` |
+| `line_spacing` | `Pt(...)` exact, or float multiple (1.0, 1.5, 2.0) |
+| `line_spacing_rule` | `WD_LINE_SPACING.{EXACTLY,AT_LEAST,MULTIPLE,SINGLE,DOUBLE,ONE_POINT_FIVE}` |
+| `keep_together` / `keep_with_next` / `page_break_before` / `widow_control` | bool |
 
-### Paragraph Format
+Tab stops: `pf.tab_stops.add_tab_stop(position, alignment, leader)`.
 
-```python
-from docx.enum.text import WD_ALIGN_PARAGRAPH, WD_LINE_SPACING
+- `WD_TAB_ALIGNMENT`: `LEFT`, `CENTER`, `RIGHT`, `DECIMAL`, `BAR`, `CLEAR`, `END`, `NUM`.
+- `WD_TAB_LEADER`: `SPACES`, `DOTS`, `DASHES`, `LINES`, `HEAVY`, `MIDDLE_DOT`.
 
-pf = p.paragraph_format
+### Run / Font (`run.font`)
 
-pf.alignment = WD_ALIGN_PARAGRAPH.CENTER
-# WD_ALIGN_PARAGRAPH: LEFT, CENTER, RIGHT, JUSTIFY, DISTRIBUTE
+Bool props: `bold`, `italic`, `strike`, `double_strike`, `subscript`, `superscript`, `all_caps`, `small_caps`, `shadow`, `outline`, `emboss`, `imprint`, `hidden`, `no_proof`, `math`.
 
-pf.left_indent = Inches(0.5)                # Left indent
-pf.right_indent = Inches(0.5)               # Right indent
-pf.first_line_indent = Inches(0.25)         # First-line indent (positive)
-pf.first_line_indent = Inches(-0.25)        # Hanging indent (negative)
+`underline` — `True` / `False` / one of `WD_UNDERLINE`: `NONE`, `SINGLE`, `WORDS`, `DOUBLE`, `DOTTED`, `THICK`, `DASH`, `DOT_DASH`, `DOT_DOT_DASH`, `WAVY`, `DOTTED_HEAVY`, `DASH_HEAVY`, `DOT_DASH_HEAVY`, `DOT_DOT_DASH_HEAVY`, `WAVY_HEAVY` (14 types).
 
-pf.space_before = Pt(12)                    # Space before paragraph
-pf.space_after = Pt(12)                     # Space after paragraph
-pf.line_spacing = Pt(14)                    # Exact line spacing
-pf.line_spacing = 1.5                       # Multiple (1.0, 1.5, 2.0, etc.)
-pf.line_spacing_rule = WD_LINE_SPACING.EXACTLY       # EXACTLY | AT_LEAST | MULTIPLE
-                                             # | SINGLE | DOUBLE | ONE_POINT_FIVE
+`font.color.rgb = RGBColor(0xFF, 0x00, 0x00)` or `font.color.theme_color = MSO_THEME_COLOR.ACCENT_1`.
 
-pf.keep_together = True                      # Keep paragraph on one page
-pf.keep_with_next = True                     # Keep with next paragraph
-pf.page_break_before = True                  # Page break before paragraph
-pf.widow_control = True                      # Prevent widows/orphans
+- `MSO_THEME_COLOR`: `ACCENT_1`–`ACCENT_6`, `BACKGROUND_1`–`BACKGROUND_2`, `DARK_1`–`DARK_2`, `LIGHT_1`–`LIGHT_2`, `FOLLOWED_HYPERLINK`, `HYPERLINK`, `TEXT_1`–`TEXT_2`, `MIXED`.
 
-# Tab stops
-from docx.enum.text import WD_TAB_ALIGNMENT, WD_TAB_LEADER
-tab_stops = pf.tab_stops
-tab_stops.add_tab_stop(Inches(2.0))                                     # Left tab
-tab_stops.add_tab_stop(Inches(4.0), WD_TAB_ALIGNMENT.CENTER)            # Center tab
-tab_stops.add_tab_stop(Inches(6.0), WD_TAB_ALIGNMENT.RIGHT, WD_TAB_LEADER.DOTS)  # Right tab with dots
-# WD_TAB_ALIGNMENT: LEFT, CENTER, RIGHT, DECIMAL, BAR, CLEAR, END, NUM
-# WD_TAB_LEADER: SPACES, DOTS, DASHES, LINES, HEAVY, MIDDLE_DOT
-```
+`font.highlight_color = WD_COLOR_INDEX.YELLOW`.
 
-### Run / Font Formatting
-
-```python
-run = p.add_run("Formatted text")
-font = run.font
-
-font.name = "Arial"                          # Font family
-font.size = Pt(12)                           # Point size
-font.bold = True                             # bool or None (inherit)
-font.italic = True
-font.underline = True                        # True for single underline
-font.underline = WD_UNDERLINE.DOUBLE         # Specific underline type
-# WD_UNDERLINE: NONE, SINGLE, WORDS, DOUBLE, DOTTED, THICK, DASH,
-#   DOT_DASH, DOT_DOT_DASH, WAVY, DOTTED_HEAVY, DASH_HEAVY,
-#   DOT_DASH_HEAVY, DOT_DOT_DASH_HEAVY, WAVY_HEAVY (14 types)
-
-font.strike = True                           # Strikethrough
-font.double_strike = True                    # Double strikethrough
-font.subscript = True
-font.superscript = True
-font.all_caps = True
-font.small_caps = True
-font.shadow = True
-font.outline = True
-font.emboss = True
-font.imprint = True                          # Engrave
-font.hidden = True                           # Hidden text
-font.no_proof = True                         # Skip spell check
-font.math = True                             # Math mode
-
-font.color.rgb = RGBColor(0xFF, 0x00, 0x00) # RGB color
-font.color.theme_color = MSO_THEME_COLOR.ACCENT_1  # Theme color
-# MSO_THEME_COLOR: ACCENT_1-6, BACKGROUND_1-2, DARK_1-2, LIGHT_1-2,
-#   FOLLOWED_HYPERLINK, HYPERLINK, TEXT_1-2, MIXED
-
-font.highlight_color = WD_COLOR_INDEX.YELLOW
-# WD_COLOR_INDEX: AUTO, BLACK, BLUE, BRIGHT_GREEN, DARK_BLUE, DARK_RED,
-#   DARK_YELLOW, GRAY_25, GRAY_50, GREEN, PINK, RED, TEAL, TURQUOISE,
-#   VIOLET, WHITE, YELLOW
-```
+- `WD_COLOR_INDEX`: `AUTO`, `BLACK`, `BLUE`, `BRIGHT_GREEN`, `DARK_BLUE`, `DARK_RED`, `DARK_YELLOW`, `GRAY_25`, `GRAY_50`, `GREEN`, `PINK`, `RED`, `TEAL`, `TURQUOISE`, `VIOLET`, `WHITE`, `YELLOW`.
 
 ## 2.3 Headings & Lists
 
-```python
-doc.add_heading("Title", level=0)            # Title (level 0)
-doc.add_heading("Heading 1", level=1)        # Heading levels 1-9
-doc.add_heading("Heading 2", level=2)
+> `claw docx add-heading` covers headings — see [claw/docx.md](claw/docx.md).
 
-# Bullet lists (use style names)
-doc.add_paragraph("Item 1", style="List Bullet")
-doc.add_paragraph("Item 1a", style="List Bullet 2")    # Indented
-doc.add_paragraph("Item 1ai", style="List Bullet 3")   # Further indented
+Library: `doc.add_heading("Title", level=0)` (title) through `level=9`.
 
-# Numbered lists
-doc.add_paragraph("Step 1", style="List Number")
-doc.add_paragraph("Step 1a", style="List Number 2")
-doc.add_paragraph("Step 1ai", style="List Number 3")
-```
+Bullet / numbered list paragraph styles (from default template):
+
+| Style | Effect |
+|---|---|
+| `List Bullet` / `List Bullet 2` / `List Bullet 3` | Bullet, indented levels |
+| `List Number` / `List Number 2` / `List Number 3` | Numbered, indented levels |
+
+Apply via `doc.add_paragraph("text", style="List Bullet")`.
 
 ## 2.4 Tables
 
-```python
-table = doc.add_table(rows=3, cols=4)        # Create table
-table = doc.add_table(rows=3, cols=4, style="Table Grid")  # With style
+> `claw docx add-table | table fit` covers creation / sizing / autofit / style — see [claw/docx.md](claw/docx.md). Below: built-in style names and XML-level borders / shading escape hatch.
 
-# Built-in styles: "Table Grid", "Light List", "Light Grid", "Medium Shading 1",
-#   "Light Shading - Accent 1", "Colorful Grid - Accent 2", etc.
-table.style = "Light Shading - Accent 1"
+Built-in table styles: `"Table Grid"`, `"Light List"`, `"Light Grid"`, `"Medium Shading 1"`, `"Light Shading - Accent 1"`, `"Colorful Grid - Accent 2"`, ... (see Word's Table Design gallery for the full list).
 
-# Table alignment
-table.alignment = WD_TABLE_ALIGNMENT.CENTER  # LEFT | CENTER | RIGHT
+Alignment: `table.alignment = WD_TABLE_ALIGNMENT.{LEFT,CENTER,RIGHT}`.
 
-# Autofit
-table.autofit = True                         # Allow autofit
-table.allow_autofit = True                   # Same
-```
+Row height rule: `row.height_rule = WD_ROW_HEIGHT_RULE.{EXACTLY,AT_LEAST,AUTO}`.
 
-### Cell Access & Content
+Cell vertical alignment: `cell.vertical_alignment = WD_ALIGN_VERTICAL.{TOP,CENTER,BOTTOM}`.
+
+Merge: `cell_a.merge(cell_b)` — works for horizontal or vertical merges (pass opposite-corner cells).
+
+Borders / shading require direct XML — `claw` doesn't wrap the OOXML level:
 
 ```python
-cell = table.cell(0, 0)                      # Access cell (row, col) 0-based
-cell.text = "Hello"                           # Set text (replaces all content)
-cell.text                                     # Read text
-
-# Rich content in cell
-p = cell.paragraphs[0]                        # First paragraph in cell
-p.text = "Text"
-p.alignment = WD_ALIGN_PARAGRAPH.CENTER
-
-cell.add_paragraph("Another paragraph")       # Add paragraph to cell
-cell.add_table(2, 2)                          # Nested table in cell
-```
-
-### Row & Column Operations
-
-```python
-row = table.rows[0]                           # Access row
-row.cells                                     # Cells in row
-row.height = Inches(0.5)                      # Row height
-row.height_rule = WD_ROW_HEIGHT_RULE.EXACTLY  # EXACTLY | AT_LEAST | AUTO
-
-table.add_row()                               # Add row at end
-table.add_column(Inches(1.5))                 # Add column with width
-
-col = table.columns[0]                        # Access column
-col.width = Inches(2.0)                       # Column width
-```
-
-### Merge Cells
-
-```python
-cell_a = table.cell(0, 0)
-cell_b = table.cell(0, 3)
-cell_a.merge(cell_b)                          # Merge from cell_a to cell_b
-
-# Vertical merge
-table.cell(0, 0).merge(table.cell(2, 0))     # Merge rows 0-2 in column 0
-```
-
-### Cell Formatting
-
-```python
-cell.vertical_alignment = WD_ALIGN_VERTICAL.CENTER  # TOP | CENTER | BOTTOM
-
-# Borders and shading via direct XML manipulation
 from docx.oxml.ns import qn, nsdecls
 from docx.oxml import parse_xml
-
-# Shading
 shading = parse_xml(f'<w:shd {nsdecls("w")} w:fill="4472C4"/>')
 cell._tc.get_or_add_tcPr().append(shading)
-
-# Borders (per-cell via XML)
 tc_pr = cell._tc.get_or_add_tcPr()
 borders = parse_xml(
     f'<w:tcBorders {nsdecls("w")}>'
@@ -1058,141 +440,65 @@ borders = parse_xml(
     '</w:tcBorders>'
 )
 tc_pr.append(borders)
-# w:val border types: "single","double","dotted","dashed","thick","thinThickSmallGap", etc.
-# w:sz = border width in 1/8 pt (e.g., 12 = 1.5pt)
+# w:val types: "single","double","dotted","dashed","thick","thinThickSmallGap", ...
+# w:sz = border width in 1/8 pt (12 = 1.5pt)
 ```
 
 ## 2.5 Images
 
-```python
-doc.add_picture("image.png")                          # Full width
-doc.add_picture("image.png", width=Inches(4.0))       # Specify width (auto height)
-doc.add_picture("image.png", height=Inches(3.0))      # Specify height (auto width)
-doc.add_picture("image.png", width=Inches(4), height=Inches(3))  # Both (may distort)
+> `claw docx add-image` covers inline images — see [claw/docx.md](claw/docx.md).
 
-# From stream
-from io import BytesIO
-doc.add_picture(BytesIO(image_bytes), width=Inches(4))
-
-# Inline shapes collection
-for shape in doc.inline_shapes:
-    shape.width = Inches(3)
-    shape.height = Inches(2)
-```
+Library: `doc.add_picture(path_or_stream, width=Inches(4), height=Inches(3))` — specify one of width/height to preserve aspect; specifying both may distort.
 
 ## 2.6 Sections & Page Layout
 
-```python
-section = doc.sections[0]                     # First section (always exists)
-section = doc.add_section(WD_SECTION.NEW_PAGE)  # Add new section
+> `claw docx section add` covers section breaks + page size + orientation + margins — see [claw/docx.md](claw/docx.md). Below: enum listings.
 
-# WD_SECTION: NEW_PAGE, CONTINUOUS, EVEN_PAGE, ODD_PAGE, NEW_COLUMN
+- `WD_SECTION`: `NEW_PAGE`, `CONTINUOUS`, `EVEN_PAGE`, `ODD_PAGE`, `NEW_COLUMN`.
+- `WD_ORIENT`: `PORTRAIT`, `LANDSCAPE`. When toggling, also swap `page_width` / `page_height`.
 
-# Page size
-section.page_width = Inches(8.5)             # Letter width
-section.page_height = Inches(11)             # Letter height
-
-# Orientation
-section.orientation = WD_ORIENT.LANDSCAPE    # PORTRAIT | LANDSCAPE
-# When switching orientation, also swap width/height:
-section.page_width, section.page_height = section.page_height, section.page_width
-
-# Margins
-section.top_margin = Inches(1.0)
-section.bottom_margin = Inches(1.0)
-section.left_margin = Inches(1.0)
-section.right_margin = Inches(1.0)
-section.gutter = Inches(0)                   # Gutter margin (binding edge)
-
-# Header/footer distance from edge
-section.header_distance = Inches(0.5)
-section.footer_distance = Inches(0.5)
-```
+Section props: `page_width`, `page_height`, `orientation`, `top_margin`, `bottom_margin`, `left_margin`, `right_margin`, `gutter`, `header_distance`, `footer_distance` — all accept length units (Inches/Cm/Mm/Pt/Emu/Twips).
 
 ## 2.7 Headers & Footers
 
-```python
-section = doc.sections[0]
+> `claw docx header set | footer set` covers basic text / alignment — see [claw/docx.md](claw/docx.md). Below: section linking model, different-first-page + even/odd, escape-hatch recipe #5 for section-scoped headers.
 
-# Default header/footer
-header = section.header                       # _Header object
-footer = section.footer                       # _Footer object
+Linking model: `header.is_linked_to_previous = True/False` — when `True`, the header inherits from the previous section.
 
-header.is_linked_to_previous                  # bool - linked to previous section
-header.is_linked_to_previous = False          # Unlink
+Different first page: `section.different_first_page_header_footer = True` then use `section.first_page_header` / `section.first_page_footer`.
 
-# Write to header
-p = header.paragraphs[0]                      # First paragraph (always exists)
-p.text = "Document Title"
-p.alignment = WD_ALIGN_PARAGRAPH.CENTER
+Even/odd pages (document-level toggle): `doc.settings.odd_and_even_pages_header_footer = True` then `section.even_page_header` / `section.even_page_footer`.
 
-# Multiple paragraphs
-header.add_paragraph("Second line")
-
-# Tables in header
-header.add_table(1, 3, width=Inches(6))
-
-# Images in header
-run = header.paragraphs[0].add_run()
-run.add_picture("logo.png", width=Inches(1))
-
-# Different first page
-section.different_first_page_header_footer = True
-first_header = section.first_page_header      # First page header
-first_footer = section.first_page_footer
-
-# Even/odd pages
-doc.settings.odd_and_even_pages_header_footer = True
-even_header = section.even_page_header
-even_footer = section.even_page_footer
-```
+Headers / footers support full body content — paragraphs, tables (via `header.add_table(rows, cols, width)`), and images (via `run.add_picture(path, width=...)`).
 
 ## 2.8 Breaks
 
-```python
-# Page break (within text flow)
-doc.add_page_break()
+> `claw docx insert pagebreak` covers page breaks — see [claw/docx.md](claw/docx.md). Below: break-type enum.
 
-# Or via run
-run = p.add_run()
-run.add_break(WD_BREAK.PAGE)
+- `WD_BREAK`: `LINE`, `PAGE`, `COLUMN`, `LINE_CLEAR_LEFT`, `LINE_CLEAR_RIGHT`, `LINE_CLEAR_ALL`.
 
-from docx.enum.text import WD_BREAK
-# WD_BREAK: LINE, PAGE, COLUMN, LINE_CLEAR_LEFT, LINE_CLEAR_RIGHT, LINE_CLEAR_ALL
-
-# Section break (creates new section)
-doc.add_section(WD_SECTION.NEW_PAGE)
-doc.add_section(WD_SECTION.CONTINUOUS)        # No page break, just new section
-doc.add_section(WD_SECTION.EVEN_PAGE)
-doc.add_section(WD_SECTION.ODD_PAGE)
-```
+API: `doc.add_page_break()` or `run.add_break(WD_BREAK.COLUMN)` for other break types.
 
 ## 2.9 Hyperlinks
 
+> `claw docx hyperlink add` covers the common "link a run of text" case — see [claw/docx.md](claw/docx.md). python-docx has **no built-in hyperlink API**; `claw` uses (and exposes) the same XML helper below.
+
 ```python
-# python-docx has no built-in hyperlink API; use helper via XML:
 from docx.oxml.ns import qn
 from docx.oxml import OxmlElement
 import docx.opc.constants
 
 def add_hyperlink(paragraph, url, text, color="0563C1", underline=True):
-    """Add a hyperlink to a paragraph."""
     part = paragraph.part
     r_id = part.relate_to(url, docx.opc.constants.RELATIONSHIP_TYPE.HYPERLINK, is_external=True)
-
     hyperlink = OxmlElement("w:hyperlink")
     hyperlink.set(qn("r:id"), r_id)
-
     new_run = OxmlElement("w:r")
     rPr = OxmlElement("w:rPr")
     if color:
-        c = OxmlElement("w:color")
-        c.set(qn("w:val"), color)
-        rPr.append(c)
+        c = OxmlElement("w:color"); c.set(qn("w:val"), color); rPr.append(c)
     if underline:
-        u = OxmlElement("w:u")
-        u.set(qn("w:val"), "single")
-        rPr.append(u)
+        u = OxmlElement("w:u"); u.set(qn("w:val"), "single"); rPr.append(u)
     new_run.append(rPr)
     new_run.text = text
     hyperlink.append(new_run)
@@ -1202,69 +508,31 @@ def add_hyperlink(paragraph, url, text, color="0563C1", underline=True):
 
 ## 2.10 Styles
 
-```python
-# Access styles
-styles = doc.styles
+> `claw docx style define | apply` covers common create / modify — see [claw/docx.md](claw/docx.md). Below: enum listing.
 
-# Paragraph style
-style = styles["Normal"]
-style.font.name = "Arial"
-style.font.size = Pt(11)
-style.paragraph_format.space_after = Pt(6)
+- `WD_STYLE_TYPE`: `PARAGRAPH`, `CHARACTER`, `TABLE`, `LIST`.
 
-# Add new style
-from docx.enum.style import WD_STYLE_TYPE
-new_style = styles.add_style("CustomHeading", WD_STYLE_TYPE.PARAGRAPH)
-new_style.base_style = styles["Heading 1"]
-new_style.font.color.rgb = RGBColor(0x00, 0x00, 0x80)
-new_style.font.size = Pt(18)
-
-# WD_STYLE_TYPE: PARAGRAPH, CHARACTER, TABLE, LIST
-
-# Character style
-char_style = styles.add_style("Emphasis2", WD_STYLE_TYPE.CHARACTER)
-char_style.font.italic = True
-char_style.font.color.rgb = RGBColor(0xFF, 0x00, 0x00)
-run = p.add_run("emphasized", style="Emphasis2")
-
-# Table style
-table.style = doc.styles["Table Grid"]
-```
+New style pattern: `styles.add_style("Name", WD_STYLE_TYPE.PARAGRAPH)` then set `base_style = styles["Heading 1"]`, `font.*`, `paragraph_format.*`.
 
 ## 2.11 Core Properties
 
-```python
-props = doc.core_properties
-props.author = "Author Name"
-props.title = "Document Title"
-props.subject = "Subject"
-props.keywords = "keyword1, keyword2"
-props.comments = "Description"
-props.category = "Category"
-props.content_status = "Draft"               # "Draft" | "Final" | etc.
-props.created                                 # datetime (read-only after creation)
-props.modified                                # datetime
-props.last_modified_by = "Editor Name"
-props.revision                                # int
-props.version = "1.0"
-props.language = "en-US"
-props.identifier = "DOC-001"
-```
+> `claw docx meta get | set` covers read / write — see [claw/docx.md](claw/docx.md).
+
+`doc.core_properties`: `author`, `title`, `subject`, `keywords`, `comments`, `category`, `content_status` (`"Draft"` / `"Final"` / custom), `created` (datetime, read-only), `modified` (datetime), `last_modified_by`, `revision` (int), `version`, `language`, `identifier`.
 
 ## 2.12 Length Units
 
 ```python
 from docx.shared import Inches, Cm, Mm, Pt, Emu, Twips
-
-Inches(1)         # 914400 EMU
-Cm(2.54)          # 914400 EMU
-Mm(25.4)          # 914400 EMU
-Pt(72)            # 914400 EMU
-Emu(914400)       # 1 inch
-Twips(1440)       # 914400 EMU (1 inch = 1440 twips)
-
-# All return Emu-compatible Length objects usable for any dimension property
+Inches(1)       # = 914400 EMU
+Cm(2.54)        # = 914400 EMU
+Mm(25.4)        # = 914400 EMU
+Pt(72)          # = 914400 EMU
+Emu(914400)     # = 1 inch
+Twips(1440)     # = 914400 EMU (1 inch = 1440 twips)
 ```
+
+All return EMU-compatible `Length` objects usable for any dimension property.
 
 ---
 
@@ -1279,284 +547,114 @@ from pptx.enum.text import PP_ALIGN, MSO_ANCHOR, MSO_AUTO_SIZE
 
 ## 3.1 Presentation & Slides
 
-```python
-prs = Presentation()                          # Create new (default template)
-prs = Presentation("template.pptx")          # Open existing
+> `claw pptx new | add-slide | from-outline` covers create / layouts / add-slide / notes / save — see [claw/pptx.md](claw/pptx.md).
 
-# Slide dimensions
-prs.slide_width = Inches(13.333)             # Widescreen 16:9
-prs.slide_height = Inches(7.5)
-prs.slide_width = Inches(10)                 # Standard 4:3
-prs.slide_height = Inches(7.5)
+Slide dimensions presets:
 
-# Slide layouts
-slide_layouts = prs.slide_layouts             # Collection
-layout = prs.slide_layouts[0]                 # By index
-layout.name                                   # Layout name (e.g., "Title Slide")
-# Common layouts by index (default template):
-# 0=Title Slide, 1=Title and Content, 2=Section Header,
-# 3=Two Content, 4=Comparison, 5=Title Only, 6=Blank,
-# 7=Content with Caption, 8=Picture with Caption
+| Aspect | Width × Height |
+|---|---|
+| Widescreen 16:9 | `Inches(13.333)` × `Inches(7.5)` |
+| Standard 4:3 | `Inches(10)` × `Inches(7.5)` |
 
-# Slide masters
-prs.slide_masters                             # SlideMaster collection
-prs.slide_masters[0].slide_layouts            # Layouts for this master
+Default slide layouts by index:
 
-# Add slide
-slide = prs.slides.add_slide(layout)
+| Idx | Layout |
+|---|---|
+| 0 | Title Slide |
+| 1 | Title and Content |
+| 2 | Section Header |
+| 3 | Two Content |
+| 4 | Comparison |
+| 5 | Title Only |
+| 6 | Blank |
+| 7 | Content with Caption |
+| 8 | Picture with Caption |
 
-# Notes slide
-notes_slide = slide.notes_slide
-notes_tf = notes_slide.notes_text_frame
-notes_tf.text = "Speaker notes here"
-
-# Save
-prs.save("output.pptx")
-
-# Save to stream
-from io import BytesIO
-stream = BytesIO()
-prs.save(stream)
-```
+Notes: `slide.notes_slide.notes_text_frame.text = "..."`.
 
 ## 3.2 Shapes
 
-### Common Shape Properties
+> `claw pptx add-shape | add-image | add-table` covers the common shape-inserts — see [claw/pptx.md](claw/pptx.md). Below: enum catalog and escape-hatch APIs (freeform, connector, group, picture crop).
+
+### Common shape properties
+
+`shape.left / .top / .width / .height` (Length) · `rotation` (degrees CW) · `name` · `shape_id` (read-only) · `shape_type` (MSO_SHAPE_TYPE).
+
+### `MSO_SHAPE` — 187 presets (AutoShape catalog)
+
+Common: `RECTANGLE`, `ROUNDED_RECTANGLE`, `OVAL`, `DIAMOND`, `TRIANGLE`, `RIGHT_TRIANGLE`, `PARALLELOGRAM`, `TRAPEZOID`, `PENTAGON`, `HEXAGON`, `OCTAGON`, `CROSS`.
+
+Stars / decorative: `STAR_4_POINT`, `STAR_5_POINT`, `STAR_6_POINT`, `HEART`, `LIGHTNING_BOLT`, `SUN`, `MOON`, `CLOUD`.
+
+Arrows: `LEFT_ARROW`, `RIGHT_ARROW`, `UP_ARROW`, `DOWN_ARROW`, `LEFT_RIGHT_ARROW`, `UP_DOWN_ARROW`, `CURVED_RIGHT_ARROW`, `CHEVRON`.
+
+Callouts: `CALLOUT_1`, `CALLOUT_2`, `CALLOUT_3`, `ROUNDED_RECTANGLE_CALLOUT`, `OVAL_CALLOUT`, `CLOUD_CALLOUT`.
+
+Flowchart: `FLOWCHART_PROCESS`, `FLOWCHART_DECISION`, `FLOWCHART_DATA`, `FLOWCHART_TERMINATOR`, `FLOWCHART_DOCUMENT`, …
+
+### Picture crop
 
 ```python
-shape.left = Inches(1.0)                     # X position from left edge
-shape.top = Inches(1.0)                      # Y position from top edge
-shape.width = Inches(5.0)                    # Width
-shape.height = Inches(3.0)                   # Height
-shape.rotation = 45.0                        # Rotation in degrees (clockwise)
-shape.name = "MyShape"                       # Shape name (string)
-shape.shape_id                                # Unique ID (int, read-only)
-shape.shape_type                              # MSO_SHAPE_TYPE enum (read-only)
-```
-
-### AutoShape
-
-```python
-from pptx.enum.shapes import MSO_SHAPE
-
-shape = slide.shapes.add_shape(
-    MSO_SHAPE.RECTANGLE,                     # Shape type (187 presets, see below)
-    left=Inches(1), top=Inches(1),
-    width=Inches(3), height=Inches(2),
-)
-
-# Common MSO_SHAPE values: RECTANGLE, ROUNDED_RECTANGLE, OVAL, DIAMOND, TRIANGLE,
-# RIGHT_TRIANGLE, PARALLELOGRAM, TRAPEZOID, PENTAGON, HEXAGON, OCTAGON, CROSS,
-# STAR_{4,5,6}_POINT, HEART, LIGHTNING_BOLT, SUN, MOON, CLOUD, {LEFT,RIGHT,UP,DOWN}_ARROW,
-# LEFT_RIGHT_ARROW, UP_DOWN_ARROW, CURVED_RIGHT_ARROW, CHEVRON, CALLOUT_{1,2,3},
-# ROUNDED_RECTANGLE_CALLOUT, OVAL_CALLOUT, CLOUD_CALLOUT,
-# FLOWCHART_{PROCESS,DECISION,DATA,TERMINATOR,DOCUMENT}, etc. — 187 members total.
-```
-
-### TextBox
-
-```python
-txBox = slide.shapes.add_textbox(
-    left=Inches(1), top=Inches(1),
-    width=Inches(5), height=Inches(1),
-)
-tf = txBox.text_frame
-tf.text = "Hello"                             # Set text (first paragraph)
-```
-
-### Picture
-
-```python
-pic = slide.shapes.add_picture(
-    "image.png",                              # File path or stream
-    left=Inches(1), top=Inches(1),
-    width=Inches(4),                          # Optional (preserves aspect if only one)
-    height=Inches(3),                         # Optional
-)
-
-# Crop (proportional values 0.0-1.0)
-pic.crop_left = 0.1
+pic.crop_left = 0.1     # proportional 0.0-1.0
 pic.crop_right = 0.1
 pic.crop_top = 0.05
 pic.crop_bottom = 0.05
-
-# Insert into placeholder
-placeholder = slide.placeholders[1]           # Content placeholder
-placeholder.insert_picture("image.png")
 ```
 
-### Table
+### Table props (on `table_shape.table`)
 
-```python
-table_shape = slide.shapes.add_table(
-    rows=4, cols=3,
-    left=Inches(1), top=Inches(2),
-    width=Inches(8), height=Inches(3),
-)
-table = table_shape.table
+Banding flags: `first_row`, `last_row`, `first_col`, `last_col`, `horz_banding`, `vert_banding`.
+Cell props: `fill.solid()` + `fill.fore_color.rgb`, `vertical_anchor = MSO_ANCHOR.{TOP,MIDDLE,BOTTOM}`, `margin_{left,right,top,bottom}`.
 
-# Cell access
-cell = table.cell(0, 0)                      # (row, col) 0-based
-cell.text = "Header"                          # Set text
-cell.text_frame                               # Access TextFrame for rich formatting
-
-# Merge cells
-cell.merge(table.cell(0, 2))                 # Merge cell(0,0) through cell(0,2)
-
-# Banding
-table.first_row = True                       # Special formatting for first row
-table.last_row = False
-table.first_col = False
-table.last_col = False
-table.horz_banding = True                    # Horizontal banding
-table.vert_banding = False                   # Vertical banding
-
-# Column widths / row heights
-table.columns[0].width = Inches(2)
-table.rows[0].height = Inches(0.5)
-
-# Cell formatting
-cell.fill.solid()
-cell.fill.fore_color.rgb = RGBColor(0x44, 0x72, 0xC4)
-cell.vertical_anchor = MSO_ANCHOR.MIDDLE     # TOP | MIDDLE | BOTTOM
-cell.margin_left = Inches(0.05)
-cell.margin_right = Inches(0.05)
-cell.margin_top = Inches(0.02)
-cell.margin_bottom = Inches(0.02)
-```
-
-### Group Shape
-
-```python
-from pptx.enum.shapes import MSO_SHAPE_TYPE
-
-group = slide.shapes.add_group_shape()
-group.left = Inches(1)
-group.top = Inches(1)
-# Shapes within the group (via XML manipulation for complex groups)
-# group.shapes returns GroupShapes collection
-```
-
-### Connector
+### Connector (escape hatch)
 
 ```python
 connector = slide.shapes.add_connector(
-    connector_type=1,                         # 1=straight, 2=elbow, 3=curved
+    connector_type=1,              # 1=straight, 2=elbow, 3=curved
     begin_x=Inches(1), begin_y=Inches(1),
     end_x=Inches(5), end_y=Inches(3),
 )
-connector.begin_connect(shape1, 0)           # Connect to shape1, connection point 0
-connector.end_connect(shape2, 2)             # Connect to shape2, connection point 2
+connector.begin_connect(shape1, 0)    # shape + connection point index
+connector.end_connect(shape2, 2)
 ```
 
-### Freeform
+### Freeform (escape hatch)
 
 ```python
-builder = slide.shapes.build_freeform(
-    start_x=Inches(1), start_y=Inches(1),
-)
-builder.add_line_segments([
-    (Inches(3), Inches(1)),                  # (x, y) tuples
-    (Inches(3), Inches(3)),
-    (Inches(1), Inches(3)),
-])
-builder.close()                              # Close the shape path
+builder = slide.shapes.build_freeform(start_x=Inches(1), start_y=Inches(1))
+builder.add_line_segments([(Inches(3), Inches(1)), (Inches(3), Inches(3)), (Inches(1), Inches(3))])
+builder.close()
 freeform = builder.convert_to_shape()
 ```
 
+### Group shape (escape hatch)
+
+`slide.shapes.add_group_shape()` — `group.shapes` exposes the `GroupShapes` collection; complex groups require XML-level manipulation via `_spTree`.
+
 ## 3.3 Text Frames & Formatting
 
-### TextFrame
+> `claw pptx fill` covers basic text insertion + alignment — see [claw/pptx.md](claw/pptx.md). Below: full paragraph / run property surface.
 
-```python
-tf = shape.text_frame
+TextFrame props: `text`, `word_wrap` (bool), `auto_size` (`MSO_AUTO_SIZE.{NONE, SHAPE_TO_FIT_TEXT, TEXT_TO_FIT_SHAPE}`), `margin_{left,right,top,bottom}`.
 
-tf.text = "Simple text"                       # Set all text (single paragraph)
-tf.paragraphs                                 # List of Paragraph objects (always >= 1)
+Paragraph alignment: `PP_ALIGN.{LEFT,CENTER,RIGHT,JUSTIFY,DISTRIBUTE,JUSTIFY_LOW,THAI_DISTRIBUTE}`.
 
-tf.word_wrap = True                           # Enable word wrap
-tf.auto_size = MSO_AUTO_SIZE.NONE             # No auto-size
-tf.auto_size = MSO_AUTO_SIZE.SHAPE_TO_FIT_TEXT  # Resize shape to fit text
-tf.auto_size = MSO_AUTO_SIZE.TEXT_TO_FIT_SHAPE  # Shrink text to fit shape
+Paragraph props: `level` (0-8 indent), `space_before` / `space_after` (Pt or Emu), `line_spacing` (Pt exact or float multiple), `font`.
 
-tf.margin_left = Inches(0.1)                 # Internal margins
-tf.margin_right = Inches(0.1)
-tf.margin_top = Inches(0.05)
-tf.margin_bottom = Inches(0.05)
-```
+Run props (same for paragraph.font and run.font): `name`, `size` (Pt), `bold`, `italic`, `underline` (True/False/None + additional XML-level types `"sng"`, `"dbl"`, `"heavy"`, `"dotted"`, `"dash"`, `"dashHeavy"`, ...), `color.rgb = RGBColor(r, g, b)`, `color.theme_color = MSO_THEME_COLOR.*`, `color.brightness` (-1.0 to 1.0 for theme colors).
 
-### Paragraph
-
-```python
-p = tf.paragraphs[0]                         # First paragraph
-p = tf.add_paragraph()                        # Add new paragraph
-
-p.text = "Text"                               # Set paragraph text
-p.alignment = PP_ALIGN.CENTER
-# PP_ALIGN: LEFT, CENTER, RIGHT, JUSTIFY, DISTRIBUTE,
-#   JUSTIFY_LOW, THAI_DISTRIBUTE (+ others)
-
-p.level = 0                                  # Indentation level (0-8)
-p.space_before = Pt(6)                       # Space before (Pt or Emu)
-p.space_after = Pt(6)                        # Space after
-p.line_spacing = Pt(18)                      # Exact line spacing
-p.line_spacing = 1.5                         # Multiple (float)
-
-p.font                                        # Default font for paragraph (inherited by runs)
-```
-
-### Run
-
-```python
-run = p.add_run()
-run.text = "Formatted text"
-
-# Hyperlink
-run.hyperlink.address = "https://example.com"
-
-# Font (same properties for paragraph.font and run.font)
-font = run.font
-font.name = "Arial"
-font.size = Pt(14)
-font.bold = True
-font.italic = True
-font.underline = True                         # True | False | None (inherit)
-# Additional underline types via XML: "sng","dbl","heavy","dotted","dash","dashHeavy", etc.
-font.color.rgb = RGBColor(0xFF, 0x00, 0x00)
-font.color.theme_color = MSO_THEME_COLOR.ACCENT_1
-font.color.brightness = -0.25               # -1.0 (darker) to 1.0 (lighter), for theme colors
-```
+Hyperlinks: `run.hyperlink.address = "https://..."`.
 
 ## 3.4 Charts
 
-```python
-from pptx.chart.data import (
-    CategoryChartData, XyChartData, BubbleChartData
-)
-from pptx.enum.chart import (
-    XL_CHART_TYPE, XL_LEGEND_POSITION, XL_LABEL_POSITION,
-    XL_TICK_MARK, XL_TICK_LABEL_POSITION
-)
-```
-
-### Create a Chart
+> `claw pptx add-chart | chart refresh` covers common chart types + data binding — see [claw/pptx.md](claw/pptx.md). Below: XL_CHART_TYPE catalog, XY/bubble data models, axis / legend / data-label enums.
 
 ```python
-chart_data = CategoryChartData()
-chart_data.categories = ["Q1", "Q2", "Q3", "Q4"]
-chart_data.add_series("2024", (100, 150, 130, 170))
-chart_data.add_series("2025", (120, 160, 140, 190))
-
-chart_frame = slide.shapes.add_chart(
-    XL_CHART_TYPE.COLUMN_CLUSTERED,           # Chart type enum
-    left=Inches(1), top=Inches(2),
-    width=Inches(8), height=Inches(4.5),
-    chart_data=chart_data,
-)
-chart = chart_frame.chart
+from pptx.chart.data import CategoryChartData, XyChartData, BubbleChartData
+from pptx.enum.chart import XL_CHART_TYPE, XL_LEGEND_POSITION, XL_LABEL_POSITION, XL_TICK_MARK, XL_TICK_LABEL_POSITION
 ```
 
-### Chart Types (XL_CHART_TYPE)
+### XL_CHART_TYPE catalog
 
 - **Bar / Column**: `BAR_CLUSTERED` / `BAR_STACKED` / `BAR_STACKED_100`, `COLUMN_CLUSTERED` / `COLUMN_STACKED` / `COLUMN_STACKED_100`, plus `THREE_D_*` variants.
 - **Line**: `LINE`, `LINE_MARKERS`, `LINE_MARKERS_STACKED`, `LINE_MARKERS_STACKED_100`, `LINE_STACKED`, `LINE_STACKED_100`, `THREE_D_LINE`.
@@ -1566,206 +664,66 @@ chart = chart_frame.chart
 - **Bubble**: `BUBBLE`, `BUBBLE_THREE_D_EFFECT`.
 - **Radar**: `RADAR`, `RADAR_FILLED`, `RADAR_MARKERS`.
 
-### XY / Scatter Chart Data
+### XY / Bubble data
 
 ```python
-chart_data = XyChartData()
-series = chart_data.add_series("Series 1")
-series.add_data_point(1.0, 2.5)
-series.add_data_point(2.0, 4.1)
-series.add_data_point(3.0, 3.7)
+xy = XyChartData(); s = xy.add_series("S1"); s.add_data_point(1.0, 2.5)
+bub = BubbleChartData(); s = bub.add_series("S1"); s.add_data_point(1.0, 2.5, 10)   # x, y, size
 ```
 
-### Bubble Chart Data
+### Legend / axes / labels
 
-```python
-chart_data = BubbleChartData()
-series = chart_data.add_series("Series 1")
-series.add_data_point(1.0, 2.5, 10)         # x, y, size
-series.add_data_point(2.0, 4.1, 20)
-```
+- `XL_LEGEND_POSITION`: `BOTTOM`, `CORNER`, `CUSTOM`, `LEFT`, `RIGHT`, `TOP`.
+- `XL_TICK_MARK`: `CROSS`, `INSIDE`, `OUTSIDE`, `NONE`.
+- `XL_TICK_LABEL_POSITION`: `HIGH`, `LOW`, `NEXT_TO_AXIS`, `NONE`.
+- `XL_LABEL_POSITION`: `ABOVE`, `BELOW`, `BEST_FIT`, `CENTER`, `INSIDE_BASE`, `INSIDE_END`, `LEFT`, `MIXED`, `OUTSIDE_END`, `RIGHT`.
 
-### Chart Title
+Value-axis props: `minimum_scale`, `maximum_scale`, `major_unit`, `minor_unit`, `has_major_gridlines`, `has_minor_gridlines`, `major_tick_mark`, `minor_tick_mark`, `tick_label_position`, `visible`.
 
-```python
-chart.has_title = True
-chart.chart_title.has_text_frame = True
-chart.chart_title.text_frame.text = "Sales Report"
-chart.chart_title.text_frame.paragraphs[0].font.size = Pt(18)
-```
+Category-axis props: `has_title`, `axis_title.text_frame.text`, `tick_labels.font.size`, `tick_labels.number_format`, `tick_labels.number_format_is_linked`.
 
-### Legend
+Data-label bool flags (`plot.data_labels.*`): `show_category_name`, `show_legend_key`, `show_percentage`, `show_series_name`, `show_value`; plus `number_format`, `label_position`.
 
-```python
-chart.has_legend = True
-chart.legend.position = XL_LEGEND_POSITION.BOTTOM
-# XL_LEGEND_POSITION: BOTTOM, CORNER, CUSTOM, LEFT, RIGHT, TOP
-chart.legend.include_in_layout = False       # Don't overlap chart area
-chart.legend.font.size = Pt(10)
-```
-
-### Axes
-
-```python
-# Value axis (y)
-value_axis = chart.value_axis
-value_axis.has_title = True
-value_axis.axis_title.text_frame.text = "Revenue ($)"
-value_axis.minimum_scale = 0
-value_axis.maximum_scale = 200
-value_axis.major_unit = 50
-value_axis.minor_unit = 25
-value_axis.has_major_gridlines = True
-value_axis.has_minor_gridlines = False
-value_axis.major_tick_mark = XL_TICK_MARK.OUTSIDE   # CROSS | INSIDE | OUTSIDE | NONE
-value_axis.minor_tick_mark = XL_TICK_MARK.NONE
-value_axis.tick_label_position = XL_TICK_LABEL_POSITION.NEXT_TO_AXIS
-# XL_TICK_LABEL_POSITION: HIGH, LOW, NEXT_TO_AXIS, NONE
-value_axis.visible = True
-value_axis.format.line.fill.background()     # Hide axis line
-
-# Category axis (x)
-category_axis = chart.category_axis
-category_axis.has_title = True
-category_axis.axis_title.text_frame.text = "Quarter"
-category_axis.tick_labels.font.size = Pt(10)
-category_axis.tick_labels.number_format = "0%"
-category_axis.tick_labels.number_format_is_linked = False
-```
-
-### Data Labels
-
-```python
-plot = chart.plots[0]
-plot.has_data_labels = True
-data_labels = plot.data_labels
-data_labels.font.size = Pt(9)
-data_labels.font.color.rgb = RGBColor(0x00, 0x00, 0x00)
-data_labels.number_format = "$#,##0"
-data_labels.number_format_is_linked = False
-data_labels.show_category_name = False
-data_labels.show_legend_key = False
-data_labels.show_percentage = False           # For pie/doughnut
-data_labels.show_series_name = False
-data_labels.show_value = True
-data_labels.label_position = XL_LABEL_POSITION.OUTSIDE_END
-# XL_LABEL_POSITION: ABOVE, BELOW, BEST_FIT, CENTER, INSIDE_BASE,
-#   INSIDE_END, LEFT, MIXED, OUTSIDE_END, RIGHT
-```
-
-### Series Formatting
-
-```python
-series = chart.series[0]
-series.format.fill.solid()
-series.format.fill.fore_color.rgb = RGBColor(0x44, 0x72, 0xC4)
-
-series.format.line.color.rgb = RGBColor(0x00, 0x00, 0x00)
-series.format.line.width = Pt(1.5)
-
-series.smooth = True                          # Smooth line (line charts)
-
-# Individual point formatting
-point = series.points[0]
-point.format.fill.solid()
-point.format.fill.fore_color.rgb = RGBColor(0xFF, 0x00, 0x00)
-
-# Gap & overlap (bar/column only)
-plot = chart.plots[0]
-plot.gap_width = 150                          # Gap width (percent, 0-500)
-plot.overlap = 0                              # Overlap (-100 to 100)
-```
+Bar / column plot: `plot.gap_width` (0-500), `plot.overlap` (-100..100).
 
 ## 3.5 Fill & Line Formatting
 
+> `claw pptx brand` covers solid fills + common theme tints — see [claw/pptx.md](claw/pptx.md). Gradients, pattern fills, picture fills, alpha blending stay in the library. Below: enum listings + gradient API.
+
 ### FillFormat
 
-```python
-# Solid fill
-shape.fill.solid()
-shape.fill.fore_color.rgb = RGBColor(0x44, 0x72, 0xC4)
-shape.fill.fore_color.theme_color = MSO_THEME_COLOR.ACCENT_1
-shape.fill.fore_color.brightness = 0.4       # Lighter tint
-
-# Gradient fill
-shape.fill.gradient()
-shape.fill.gradient_angle = 45               # Degrees
-shape.fill.gradient_stops[0].color.rgb = RGBColor(0xFF, 0x00, 0x00)
-shape.fill.gradient_stops[0].position = 0.0  # 0.0 to 1.0
-shape.fill.gradient_stops[1].color.rgb = RGBColor(0x00, 0x00, 0xFF)
-shape.fill.gradient_stops[1].position = 1.0
-
-# Pattern fill
-shape.fill.patterned()
-shape.fill.pattern = MSO_PATTERN.CROSS        # See MSO_PATTERN enum
-shape.fill.fore_color.rgb = RGBColor(0x00, 0x00, 0x00)
-shape.fill.back_color.rgb = RGBColor(0xFF, 0xFF, 0xFF)
-
-# Picture fill (from image file)
-shape.fill.picture()
-# (requires XML-level manipulation to set the image)
-
-# No fill (transparent)
-shape.fill.background()
-
-# Transparent
-shape.fill.solid()
-shape.fill.fore_color.rgb = RGBColor(0xFF, 0xFF, 0xFF)
-# Alpha via XML: shape.fill._fill element
-```
+- `fill.solid()` + `fill.fore_color.rgb = RGBColor(...)` / `fill.fore_color.theme_color = MSO_THEME_COLOR.ACCENT_1` / `fill.fore_color.brightness = 0.4`.
+- `fill.gradient()` + `fill.gradient_angle = 45` + `fill.gradient_stops[i].color.rgb = RGBColor(...)` + `.position = 0.0..1.0`.
+- `fill.patterned()` + `fill.pattern = MSO_PATTERN.*` + `fill.fore_color.rgb` + `fill.back_color.rgb`.
+- `fill.picture()` — image set via XML-level manipulation.
+- `fill.background()` — transparent / no fill.
+- Alpha via XML: `shape.fill._fill` element.
 
 ### LineFormat
 
-```python
-shape.line.color.rgb = RGBColor(0x00, 0x00, 0x00)
-shape.line.color.theme_color = MSO_THEME_COLOR.ACCENT_1
-shape.line.width = Pt(2.0)                   # Line width
-shape.line.fill.background()                 # No line (transparent)
-shape.line.fill.solid()                      # Solid line
+- `shape.line.color.rgb = RGBColor(...)` / `.theme_color`.
+- `shape.line.width = Pt(2.0)`.
+- `shape.line.fill.background()` → no line · `shape.line.fill.solid()` → solid.
+- `shape.line.dash_style = MSO_LINE_DASH_STYLE.*`.
 
-shape.line.dash_style = MSO_LINE_DASH_STYLE.DASH
-# MSO_LINE_DASH_STYLE: SOLID, ROUND_DOT, SQUARE_DOT, DASH, DASH_DOT,
-#   LONG_DASH, LONG_DASH_DOT, LONG_DASH_DOT_DOT, DASH_STYLE_MIXED,
-#   SYSTEM_DASH, SYSTEM_DOT, SYSTEM_DASH_DOT
-```
+`MSO_LINE_DASH_STYLE`: `SOLID`, `ROUND_DOT`, `SQUARE_DOT`, `DASH`, `DASH_DOT`, `LONG_DASH`, `LONG_DASH_DOT`, `LONG_DASH_DOT_DOT`, `DASH_STYLE_MIXED`, `SYSTEM_DASH`, `SYSTEM_DOT`, `SYSTEM_DASH_DOT`.
 
 ## 3.6 Placeholders
 
-```python
-# Access placeholders on slide
-for ph in slide.placeholders:
-    print(ph.placeholder_format.idx, ph.name, ph.placeholder_format.type)
+> `claw pptx fill --placeholder` covers common placeholder population — see [claw/pptx.md](claw/pptx.md).
 
-# Common placeholder types (MSO_PLACEHOLDER):
-# TITLE (0), BODY (1/13), CENTER_TITLE (3), SUBTITLE (4),
-# DATE (10), SLIDE_NUMBER (12), FOOTER (11),
-# OBJECT (7), TABLE (12), CHART (13), ORG_CHART (14),
-# MEDIA_CLIP (16), PICTURE (18), BITMAP (9),
-# VERTICAL_BODY (14), VERTICAL_OBJECT (15), VERTICAL_TITLE (16)
+`MSO_PLACEHOLDER` types: `TITLE` (0), `BODY` (1/13), `CENTER_TITLE` (3), `SUBTITLE` (4), `DATE` (10), `SLIDE_NUMBER` (12), `FOOTER` (11), `OBJECT` (7), `TABLE` (12), `CHART` (13), `ORG_CHART` (14), `MEDIA_CLIP` (16), `PICTURE` (18), `BITMAP` (9), `VERTICAL_BODY` (14), `VERTICAL_OBJECT` (15), `VERTICAL_TITLE` (16).
 
-# Access by index
-title = slide.placeholders[0]
-title.text = "Slide Title"
-
-body = slide.placeholders[1]
-tf = body.text_frame
-tf.text = "First bullet"
-tf.add_paragraph().text = "Second bullet"
-
-# Insert picture into picture placeholder
-pic_ph = slide.placeholders[1]               # Must be a picture placeholder
-pic_ph.insert_picture("image.png")
-```
+Picture placeholder: `pic_ph.insert_picture("image.png")` (placeholder must be a picture type).
 
 ## 3.7 Slide Background
 
-```python
-background = slide.background
-fill = background.fill
-fill.solid()
-fill.fore_color.rgb = RGBColor(0xF0, 0xF0, 0xF0)
+Escape hatch — not wrapped.
 
-# Gradient background
+```python
+fill = slide.background.fill
+fill.solid(); fill.fore_color.rgb = RGBColor(0xF0, 0xF0, 0xF0)
+# Or gradient:
 fill.gradient()
 fill.gradient_stops[0].color.rgb = RGBColor(0x00, 0x00, 0x80)
 fill.gradient_stops[1].color.rgb = RGBColor(0x00, 0x00, 0x00)
@@ -1773,55 +731,29 @@ fill.gradient_stops[1].color.rgb = RGBColor(0x00, 0x00, 0x00)
 
 ## 3.8 Hyperlinks & Click Actions
 
-```python
-# Hyperlink on a run
-run.hyperlink.address = "https://example.com"
+> `claw pptx link add` covers run-level + shape click-action hyperlinks — see [claw/pptx.md](claw/pptx.md).
 
-# Click action on shape
-shape.click_action.hyperlink.address = "https://example.com"
-shape.click_action.target_slide = prs.slides[2]  # Link to specific slide
-```
+Library: `run.hyperlink.address = "https://example.com"` · `shape.click_action.hyperlink.address = "..."` · `shape.click_action.target_slide = prs.slides[2]` (internal link).
 
 ## 3.9 OLE Embedding & Media
 
-```python
-# Embed video (via XML-level manipulation)
-# python-pptx has limited native support for media;
-# use slide.shapes._spTree to add media elements via lxml
-
-# For basic movie placeholder usage:
-# Requires manipulating the XML directly — use pptx.oxml helpers
-```
+Escape hatch — python-pptx has limited native media support. Use `slide.shapes._spTree` + `pptx.oxml` helpers via `lxml` for embedded video / audio / OLE objects. `claw` does **not** wrap this surface.
 
 ## 3.10 Core Properties
 
-```python
-props = prs.core_properties
-props.author = "Author Name"
-props.title = "Presentation Title"
-props.subject = "Subject"
-props.keywords = "keyword1, keyword2"
-props.comments = "Description"
-props.category = "Category"
-props.content_status = "Draft"
-props.last_modified_by = "Editor"
-props.revision = 1                            # int
-props.created                                 # datetime
-props.modified                                # datetime
-```
+> `claw pptx meta` covers read / write — see [claw/pptx.md](claw/pptx.md).
+
+`prs.core_properties`: `author`, `title`, `subject`, `keywords`, `comments`, `category`, `content_status`, `last_modified_by`, `revision` (int), `created` (datetime), `modified` (datetime).
 
 ## 3.11 Length Units
 
 ```python
 from pptx.util import Inches, Cm, Mm, Pt, Emu
-
-Inches(1)         # 914400 EMU
-Cm(2.54)          # 914400 EMU
-Mm(25.4)          # 914400 EMU
-Pt(72)            # 914400 EMU
-Emu(914400)       # Direct EMU value
-
-# All dimension properties accept these Length objects
+Inches(1)       # = 914400 EMU
+Cm(2.54)        # = 914400 EMU
+Mm(25.4)        # = 914400 EMU
+Pt(72)          # = 914400 EMU
+Emu(914400)     # Direct EMU value
 ```
 
 ---
@@ -1876,7 +808,7 @@ from pptx.chart.data import CategoryChartData, XyChartData, BubbleChartData
 
 ## Escape-hatch recipes
 
-Five patterns `claw` deliberately doesn't wrap. Use the library APIs above.
+Six patterns `claw` deliberately doesn't wrap. Use the library APIs directly.
 
 ### 1. Combo chart (bar + line on dual axis)
 
@@ -1980,7 +912,6 @@ for i, section in enumerate(doc.sections):
     header = section.header
     header.is_linked_to_previous = (i == 0)      # first inherits; rest independent
     header.paragraphs[0].text = f"Part {i+1} — Confidential"
-    # Add PAGE field in footer via XML:
     footer = section.footer
     footer.is_linked_to_previous = (i == 0)
 ```

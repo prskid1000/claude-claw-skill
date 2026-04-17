@@ -249,7 +249,7 @@ Cache entries never contain secrets; interpolation results that resolve `${env:.
 | `pptx` | [references/document-creation.md § python-pptx](../document-creation.md#3-python-pptx-powerpoint-pptx) |
 | `pdf` | [references/pdf-tools.md](../pdf-tools.md) (fitz / pypdf / pdfplumber / reportlab) |
 | `img` | [references/media-tools.md § Pillow / ImageMagick](../media-tools.md) |
-| `media` | [references/media-tools.md § ffmpeg](../media-tools.md#3-ffmpeg----video--audio) |
+| `media` | [references/media-tools.md § ffmpeg](../media-tools.md#3-ffmpeg) |
 | `convert` | [references/conversion-tools.md](../conversion-tools.md) (full Pandoc flag surface) |
 | `email` | [references/email-reference.md](../email-reference.md) (raw MIME + Gmail API) |
 | `doc` / `sheet` | [references/gws-cli.md](../gws-cli.md) (all `gws` verbs + params) |

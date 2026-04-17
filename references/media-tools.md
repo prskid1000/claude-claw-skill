@@ -37,6 +37,8 @@
 
 # 1. Pillow (PIL) -- Python Image Manipulation
 
+> **TL;DR: use `claw img <verb>` for everything in this section's covered branches.** See [references/claw/img.md](claw/img.md) — `resize`, `fit`, `pad`, `thumb`, `crop`, `enhance`, `sharpen`, `composite`, `watermark`, `overlay`, `convert`, `to-jpeg`, `to-webp`, `exif`, `rename`, `batch`, `gif-from-frames`. This section keeps only the API shape `claw img` doesn't wrap: full format-param catalog, mode catalog, resample / transform enums, `ImageDraw` primitives (freeform canvas), `ImageFont` variable-axis control, `ImageChops` channel math, `ImageMath` expression eval, and `ImageCms` ICC profiles.
+
 ```python
 from PIL import Image, ImageDraw, ImageFont, ImageFilter, ImageEnhance, ImageOps, ImageChops, ImageStat, ImageGrab, ImageSequence, ImageMorph, ImagePath, ImageCms, ImageColor, ImageMath
 ```
@@ -87,38 +89,32 @@ Key save params by format:
 
 ## 1.3 Image Class -- All Methods and Properties
 
-### Opening, Creating, Saving
+> `claw img resize | fit | pad | thumb | crop | convert | to-jpeg | to-webp | exif` cover the common ops — see [claw/img.md](claw/img.md). Below: construction API, resample / transpose / transform enums (for escape-hatch calls from your own code).
 
-```python
-Image.open(fp, mode="r", formats=None)           # Open from file/path/URL/bytes
-Image.new(mode, size, color=0)                    # Create blank image
-Image.frombytes(mode, size, data, decoder="raw")  # Create from raw bytes
-Image.frombuffer(mode, size, data)                # Create from buffer (no copy)
-Image.fromarray(obj, mode=None)                   # Create from numpy array
+### Construction / save / close
 
-img.save(fp, format=None, **params)               # Save to file/buffer
-img.copy()                                        # Deep copy
-img.close()                                       # Release resources
-img.show(title=None)                              # Display with system viewer
-```
+- `Image.open(fp, mode="r", formats=None)` — file / path / URL / bytes
+- `Image.new(mode, size, color=0)` — blank
+- `Image.frombytes(mode, size, data, decoder="raw")` — from raw bytes
+- `Image.frombuffer(mode, size, data)` — no-copy buffer wrap
+- `Image.fromarray(obj, mode=None)` — from numpy
+- `img.save(fp, format=None, **params)` — params per format in §1.1
+- `img.copy()` · `img.close()` · `img.show(title=None)`
 
-Save parameters by format: see the format table in §1.1.
+### Geometry methods
 
-### Geometry Operations
+- `img.resize(size, resample=BICUBIC, box=None, reducing_gap=None)`
+- `img.thumbnail(size, resample=BICUBIC, reducing_gap=2.0)` — in-place, preserves aspect
+- `img.crop(box=(left, upper, right, lower))`
+- `img.rotate(angle, resample=NEAREST, expand=False, center=None, translate=None, fillcolor=None)`
+- `img.transpose(method)` (method enums below)
+- `img.transform(size, method, data=None, resample=BICUBIC, fill=1, fillcolor=None)`
+- `img.reduce(factor, box=None)` — integer downscale
 
-```python
-img.resize(size, resample=BICUBIC, box=None, reducing_gap=None)
-img.thumbnail(size, resample=BICUBIC, reducing_gap=2.0)  # In-place, preserves aspect
-img.crop(box=(left, upper, right, lower))
-img.rotate(angle, resample=NEAREST, expand=False, center=None, translate=None, fillcolor=None)
-img.transpose(method)
-img.transform(size, method, data=None, resample=BICUBIC, fill=1, fillcolor=None)
-img.reduce(factor, box=None)                      # Integer downscale
-```
+### Resample algorithms (for `resize`, `rotate`, `transform`)
 
-Resample algorithms (for `resize`, `rotate`, `transform`):
 | Constant | Value | Quality | Speed |
-|----------|-------|---------|-------|
+|---|---|---|---|
 | `Image.Resampling.NEAREST` | 0 | Lowest | Fastest |
 | `Image.Resampling.BOX` | 4 | Low | Fast |
 | `Image.Resampling.BILINEAR` | 2 | Medium | Medium |
@@ -126,298 +122,198 @@ Resample algorithms (for `resize`, `rotate`, `transform`):
 | `Image.Resampling.BICUBIC` | 3 | High | Slow |
 | `Image.Resampling.LANCZOS` | 1 | Highest | Slowest |
 
-Transpose methods:
+### Transpose methods
+
 | Constant | Effect |
-|----------|--------|
+|---|---|
 | `Image.Transpose.FLIP_LEFT_RIGHT` | Horizontal mirror |
 | `Image.Transpose.FLIP_TOP_BOTTOM` | Vertical mirror |
-| `Image.Transpose.ROTATE_90` | 90 degrees CCW |
-| `Image.Transpose.ROTATE_180` | 180 degrees |
-| `Image.Transpose.ROTATE_270` | 270 degrees CCW |
-| `Image.Transpose.TRANSPOSE` | Transpose around main diagonal |
-| `Image.Transpose.TRANSVERSE` | Transpose around secondary diagonal |
+| `Image.Transpose.ROTATE_90` | 90° CCW |
+| `Image.Transpose.ROTATE_180` | 180° |
+| `Image.Transpose.ROTATE_270` | 270° CCW |
+| `Image.Transpose.TRANSPOSE` | Main diagonal |
+| `Image.Transpose.TRANSVERSE` | Secondary diagonal |
 
-Transform methods:
+### Transform methods
+
 | Constant | Data | Description |
-|----------|------|-------------|
-| `Image.Transform.AFFINE` | 6-tuple (a,b,c,d,e,f) | Affine transform |
+|---|---|---|
+| `Image.Transform.AFFINE` | 6-tuple (a,b,c,d,e,f) | Affine |
 | `Image.Transform.PERSPECTIVE` | 8-tuple | Perspective warp |
-| `Image.Transform.QUAD` | 8-tuple (4 corners) | Map quadrilateral to rectangle |
-| `Image.Transform.MESH` | list of (box, quad) | Piecewise transform |
+| `Image.Transform.QUAD` | 8-tuple (4 corners) | Map quad → rectangle |
+| `Image.Transform.MESH` | list of `(box, quad)` | Piecewise transform |
 | `Image.Transform.EXTENT` | 4-tuple (box) | Crop + scale |
 
-### Compositing and Merging
+### Compositing / merging
 
-```python
-img.paste(im, box=None, mask=None)                # Paste image/color onto self
-Image.alpha_composite(im1, im2)                   # Alpha composite (both RGBA)
-Image.composite(im1, im2, mask)                   # Composite using mask
-Image.blend(im1, im2, alpha)                      # Linear interpolation
-Image.merge(mode, bands)                          # Merge single-band images
-img.split()                                       # Split into bands
-```
+- `img.paste(im, box=None, mask=None)`
+- `Image.alpha_composite(im1, im2)` — both RGBA
+- `Image.composite(im1, im2, mask)` — composite via mask
+- `Image.blend(im1, im2, alpha)` — linear interpolation
+- `Image.merge(mode, bands)` · `img.split()`
 
-### Mode Conversion
+### Mode conversion / quantize
 
-```python
-img.convert(mode=None, matrix=None, dither=None, palette=Palette.WEB, colors=256)
-img.quantize(colors=256, method=None, kmeans=0, palette=None, dither=Dither.FLOYDSTEINBERG)
-```
+- `img.convert(mode=None, matrix=None, dither=None, palette=Palette.WEB, colors=256)`
+- `img.quantize(colors=256, method=None, kmeans=0, palette=None, dither=Dither.FLOYDSTEINBERG)`
 
-Dither options: `Dither.NONE`, `Dither.FLOYDSTEINBERG`, `Dither.ORDERED`, `Dither.RASTERIZE`
-Quantize methods: `Quantize.MEDIANCUT` (0), `Quantize.MAXCOVERAGE` (1), `Quantize.FASTOCTREE` (2), `Quantize.LIBIMAGEQUANT` (3)
+Dither: `Dither.NONE` / `FLOYDSTEINBERG` / `ORDERED` / `RASTERIZE`.
 
-### Filtering and Point Operations
+Quantize methods: `Quantize.MEDIANCUT` (0), `MAXCOVERAGE` (1), `FASTOCTREE` (2), `LIBIMAGEQUANT` (3).
 
-```python
-img.filter(kernel)                                # Apply ImageFilter kernel
-img.point(lut, mode=None)                         # Map pixels through lookup table/function
-```
+### Pixel / data access
 
-### Pixel Access
+`img.filter(kernel)` · `img.point(lut, mode=None)` · `img.getpixel((x,y))` · `img.putpixel((x,y), value)` · `img.load()` → `PixelAccess` · `img.getdata(band=None)` · `img.putdata(data, scale=1.0, offset=0.0)` · `img.tobytes(encoder_name="raw", *args)`.
 
-```python
-img.getpixel((x, y))                              # Get single pixel value
-img.putpixel((x, y), value)                       # Set single pixel value
-img.load()                                        # Load pixel data, return PixelAccess
-img.getdata(band=None)                            # Get flat sequence of pixels
-img.putdata(data, scale=1.0, offset=0.0)          # Set pixels from flat sequence
-img.tobytes(encoder_name="raw", *args)            # Serialize to bytes
-```
+### Introspection
 
-### Image Information
+`img.getbbox()` · `img.getcolors(maxcolors=256)` · `img.getextrema()` · `img.histogram(mask=None, extrema=None)` · `img.entropy(mask=None, extrema=None)`.
 
-```python
-img.getbbox()                                     # Bounding box of non-zero regions -> (l,u,r,lo)
-img.getcolors(maxcolors=256)                      # List of (count, color) tuples
-img.getextrema()                                  # Min/max pixel values per band
-img.histogram(mask=None, extrema=None)            # Pixel value histogram (list)
-img.entropy(mask=None, extrema=None)              # Image entropy (float)
-```
+### Metadata / properties
 
-### Metadata
+`img.getexif()` · `img.getxmp()` · `img.info` (dict) · `img.format` · `img.mode` · `img.size` / `.width` / `.height` · `img.palette` (P mode) · `img.n_frames` · `img.is_animated`.
 
-```python
-img.getexif()                                     # Return Exif object (dict-like)
-img.getxmp()                                      # Return XMP data as dict
-img.info                                          # Dict of format-specific metadata
-img.format                                        # Source format string ("PNG", "JPEG", etc.)
-img.mode                                          # Pixel mode string
-img.size                                          # (width, height) tuple
-img.width                                         # Width in pixels
-img.height                                        # Height in pixels
-img.palette                                       # ImagePalette for "P" mode images
-img.n_frames                                      # Frame count (animated/multi-page)
-img.is_animated                                   # True if n_frames > 1
-```
+### Animation / multi-frame
 
-### Animation / Multi-frame
+`img.seek(frame)` · `img.tell()` · `img.n_frames`.
 
-```python
-img.seek(frame)                                   # Seek to frame number
-img.tell()                                        # Return current frame number
-img.n_frames                                      # Total frame count
-```
+### Palette / miscellaneous
 
-### Miscellaneous
-
-```python
-img.draft(mode, size)                             # Configure loader for speed (JPEG only)
-img.verify()                                      # Verify file integrity (no pixel decode)
-img.effect_spread(distance)                       # Randomly spread pixels
-img.getpalette(mode="RGB")                        # Get palette as flat list
-img.putpalette(data, rawmode="RGB")               # Set palette
-img.remap_palette(dest_map, source_palette=None)  # Remap palette indices
-```
+`img.draft(mode, size)` (JPEG loader speed) · `img.verify()` · `img.effect_spread(distance)` · `img.getpalette(mode="RGB")` · `img.putpalette(data, rawmode="RGB")` · `img.remap_palette(dest_map, source_palette=None)`.
 
 ## 1.4 ImageDraw
+
+Escape hatch — `claw img watermark` handles the common "stamp text / logo" case; any freeform drawing (shapes, diagrams, custom charts) uses this API directly.
 
 ```python
 from PIL import ImageDraw
 draw = ImageDraw.Draw(im, mode=None)
 ```
 
-### Drawing Primitives
+### Drawing primitives
 
-```python
-draw.line(xy, fill=None, width=0, joint=None)
-# xy: [(x1,y1),(x2,y2),...] or [x1,y1,x2,y2,...]
-# joint: None or "curve" (rounded joints)
+| Call | Signature |
+|---|---|
+| `line` | `draw.line(xy, fill=None, width=0, joint=None)` — `joint=None` or `"curve"` |
+| `rectangle` | `draw.rectangle(xy, fill, outline, width=1)` |
+| `rounded_rectangle` | `draw.rounded_rectangle(xy, radius, fill, outline, width=1, corners=(tl,tr,br,bl))` |
+| `ellipse` | `draw.ellipse(xy, fill, outline, width=1)` — `xy` = bounding box |
+| `polygon` | `draw.polygon(xy, fill, outline, width=1)` |
+| `regular_polygon` | `draw.regular_polygon(bounding_circle, n_sides, rotation=0, fill, outline, width=1)` |
+| `arc` | `draw.arc(xy, start, end, fill, width=0)` — degrees, 0=3 o'clock CCW |
+| `chord` | `draw.chord(xy, start, end, fill, outline, width=1)` |
+| `pieslice` | `draw.pieslice(xy, start, end, fill, outline, width=1)` |
+| `point` | `draw.point(xy, fill)` |
+| `circle` | `draw.circle(xy, radius, fill, outline, width=1)` — `xy` = center |
+| `bitmap` | `draw.bitmap(xy, bitmap, fill)` — bitmap is mode "1" image |
 
-draw.rectangle(xy, fill=None, outline=None, width=1)
-# xy: [(x0,y0),(x1,y1)] or [x0,y0,x1,y1]
+`xy` coord format: `[(x1,y1),(x2,y2),...]` or flat `[x1,y1,x2,y2,...]`.
 
-draw.rounded_rectangle(xy, radius=0, fill=None, outline=None, width=1, corners=None)
-# corners: (top_left, top_right, bottom_right, bottom_left) booleans
-
-draw.ellipse(xy, fill=None, outline=None, width=1)
-# xy: bounding box
-
-draw.polygon(xy, fill=None, outline=None, width=1)
-
-draw.regular_polygon(bounding_circle, n_sides, rotation=0, fill=None, outline=None, width=1)
-# bounding_circle: (x, y, radius) or ((x, y), radius)
-
-draw.arc(xy, start, end, fill=None, width=0)
-# start/end: angles in degrees (0=3 o'clock, CCW)
-
-draw.chord(xy, start, end, fill=None, outline=None, width=1)
-
-draw.pieslice(xy, start, end, fill=None, outline=None, width=1)
-
-draw.point(xy, fill=None)
-
-draw.circle(xy, radius, fill=None, outline=None, width=1)
-# xy: center (x, y)
-
-draw.bitmap(xy, bitmap, fill=None)
-# xy: upper-left corner, bitmap: mode "1" image
-```
-
-### Text Rendering
+### Text rendering
 
 ```python
 draw.text(xy, text, fill=None, font=None, anchor=None, spacing=4, align="left",
-          direction=None, features=None, language=None, stroke_width=0, stroke_fill=None,
-          embedded_color=False)
-# anchor: 2-char string (horizontal: l/m/r/s, vertical: a/t/m/s/b/d)
-# align: "left"/"center"/"right" (for multiline)
-# direction: "rtl"/"ltr"/"ttb" (requires libraqm)
-
-draw.multiline_text(xy, text, fill=None, font=None, anchor=None, spacing=4, align="left",
-                    direction=None, features=None, language=None, stroke_width=0, stroke_fill=None)
-
-draw.textlength(text, font=None, direction=None, features=None, language=None)
-# Return: float width
-
-draw.textbbox(xy, text, font=None, anchor=None, spacing=4, align="left",
-              direction=None, features=None, language=None, stroke_width=0)
-# Return: (left, top, right, bottom)
-
-draw.multiline_textbbox(xy, text, font=None, anchor=None, spacing=4, align="left",
-                        direction=None, features=None, language=None, stroke_width=0)
-
-draw.multiline_textlength(text, font=None, direction=None, features=None, language=None)
+          direction=None, features=None, language=None,
+          stroke_width=0, stroke_fill=None, embedded_color=False)
 ```
 
-### Flood Fill
+`anchor` — 2-char string: horizontal `l`/`m`/`r`/`s`, vertical `a`/`t`/`m`/`s`/`b`/`d`.
+`align` — `"left"` / `"center"` / `"right"` (multiline only).
+`direction` — `"rtl"` / `"ltr"` / `"ttb"` (requires libraqm).
 
-```python
-ImageDraw.floodfill(image, xy, value, border=None, thresh=0)
-```
+Also: `draw.multiline_text(...)`, `draw.textlength(...)`, `draw.textbbox(xy, text, font, anchor, spacing, align, direction, features, language, stroke_width)` → `(l, t, r, b)`, `draw.multiline_textbbox(...)`, `draw.multiline_textlength(...)`.
+
+### Flood fill
+
+`ImageDraw.floodfill(image, xy, value, border=None, thresh=0)`.
 
 ## 1.5 ImageFont
 
-```python
-from PIL import ImageFont
+Escape hatch — `claw img watermark` accepts a `--font` path + size; any variable-axis control, font-metrics lookup, or transposed-font work goes through this API.
 
-ImageFont.truetype(font=None, size=10, index=0, encoding="", layout_engine=None)
-# font: path to .ttf/.otf file or file-like object
-# layout_engine: ImageFont.Layout.BASIC or ImageFont.Layout.RAQM
+`ImageFont.truetype(font, size=10, index=0, encoding="", layout_engine=None)` — layout engines: `ImageFont.Layout.BASIC` or `RAQM`.
 
-ImageFont.load_default(size=None)  # Built-in bitmap font; size param requires Pillow >= 10.1
+`ImageFont.load_default(size=None)` — built-in bitmap (size param requires Pillow ≥ 10.1).
 
-ImageFont.TransposedFont(font, orientation=None)  # Rotated font wrapper
+`ImageFont.TransposedFont(font, orientation=None)` — rotated font wrapper.
 
-# FreeTypeFont methods:
-font.getbbox(text, mode="", direction=None, features=None, language=None, stroke_width=0, anchor=None)
-font.getlength(text, mode="", direction=None, features=None, language=None)
-font.getmask(text, mode="", direction=None, features=None, language=None, stroke_width=0, anchor=None)
-font.getmetrics()  # Return (ascent, descent)
-font.getmask2(text, mode="", fill=None, direction=None, features=None, language=None,
-              stroke_width=0, anchor=None)  # Return (mask_image, offset_tuple)
-font.get_variation_names()   # Named font variations
-font.get_variation_axes()    # Variable font axes
-font.set_variation_by_name(name)
-font.set_variation_by_axes(axes)
-```
+FreeTypeFont methods:
+
+- `font.getbbox(text, mode, direction, features, language, stroke_width, anchor)`
+- `font.getlength(text, mode, direction, features, language)`
+- `font.getmask(...)` / `font.getmask2(...)` → `(mask_image, offset)`
+- `font.getmetrics()` → `(ascent, descent)`
+- `font.get_variation_names()` / `font.get_variation_axes()` — variable font introspection
+- `font.set_variation_by_name(name)` / `font.set_variation_by_axes(axes)`
 
 ## 1.6 ImageFilter
 
-```python
-from PIL import ImageFilter
-```
-
-### Preset Filters
+> `claw img sharpen` wraps `UnsharpMask`; `--op blur:N` wraps `GaussianBlur`. See [claw/img.md](claw/img.md).
 
 Apply via `img.filter(ImageFilter.PRESET)`:
 
 | Preset | Effect |
-|--------|--------|
-| `BLUR` | Uniform 5x5 blur |
+|---|---|
+| `BLUR` | Uniform 5×5 blur |
 | `CONTOUR` | Edge contours |
 | `DETAIL` | Detail enhancement |
 | `EDGE_ENHANCE` | Light edge enhancement |
 | `EDGE_ENHANCE_MORE` | Strong edge enhancement |
-| `EMBOSS` | Emboss effect |
+| `EMBOSS` | Emboss |
 | `FIND_EDGES` | Edge detection |
 | `SHARPEN` | Sharpen |
 | `SMOOTH` | Light smoothing |
 | `SMOOTH_MORE` | Strong smoothing |
 
-### Parameterized Filter Classes
+Parameterized classes:
 
-```python
-ImageFilter.GaussianBlur(radius=2)
-ImageFilter.BoxBlur(radius)
-ImageFilter.UnsharpMask(radius=2, percent=150, threshold=3)
-ImageFilter.Kernel(size, kernel, scale=None, offset=0)
-# size: (width, height), kernel: flat sequence, scale: sum factor (auto if None)
-
-ImageFilter.RankFilter(size, rank)        # size: kernel size, rank: pixel rank to pick
-ImageFilter.MedianFilter(size=3)          # Equivalent to RankFilter(size, size*size//2)
-ImageFilter.MinFilter(size=3)             # Equivalent to RankFilter(size, 0)
-ImageFilter.MaxFilter(size=3)             # Equivalent to RankFilter(size, size*size-1)
-ImageFilter.ModeFilter(size=3)            # Pick most common pixel in neighborhood
-```
+- `ImageFilter.GaussianBlur(radius=2)`
+- `ImageFilter.BoxBlur(radius)`
+- `ImageFilter.UnsharpMask(radius=2, percent=150, threshold=3)`
+- `ImageFilter.Kernel(size, kernel, scale=None, offset=0)` — size `(w, h)`; kernel flat list; scale auto if None
+- `ImageFilter.RankFilter(size, rank)` — size = kernel, rank = sorted pixel index
+- `ImageFilter.MedianFilter(size=3)` ≡ `RankFilter(size, size*size//2)`
+- `ImageFilter.MinFilter(size=3)` ≡ `RankFilter(size, 0)`
+- `ImageFilter.MaxFilter(size=3)` ≡ `RankFilter(size, size*size-1)`
+- `ImageFilter.ModeFilter(size=3)` — most common pixel in neighborhood
 
 ## 1.7 ImageEnhance
 
-```python
-from PIL import ImageEnhance
-```
+> `claw img enhance [--brightness N --color N --contrast N --sharpness N]` wraps all four — see [claw/img.md](claw/img.md).
 
-All enhancers share the same interface:
-
-```python
-enhancer = ImageEnhance.<Class>(image)
-result = enhancer.enhance(factor)
-# factor: 0.0 = minimum, 1.0 = original, 2.0 = maximum effect
-```
+Interface: `ImageEnhance.<Class>(image).enhance(factor)`. `factor`: 0.0 = minimum, 1.0 = original, 2.0 = doubled effect.
 
 | Class | factor=0.0 | factor=1.0 | factor=2.0 |
-|-------|-----------|-----------|-----------|
-| `Brightness` | Black image | Original | 2x brightness |
-| `Color` | Grayscale | Original | 2x saturation |
-| `Contrast` | Solid gray | Original | 2x contrast |
-| `Sharpness` | Blurred | Original | 2x sharpened |
+|---|---|---|---|
+| `Brightness` | Black | Original | 2× brightness |
+| `Color` | Grayscale | Original | 2× saturation |
+| `Contrast` | Solid gray | Original | 2× contrast |
+| `Sharpness` | Blurred | Original | 2× sharpened |
 
 ## 1.8 ImageOps
 
-```python
-from PIL import ImageOps
-```
+> `claw img enhance --autocontrast|--equalize|--posterize|--solarize|--invert` and `claw img fit|pad|thumb|crop` wrap the common cases — see [claw/img.md](claw/img.md). Below: the full function list for in-code escape-hatch use.
 
-```python
-ImageOps.autocontrast(image, cutoff=0, ignore=None, mask=None, preserve_tone=False)
-ImageOps.colorize(image, black, white, mid=None, blackpoint=0, whitepoint=255, midpoint=127)
-ImageOps.contain(image, size, method=BICUBIC)     # Fit inside size, preserve aspect
-ImageOps.cover(image, size, method=BICUBIC)       # Cover size, preserve aspect (may crop)
-ImageOps.crop(image, border=0)                    # Remove border pixels from all sides
-ImageOps.deform(image, deformer, resample=BILINEAR)  # Deformer needs getmesh() method
-ImageOps.equalize(image, mask=None)               # Histogram equalization
-ImageOps.expand(image, border=0, fill=0)          # Add border (int or (l,t,r,b))
-ImageOps.exif_transpose(image, in_place=False)    # Auto-rotate per EXIF orientation
-ImageOps.fit(image, size, method=BICUBIC, bleed=0.0, centering=(0.5, 0.5))  # Crop+resize to exact size
-ImageOps.flip(image)                              # Vertical flip (top-to-bottom)
-ImageOps.grayscale(image)                         # Convert to grayscale
-ImageOps.invert(image)                            # Invert colors
-ImageOps.mirror(image)                            # Horizontal flip (left-to-right)
-ImageOps.pad(image, size, method=BICUBIC, color=None, centering=(0.5, 0.5))  # Resize + letterbox
-ImageOps.posterize(image, bits)                   # Reduce to N bits per channel
-ImageOps.scale(image, factor, resample=BICUBIC)   # Scale by factor
-ImageOps.solarize(image, threshold=128)           # Invert pixels above threshold
-```
+| Function | Purpose |
+|---|---|
+| `autocontrast(img, cutoff=0, ignore=None, mask=None, preserve_tone=False)` | Maximize dynamic range |
+| `colorize(img, black, white, mid=None, blackpoint=0, whitepoint=255, midpoint=127)` | Grayscale → two/three-color gradient |
+| `contain(img, size, method=BICUBIC)` | Fit inside size, preserve aspect |
+| `cover(img, size, method=BICUBIC)` | Cover size, preserve aspect (may crop) |
+| `crop(img, border=0)` | Remove border pixels |
+| `deform(img, deformer, resample=BILINEAR)` | Deformer object w/ `getmesh()` |
+| `equalize(img, mask=None)` | Histogram equalization |
+| `expand(img, border=0, fill=0)` | Add border (int or `(l,t,r,b)`) |
+| `exif_transpose(img, in_place=False)` | Auto-rotate per EXIF orientation |
+| `fit(img, size, method=BICUBIC, bleed=0.0, centering=(0.5, 0.5))` | Crop + resize to exact size |
+| `flip(img)` | Vertical flip |
+| `grayscale(img)` | To grayscale |
+| `invert(img)` | Invert colors |
+| `mirror(img)` | Horizontal flip |
+| `pad(img, size, method=BICUBIC, color=None, centering=(0.5, 0.5))` | Resize + letterbox |
+| `posterize(img, bits)` | Reduce to N bits / channel |
+| `scale(img, factor, resample=BICUBIC)` | Scale by factor |
+| `solarize(img, threshold=128)` | Invert pixels above threshold |
 
 ## 1.9 ImageChops (Channel Operations)
 
@@ -451,48 +347,29 @@ ImageChops.logical_xor(im1, im2)                      # Bitwise XOR
 
 ## 1.10 Other Modules
 
+All escape-hatch — `claw` doesn't wrap these.
+
 ### ImageStat
 
-```python
-from PIL import ImageStat
-stat = ImageStat.Stat(image, mask=None)
-
-stat.extrema    # [(min, max), ...] per band
-stat.count      # [pixel_count, ...] per band
-stat.sum        # [sum_of_values, ...] per band
-stat.sum2       # [sum_of_squared_values, ...] per band
-stat.mean       # [mean, ...] per band
-stat.median     # [median, ...] per band
-stat.rms        # [root_mean_square, ...] per band
-stat.var        # [variance, ...] per band
-stat.stddev     # [standard_deviation, ...] per band
-```
+`stat = ImageStat.Stat(image, mask=None)` — per-band lists: `.extrema`, `.count`, `.sum`, `.sum2`, `.mean`, `.median`, `.rms`, `.var`, `.stddev`.
 
 ### ImageGrab
 
-```python
-from PIL import ImageGrab
-ImageGrab.grab(bbox=None, include_layered_windows=False, all_screens=False, xdisplay=None)
-# Return: screenshot as Image. bbox=(left, top, right, bottom)
-ImageGrab.grabclipboard()
-# Return: Image or list of file paths from clipboard
-```
+- `ImageGrab.grab(bbox=None, include_layered_windows=False, all_screens=False, xdisplay=None)` — screenshot; `bbox=(l, t, r, b)`.
+- `ImageGrab.grabclipboard()` — returns Image or list of file paths.
 
 ### ImageSequence
 
 ```python
-from PIL import ImageSequence
-for frame in ImageSequence.Iterator(im):
-    # Process each frame of an animated image
-    pass
+for frame in ImageSequence.Iterator(im):    # animated image frame iterator
+    ...
 ```
 
 ### ImageMorph
 
 ```python
-from PIL import ImageMorph
 lut = ImageMorph.LutBuilder(patterns=None, op_name=None)
-# op_name: "erosion4"/"erosion8"/"dilation4"/"dilation8"/"edge"
+# op_name: "erosion4" / "erosion8" / "dilation4" / "dilation8" / "edge"
 lut.build_lut()
 mop = ImageMorph.MorphOp(lut=None, op_name=None, patterns=None)
 count, outimage = mop.apply(image)
@@ -502,54 +379,32 @@ mop.get_on_pixels(image)
 
 ### ImagePath
 
-```python
-from PIL import ImagePath
-path = ImagePath.Path(coordinates)  # list of (x,y) tuples or flat [x1,y1,x2,y2,...]
-path.compact(distance=2)
-path.getbbox()
-path.map(function)
-path.tolist(flat=0)
-path.transform(matrix)             # 6-tuple affine or (a,b,c,d) 2x2
-```
+`path = ImagePath.Path(coords)` (list of `(x, y)` or flat `[x1,y1,x2,y2,...]`). Methods: `.compact(distance=2)`, `.getbbox()`, `.map(function)`, `.tolist(flat=0)`, `.transform(matrix)` (6-tuple affine or `(a,b,c,d)` 2×2).
 
 ### ImageCms (ICC Color Management)
 
-```python
-from PIL import ImageCms
-ImageCms.buildTransform(inputProfile, outputProfile, inMode, outMode, renderingIntent=0, flags=0)
-ImageCms.applyTransform(im, transform, inPlace=False)
-ImageCms.profileToProfile(im, inputProfile, outputProfile, renderingIntent=0, outputMode=None, inPlace=False, flags=0)
-ImageCms.createProfile(colorSpace, colorTemp=-1)  # "sRGB", "Lab", "XYZ"
-ImageCms.getOpenProfile(profileFilename)
-ImageCms.getProfileName(profile)
-ImageCms.getProfileDescription(profile)
-ImageCms.getProfileInfo(profile)
-```
+- `ImageCms.buildTransform(inputProfile, outputProfile, inMode, outMode, renderingIntent=0, flags=0)`
+- `ImageCms.applyTransform(im, transform, inPlace=False)`
+- `ImageCms.profileToProfile(im, inputProfile, outputProfile, renderingIntent=0, outputMode=None, inPlace=False, flags=0)`
+- `ImageCms.createProfile(colorSpace, colorTemp=-1)` — `"sRGB"` / `"Lab"` / `"XYZ"`
+- `ImageCms.getOpenProfile(file)` · `getProfileName` · `getProfileDescription` · `getProfileInfo`
 
-Rendering intents: `ImageCms.Intent.PERCEPTUAL` (0), `RELATIVE_COLORIMETRIC` (1), `SATURATION` (2), `ABSOLUTE_COLORIMETRIC` (3)
+Rendering intents: `ImageCms.Intent.PERCEPTUAL` (0), `RELATIVE_COLORIMETRIC` (1), `SATURATION` (2), `ABSOLUTE_COLORIMETRIC` (3).
 
 ### ImageColor
 
-```python
-from PIL import ImageColor
-ImageColor.getrgb(color)   # Parse color string -> (R, G, B) or (R, G, B, A)
-ImageColor.getcolor(color, mode)  # Parse color string -> mode-appropriate tuple
-```
+`ImageColor.getrgb(color)` → `(R, G, B)` / `(R, G, B, A)`. `ImageColor.getcolor(color, mode)` → mode-appropriate tuple.
 
-Accepted formats: `"#rgb"`, `"#rrggbb"`, `"#rrggbbaa"`, `"rgb(r,g,b)"`, `"rgb(r%,g%,b%)"`, `"hsl(h,s%,l%)"`, `"hsv(h,s%,v%)"`, named colors (CSS3 color names: `"red"`, `"cornflowerblue"`, etc.)
+Accepted formats: `"#rgb"` · `"#rrggbb"` · `"#rrggbbaa"` · `"rgb(r,g,b)"` · `"rgb(r%,g%,b%)"` · `"hsl(h,s%,l%)"` · `"hsv(h,s%,v%)"` · CSS3 names (`"red"`, `"cornflowerblue"`, …).
 
 ### ImageMath
 
 ```python
-from PIL import ImageMath
 ImageMath.eval(expression, **environment)
-# Supply images as keyword args. Arithmetic on pixel values.
-# Operators: +, -, *, /, %, **, &, |, ^, ~, >>, <<
+# Supply images as keyword args. Operators: + - * / % ** & | ^ ~ >> <<
 # Functions: abs, min, max, int, float, convert(mode)
-# Comparisons return 0/255 images
-
-ImageMath.lambda_eval(function, **environment)
-# Modern alternative using Python lambda
+# Comparisons return 0/255 images.
+ImageMath.lambda_eval(function, **environment)        # Python-lambda variant
 ```
 
 ---

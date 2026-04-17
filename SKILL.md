@@ -32,7 +32,7 @@ Every index / TOC in this skill (the File Map below, plus each reference's and e
 - Never force the tree onto code blocks, tables, or API detail — only onto index lists.
 - Broken anchors silently degrade retrieval; treat them as build-breaks.
 
-Copy [references/_TEMPLATE.md](references/_TEMPLATE.md) or [examples/_TEMPLATE.md](examples/_TEMPLATE.md) for a pre-filled shape.
+Copy [references/_TEMPLATE.md](references/_TEMPLATE.md) or [examples/_TEMPLATE.md](examples/_TEMPLATE.md) for a pre-filled shape. For adding or improving `claw` commands, follow the agent checklist in [references/claw/contributing.md](references/claw/contributing.md).
 
 ## File Map
 
