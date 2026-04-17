@@ -1,8 +1,26 @@
 # Data Pipeline Examples
 
-End-to-end working code blocks for multi-step data transformations.
+Canonical location for multi-step, cross-tool pipelines. Single-tool examples live in their own files ([office-documents.md](office-documents.md), [email-workflows.md](email-workflows.md), [google-workspace.md](google-workspace.md), [pdf-workflows.md](pdf-workflows.md)).
 
-> **Windows:** See [skill.md § Windows Notes](../skill.md#windows-notes) for subprocess setup.
+Windows subprocess helper (`shutil.which` for `.cmd` shims): [claude-md-block.md — Windows Subprocess Note](../references/patchers/claude-md-block.md#windows-subprocess-note).
+
+## Contents
+
+- **INGEST → Excel**
+  - [CSV → styled XLSX → upload as Google Sheet](#csv-to-styled-excel-to-google-sheets)
+  - [PDF → extract tables → XLSX](#pdf-to-extract-tables-to-excel)
+  - [JSON (with nested flattening) → XLSX](#json-to-excel)
+  - [HTML `<table>` (BeautifulSoup) → XLSX](#html-table-to-excel-beautifulsoup)
+- **QUERY DB → REPORT**
+  - [DB rows → styled XLSX with totals + bar chart](#database-to-excel-report-styled)
+  - [DB rows → Google Sheet (CSV upload, auto-convert)](#database-to-google-sheets-direct)
+- **ROUND-TRIP Google Sheet**
+  - [Export XLSX → modify locally → upload back, replacing content](#google-sheet-download-modify-upload-back)
+- **CONVERT for delivery**
+  - [XLSX → PDF via reportlab Table](#excel-to-pdf-reportlab-table)
+  - [Markdown → PDF via pandoc (TOC, highlight, multi-file)](#markdown-to-pdf-pandoc)
+- **FULL ORCHESTRATION**
+  - [DB query → Excel + PDF → Drive upload → Gmail with both attachments](#full-pipeline-db-query-to-process-to-excel--pdf-to-upload-drive-to-email)
 
 ## CSV to Styled Excel to Google Sheets
 

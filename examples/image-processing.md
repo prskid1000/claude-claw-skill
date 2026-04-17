@@ -2,6 +2,15 @@
 
 Working code blocks for Pillow (Python) and ImageMagick (CLI).
 
+## Contents
+
+- **PROCESS images (Python)** — `Pillow`
+  - [Resize, crop, watermark, filters, enhancement, batch](#pillow-python)
+- **PROCESS images (CLI)** — `ImageMagick`
+  - [Resize, convert, composite, montage, batch (mogrify)](#imagemagick-magick-cli)
+
+---
+
 ## Pillow (Python)
 
 ### Open, Resize, Save in Different Format

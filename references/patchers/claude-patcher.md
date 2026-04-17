@@ -2,6 +2,22 @@
 
 Script: `~/.claude/skills/claude-claw/scripts/patchers/claude-patcher.js`
 
+## Contents
+
+- **PATCH Claude Code binary** — lift hard-coded context/output/autocompact/summary limits
+  - [Patchable constants (what each flag changes)](#patchable-constants)
+  - [Usage (scan / apply / dry-run / restore)](#usage)
+  - [Re-run after Claude Code updates](#after-claude-code-updates)
+  - [How it works (anchor strategy, SEA bundle internals)](#how-it-works)
+  - [The four anchors in detail](#the-four-anchors-in-detail)
+- **RECOVER when an anchor breaks**
+  - [Diagnose + update broken anchor](#recovery-when-an-anchor-breaks)
+- **AVOID / ROLL BACK**
+  - [When you should NOT patch](#when-you-should-not-patch)
+  - [Limitations (same-length replacement, single-slot backup)](#limitations)
+
+---
+
 ## What It Does
 
 Patches numeric constants inside the compiled Claude Code binary
@@ -63,7 +79,7 @@ node ~/.claude/skills/claude-claw/scripts/patchers/claude-patcher.js --all     #
 If `--scan` reports `NOT FOUND` for any constant, the anchor broke —
 see [Recovery](#recovery-when-an-anchor-breaks) below.
 
-## How It Works Internally
+## How It Works
 
 1. **Find binary** via `--binary`, then `~/.local/bin/claude.exe`, then
    `where claude`/`which claude`. Fails with explicit error if none found.

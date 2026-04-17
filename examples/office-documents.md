@@ -2,6 +2,14 @@
 
 Complete, runnable code blocks for Excel (openpyxl), Word (python-docx), and PowerPoint (python-pptx).
 
+## Contents
+
+- **CREATE Excel (.xlsx)** — `openpyxl` → [Workbooks, styled reports, conditional formatting, charts, validation, images, tables, freeze panes, print setup, streaming large files, read-back](#excel-openpyxl)
+- **CREATE Word (.docx)** — `python-docx` → [Documents, paragraph/run styling, tables, images, headers/footers, sections, lists, hyperlinks, full templates](#word-python-docx)
+- **CREATE PowerPoint (.pptx)** — `python-pptx` → [Slides, shapes, charts, tables, images, slide notes, multi-slide decks](#powerpoint-python-pptx)
+
+API reference: [references/document-creation.md](../references/document-creation.md) · Cross-tool pipelines (CSV → Excel → Sheets, etc.): [data-pipelines.md](data-pipelines.md).
+
 ## Excel (openpyxl)
 
 ### Basic Workbook

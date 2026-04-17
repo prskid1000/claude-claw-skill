@@ -1,48 +1,63 @@
-# [Tool/Library Name] Reference
+# [Tool / Library Name] Reference
 
 <!--
 TEMPLATE — How to add a new reference file:
 
 1. Copy this file → references/[your-topic].md
-2. Replace all [bracketed] placeholders
-3. Structure: Critical Rules → numbered API sections (## 1.1, ## 1.2, ...) → Quick Reference table
-4. Keep it agent-friendly: tabular data, code blocks, no prose paragraphs
-5. Update SKILL.md File Map:
-     - Pick the matching task category (CREATE / READ / EDIT / etc.) or add a new one
-     - Add the file with one sub-bullet per H2 section in this format:
-         - Ref:
-           - [Descriptive label of section](references/your-topic.md#anchor)
-           - ... (one bullet per ## heading)
-     - Anchor format: lowercase, spaces → hyphens, strip special chars
-6. Add tool's pip / npm package to scripts/healthcheck.py PACKAGES or CLI_TOOLS dict
-7. Add an install entry to references/setup.md (matching numbered section)
+2. Replace all [bracketed] placeholders.
+3. STRUCTURE (do not reorder):
+     H1 title → Contents tree → Critical Rules → numbered API sections → Quick Reference
+4. ONLY the Contents list at the top is in decision-tree format (see SKILL.md
+   § Decision-Tree List Format). Each top-level bullet is a user-intent VERB
+   (CREATE / READ / EDIT / CONFIGURE / TROUBLESHOOT …). Nested bullets link to
+   the H2 section anchors that fulfil that intent. Do NOT force this shape on
+   the body — code blocks, tables, and API detail stay in their natural form.
+5. Every anchor linked from the Contents tree AND from SKILL.md must exist as
+   a matching H2 in this file. Anchor convention: lowercase kebab-case, strip
+   punctuation, spaces → hyphens. Number body sections as `## 1.1`, `## 1.2`
+   within a topic group.
+6. Do NOT duplicate content that lives elsewhere — link to the authoritative
+   source instead. Windows subprocess helper, installation steps, cross-tool
+   workflows etc. already have homes.
+7. Update SKILL.md File Map:
+     - Find the matching task category (or add a new one).
+     - Under the matching option, list this file in a `- Ref:` block with one
+       sub-bullet per H2 section (or the compact `·`-separated form for dense
+       nodes).
+8. Add tool's pip / npm package to scripts/healthcheck.py PACKAGES or
+   CLI_TOOLS dict, and an install entry to references/setup.md.
 
-Naming convention: lowercase-kebab-case.md (e.g. pdf-tools.md, gws-cli.md)
+Naming convention: lowercase-kebab-case.md (e.g. pdf-tools.md, gws-cli.md).
 -->
 
 ## Contents
 
-- [Critical Rules](#critical-rules)
-- [Section 1](#section-1)
-- [Section 2](#section-2)
-- [Quick Reference](#quick-reference)
+<!--
+Decision-tree shape. Top-level bullets are user intents (verbs, caps). Nested
+bullets link to H2 anchors in this file that fulfil that intent. Keep labels
+descriptive (3–8 words) — don't just repeat the heading text.
+-->
+
+- **VERB a thing**
+  - [First action in that branch](#11-first-action)
+  - [Second action](#12-second-action)
+- **ANOTHER VERB**
+  - [Something else](#21-something-else) · [And another](#22-and-another)
 
 ---
 
 ## Critical Rules
 
-<!-- List 3-8 rules that prevent common mistakes. Number them. -->
+<!-- 3–8 numbered rules that prevent common mistakes. -->
 
-1. **[Rule]** — [why it matters]
-2. **[Rule]** — [why it matters]
+1. **[Rule]** — [why it matters].
+2. **[Rule]** — [why it matters].
 
 ---
 
-## [Section 1]
+## 1.1 First Action
 
-<!-- Group by operation type (create, read, update, delete) or by sub-tool. -->
-
-### [Sub-operation]
+<!-- One H2 per discrete capability. Anchor must match the Contents link exactly. -->
 
 ```python
 # minimal working example
@@ -54,15 +69,21 @@ Naming convention: lowercase-kebab-case.md (e.g. pdf-tools.md, gws-cli.md)
 
 ---
 
-## [Section 2]
+## 1.2 Second Action
 
-<!-- Repeat section pattern as needed -->
+---
+
+## 2.1 Something Else
+
+---
+
+## 2.2 And Another
 
 ---
 
 ## Quick Reference
 
-<!-- One-liner cheatsheet table for the most common operations -->
+<!-- One-liner cheatsheet table. Optional. -->
 
 | Task | Code / Command |
 |------|----------------|

@@ -2,6 +2,27 @@
 
 Comprehensive API and command reference for Pillow (PIL), ImageMagick, and FFmpeg.
 
+## Contents
+
+- **PROCESS images (Python)** — `Pillow`
+  - [Supported formats](#11-supported-formats) · [Image modes](#12-image-modes) · [Image class — all methods](#13-image-class----all-methods-and-properties)
+  - [ImageDraw — shapes/text](#14-imagedraw) · [ImageFont — TTF/OTF](#15-imagefont) · [ImageFilter — blur/sharpen](#16-imagefilter)
+  - [ImageEnhance — brightness/contrast](#17-imageenhance) · [ImageOps — autocontrast/fit](#18-imageops) · [ImageChops — channel ops](#19-imagechops-channel-operations)
+  - [Other modules (Plugins, Sequence, Stat)](#110-other-modules)
+- **PROCESS images (CLI)** — `ImageMagick`
+  - [Core CLI tools (magick, identify, convert)](#21-core-cli-tools) · [Geometry syntax](#22-geometry-syntax) · [Resize filters](#23-resize-filters)
+  - [Format conversion](#24-format-conversion) · [Color operations](#25-color-operations) · [Drawing & text](#26-drawing-and-text)
+  - [Effects & filters](#27-effects-and-filters) · [Compositing](#28-compositing) · [Distortions](#29-distortions) · [Morphology](#210-morphology)
+  - [Montage & batch](#211-montage-and-batch-processing) · [Animation](#212-animation) · [Image comparison](#213-image-comparison)
+  - [PDF operations](#214-pdf-operations) · [Metadata (EXIF/IPTC/XMP)](#215-metadata) · [Misc operators](#216-miscellaneous-operators)
+- **PROCESS video / audio** — `ffmpeg`
+  - [Video codecs](#31-video-codecs) · [Audio codecs](#32-audio-codecs) · [Container formats](#33-container-formats) · [Rate control](#34-rate-control)
+  - [Video filters (-vf)](#35-video-filters--vf---filterv) · [Audio filters (-af)](#36-audio-filters--af---filtera)
+  - [Device capture](#37-device-capture) · [Subtitles](#38-subtitles) · [Image operations](#39-image-operations)
+  - [Advanced features (HW accel, streaming)](#310-advanced-features) · [ffprobe — inspect streams](#311-ffprobe)
+
+---
+
 # 1. Pillow (PIL) -- Python Image Manipulation
 
 ```python

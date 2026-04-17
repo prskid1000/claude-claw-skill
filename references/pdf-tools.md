@@ -2,6 +2,20 @@
 
 Comprehensive API reference for PyMuPDF (fitz), PyPDF2/pypdf, pdfplumber, and reportlab.
 
+## Contents
+
+- **Which tool?** — [Quick selection guide (capability matrix)](#quick-selection-guide)
+- **READ / EDIT / RENDER PDF** — `PyMuPDF (fitz)`
+  - [Text extraction, page rendering, search, annotate, redact, draw](#1-pymupdf-fitz----pdf-read--edit--render)
+- **MERGE / SPLIT / TRANSFORM PDF** — `PyPDF2` / `pypdf`
+  - [Merge, split, rotate, encrypt, bookmarks, forms](#2-pypdf2----pdf-merge--split--transform)
+- **EXTRACT tables / positional data** — `pdfplumber`
+  - [Table extraction with bounding boxes](#3-pdfplumber----pdf-data-extraction)
+- **CREATE PDF from scratch** — `reportlab`
+  - [Canvas, PLATYPUS, tables, fonts, charts, forms](#4-reportlab----pdf-generation)
+
+Examples: [examples/pdf-workflows.md](../examples/pdf-workflows.md) · Cross-tool pipelines (PDF → tables → Excel, etc.): [examples/data-pipelines.md](../examples/data-pipelines.md).
+
 ## 1. PyMuPDF (fitz) -- PDF Read / Edit / Render
 
 ```python

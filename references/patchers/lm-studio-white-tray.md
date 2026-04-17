@@ -4,20 +4,24 @@ On-demand patcher that replaces LM Studio's colored tray icon with a white-bars 
 
 ## Contents
 
-- [Critical Rules](#critical-rules)
-- [How It Works](#how-it-works)
-- [Usage](#usage)
-- [Customize Icon Design](#customize-icon-design)
-- [Troubleshooting](#troubleshooting)
+- **WHITEN LM Studio tray icon** — swap colored icon for a white-bars silhouette
+  - [How it works (what LM Studio reads on Windows)](#how-it-works)
+  - [Usage (apply / restore / status)](#usage)
+- **CUSTOMIZE the icon design**
+  - [Edit `BARS_64` + regenerate](#customize-icon-design)
+- **TROUBLESHOOT**
+  - [Critical rules (Windows-only, UAC, update behavior)](#critical-rules)
+  - [Symptom → fix table](#troubleshooting)
+  - [Quick-reference commands](#quick-reference)
 
 ---
 
 ## Critical Rules
 
 1. **Windows-only.** Hardcoded path `C:\Program Files\LM Studio\resources\icon.ico`; no macOS/Linux support.
-2. **Admin required for apply/restore.** Script self-elevates via UAC. Status and regenerate don't need it.
+2. **Admin required for apply/restore.** Script self-elevates via UAC. `status` doesn't need it.
 3. **Original backed up once.** `icon.ico` -> `icon.original.ico` on first apply. Never overwritten. `restore` copies the backup back over `icon.ico`.
-4. **Icon design lives in `make-white-ico.py`.** Edit the `BARS_64` constant, run `regenerate`, then `apply`.
+4. **Icon design lives in `BARS_64` inside the script itself.** Edit the constant, then re-run `apply` — the white `.ico` is rendered in-memory from `BARS_64` on every invocation.
 5. **No background watcher.** LM Studio updates revert the icon; manually re-run `apply` afterwards.
 
 ---
@@ -27,9 +31,9 @@ On-demand patcher that replaces LM Studio's colored tray icon with a white-bars 
 LM Studio's obfuscated main bundle (`resources/app/.webpack/main/index.js`) defines `trayIconPath()`. On `win32`, it returns a single hardcoded path — `path.join(process.resourcesPath, 'icon.ico')` — ignoring tray state (active / paused) and system theme. On macOS/Linux it uses the `trayIcon{,Active,Paused}{,Dark}Template.png` variants, but Windows never touches those PNGs. Only `icon.ico` matters.
 
 The patcher:
-1. Renders a multi-size `.ico` (16/20/24/32/40/48/64/128/256 px) of white horizontal bars on transparent background via `make-white-ico.py`.
-2. Hash-checks the installed `icon.ico` against the white version.
-3. On drift, backs up the original once, copies the white `.ico` over it.
+1. Renders a multi-size `.ico` (16/20/24/32/40/48/64/128/256 px) of white horizontal bars on transparent background, in-memory from the `BARS_64` constant.
+2. Hash-checks the installed `icon.ico` against the freshly-rendered white version.
+3. On drift, backs up the original once, writes the white `.ico` over it.
 
 ---
 
@@ -37,13 +41,13 @@ The patcher:
 
 ```bash
 # First-time or after an LM Studio update:
-python ~/.claude/skills/claude-claw/scripts/lm-studio-white-tray/lm-studio-white-tray.py apply
+python ~/.claude/skills/claude-claw/scripts/patchers/lm-studio-white-tray.py apply
 
 # Revert to LM Studio's original:
-python ~/.claude/skills/claude-claw/scripts/lm-studio-white-tray/lm-studio-white-tray.py restore
+python ~/.claude/skills/claude-claw/scripts/patchers/lm-studio-white-tray.py restore
 
 # Check current state (hashes, backup presence):
-python ~/.claude/skills/claude-claw/scripts/lm-studio-white-tray/lm-studio-white-tray.py status
+python ~/.claude/skills/claude-claw/scripts/patchers/lm-studio-white-tray.py status
 ```
 
 After `apply`, fully quit LM Studio from the tray (right-click -> Quit — not just close the window) and relaunch to see the new icon.
@@ -52,7 +56,7 @@ After `apply`, fully quit LM Studio from the tray (right-click -> Quit — not j
 
 ## Customize Icon Design
 
-Edit `BARS_64` at the top of `scripts/lm-studio-white-tray/make-white-ico.py`. Each tuple is `(y_center, x_start, x_end, thickness)` in a 64x64 coordinate grid. Bars have rounded caps automatically.
+Edit `BARS_64` near the top of `scripts/patchers/lm-studio-white-tray.py`. Each tuple is `(y_center, x_start, x_end, thickness)` in a 64x64 coordinate grid. Bars have rounded caps automatically.
 
 ```python
 BARS_64 = [
@@ -64,14 +68,13 @@ BARS_64 = [
 ]
 ```
 
-Then:
+Then re-push to LM Studio:
 
 ```bash
-python lm-studio-white-tray.py regenerate   # re-renders white-icon.ico
-python lm-studio-white-tray.py apply        # pushes to LM Studio (UAC)
+python ~/.claude/skills/claude-claw/scripts/patchers/lm-studio-white-tray.py apply
 ```
 
-You can also replace `white-icon.ico` directly with any valid multi-size `.ico` (transparent background recommended); `apply` uses whatever that file contains.
+`apply` re-renders from the current `BARS_64` every run, so there's no separate `regenerate` step.
 
 ---
 
@@ -93,4 +96,4 @@ You can also replace `white-icon.ico` directly with any valid multi-size `.ico` 
 | Apply white icon | `python lm-studio-white-tray.py apply` |
 | Revert to original | `python lm-studio-white-tray.py restore` |
 | Check state | `python lm-studio-white-tray.py status` |
-| Change bar layout | edit `BARS_64` -> `regenerate` -> `apply` |
+| Change bar layout | edit `BARS_64` in the script → `apply` |

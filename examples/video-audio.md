@@ -2,6 +2,16 @@
 
 Working code blocks for FFmpeg CLI.
 
+## Contents
+
+- **PROCESS video / audio** — `ffmpeg`
+  - [Video conversion (format, codec, container)](#video-conversion) · [Extraction & trimming](#extraction--trimming) · [Merging & concatenation](#merging--concatenation)
+  - [Thumbnails & frames](#thumbnails--frames) · [GIF & animated formats](#gif--animated-formats) · [Compression & scaling](#compression--scaling)
+  - [Overlays & effects](#overlays--effects) · [Speed & direction (timelapse, slow-mo, reverse)](#speed--direction) · [Audio operations](#audio-operations)
+  - [Advanced workflows (HW accel, HLS, denoise, capture, ffprobe)](#advanced)
+
+---
+
 ## Video Conversion
 
 ### Convert Video (MP4 to MKV, Codec Change)

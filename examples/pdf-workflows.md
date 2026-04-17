@@ -2,6 +2,15 @@
 
 Complete, runnable code blocks for PDF generation, editing, extraction, and manipulation.
 
+## Contents
+
+- **CREATE PDF from scratch** — `reportlab` → [Simple PDFs, styled reports (PLATYPUS), custom fonts, charts, barcodes, headers/footers, TOC, multi-column, AcroForm, encrypted](#reportlab--generate-pdfs-from-scratch)
+- **READ / EDIT / RENDER PDF** — `PyMuPDF (fitz)` → [Render pages, extract text (all modes), search, extract tables/images, annotate, redact, watermark, rotate, fill forms, insert text/drawings, bookmarks, HTML → PDF, metadata/encryption](#pymupdf-fitz--readeditmanipulate)
+- **MERGE / SPLIT / TRANSFORM PDF** — `PyPDF2` / `pypdf` → [Merge, watermark, encrypt/decrypt, extract text, bookmarks, fill forms](#pypdf2pypdf----mergesplittransform)
+- **EXTRACT tables / positional data** — `pdfplumber` → [Extract text with layout, tables, visual debugging, region extraction, positional search](#pdfplumber----extract-data)
+
+API reference: [references/pdf-tools.md](../references/pdf-tools.md) · Cross-tool pipelines (PDF → Excel, Markdown → PDF, etc.): [data-pipelines.md](data-pipelines.md).
+
 ## reportlab — Generate PDFs from Scratch
 
 ### Simple PDF (Canvas)

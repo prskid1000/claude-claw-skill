@@ -1,6 +1,16 @@
 # Email Workflows Examples
 
-Working code blocks for Python email composition and Gmail via `gws` CLI.
+End-to-end composition + send flows. MIME API details (constructors, headers, Content-ID rules) live in [email-reference.md](../references/email-reference.md); raw Gmail API commands live in [gws-cli.md — Gmail](../references/gws-cli.md#gmail).
+
+## Contents
+
+- **BUILD a MIME message** — `email.mime`
+  - [Plain, HTML-with-fallback, single/multiple attachments, inline images, reply threading](#python-email-composition-mime)
+- **SEND via Gmail** — `gws gmail`
+  - [Helpers (`+send` / `+reply` / `+forward` / `+triage`), search, read, raw-API send, drafts, attachments](#gmail-via-gws-cli)
+- **FULL pipeline** — generate report → MIME → send
+  - [Build Excel with openpyxl, attach, send via Gmail API](#full-workflow-generate-report-compose-email-send-with-attachment)
+- Other cross-tool pipelines (DB → Excel + PDF → Drive → email): see [data-pipelines.md](data-pipelines.md#full-pipeline-db-query-to-process-to-excel--pdf-to-upload-drive-to-email)
 
 ## Python Email Composition (MIME)
 
@@ -158,7 +168,7 @@ with open("/tmp/chart.png", "rb") as f:
 
 ## Gmail via `gws` CLI
 
-> **Windows:** See [skill.md § Windows Notes](../skill.md#windows-notes) for subprocess setup.
+> **Windows:** See [claude-md-block.md — Windows Subprocess Note](../references/patchers/claude-md-block.md#windows-subprocess-note) for `.cmd`-shim subprocess setup.
 >
 > **Tip:** For everyday sending / triage / replies, the `gws gmail +send`, `+triage`, `+reply`, `+reply-all`, `+forward` helpers are simpler than the raw API — no MIME plumbing required. Drop to the raw API (shown below) only when you need attachments, custom headers, or batch operations.
 

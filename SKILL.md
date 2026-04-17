@@ -19,6 +19,21 @@ python ~/.claude/skills/claude-claw/scripts/healthcheck.py
 
 `Source -> Transform (Python) -> Output (/tmp/) -> Deliver (gws)`
 
+## Decision-Tree List Format
+
+Every index / TOC in this skill (the File Map below, plus each reference's and example's Contents list) uses the same decision-tree shape. Apply it to any markdown file that indexes capability by user task.
+
+- Top level: `- **VERB …**` — the *user's intent* in bold caps (CREATE, READ, EDIT, CONVERT, PATCH, SEND, QUERY, …). New tools go under an existing verb when possible; add a new verb only for a genuinely new task category.
+- Second level: one option per line, ` — ` separator before the backticked package/binary.
+- Third level — choose one shape per node, don't mix:
+  - **Expanded** — `- Ref:` + `- Ex:` sub-bullets, one anchor per line (use for options with many subsections).
+  - **Compact** — a single line of `·`-separated anchor links (use for dense sub-capabilities where a full nested list would dominate the page).
+- Anchors: lowercase kebab-case, strip punctuation, spaces → hyphens. Link labels restate section purpose in 3–8 words — don't just repeat the heading.
+- Never force the tree onto code blocks, tables, or API detail — only onto index lists.
+- Broken anchors silently degrade retrieval; treat them as build-breaks.
+
+Copy [references/_TEMPLATE.md](references/_TEMPLATE.md) or [examples/_TEMPLATE.md](examples/_TEMPLATE.md) for a pre-filled shape.
+
 ## File Map
 
 - **CREATE a document**
@@ -128,10 +143,6 @@ python ~/.claude/skills/claude-claw/scripts/healthcheck.py
       - [Metadata frontmatter](examples/document-conversion.md#metadata)
       - [Lua filters](examples/document-conversion.md#filters)
       - [Slide deck creation](examples/document-conversion.md#slide-shows)
-      - [Slide titles](examples/document-conversion.md#slide-title)
-      - [Slides with images](examples/document-conversion.md#slide-with-image)
-      - [Code slides](examples/document-conversion.md#code-slide)
-      - [Two-column reveal.js slides](examples/document-conversion.md#two-column-slide-revealjs)
       - [EPUB books](examples/document-conversion.md#epub-creation)
       - [Advanced options](examples/document-conversion.md#advanced-options)
       - [Python integration (pypandoc)](examples/document-conversion.md#python-integration)

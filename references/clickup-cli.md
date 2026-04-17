@@ -2,7 +2,24 @@
 
 > Terminal tool for ClickUp tasks, sprints, comments, time tracking, and git integration.
 
-**Related:** [examples/clickup-workflows.md](../examples/clickup-workflows.md) | [setup.md](setup.md)
+**Related:** [examples/clickup-workflows.md](../examples/clickup-workflows.md) · install via [setup.md](setup.md#2-cli-tools)
+
+## Contents
+
+- **MANAGE tasks** — `clickup` CLI
+  - [Conventions (positional IDs, priorities, dates)](#conventions-important)
+  - [Setup & authentication](#setup)
+  - [Output flags (JSON, jq, templates)](#output-flags-most-commands)
+  - [Task management (view, create, edit, search, bulk)](#task-management)
+  - [Status management (transitions, list statuses)](#status-management)
+  - [Sprint management (current sprint, sprint view)](#sprint-management)
+  - [Comments (add, list, mention teammates)](#comments)
+  - [Time tracking (start, stop, log, list)](#time-tracking)
+  - [Custom fields (discover, set, clear)](#custom-fields)
+  - [Git integration (PR / branch / commit linking)](#git-integration)
+  - [Checklists, dependencies, tags](#checklists-dependencies-tags-on-tasks)
+  - [Workspace (spaces, lists, members)](#workspace)
+  - [Misc / less-used commands](#more)
 
 ## Conventions (important)
 

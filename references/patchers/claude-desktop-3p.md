@@ -2,6 +2,26 @@
 
 Script: `~/.claude/skills/claude-claw/scripts/patchers/claude-desktop-3p.py`
 
+## Contents
+
+- **TOGGLE Claude Desktop 3P mode** — unlock Cowork/Code tabs + point chat at local gateway
+  - [What it does (synthetic Pro org, stubbed /api responses)](#what-it-does)
+  - [Why it's needed (chat.ai gate vs 3P bypass)](#why-its-needed)
+  - [Requirements (Windows MSIX, HTTPS gateway, UAC)](#requirements)
+  - [Usage (status / enable / disable)](#usage)
+  - [Verifying it worked (main.log landmarks)](#verifying-it-worked)
+- **SCHEMA reference**
+  - [Registry schema (what gets written)](#registry-schema-what-gets-written)
+- **SURVIVE updates**
+  - [After Claude Desktop updates](#after-claude-desktop-updates)
+- **RECOVER when it stops working**
+  - [6-step diagnostic checklist](#recovery-when-it-stops-working)
+- **BACKGROUND**
+  - [Research notes — how this was discovered](#research-notes--how-this-was-discovered)
+  - [Limitations (Windows-only, provider coverage)](#limitations)
+
+---
+
 ## What It Does
 
 Activates Claude Desktop's built-in **Custom 3P** (third-party / BYOM)
@@ -102,7 +122,7 @@ set DEBUG=custom-3p:*,account:*,oauth:*
 ```
 (Already in `wrappers/claudedl.bat` — uncomment to enable.)
 
-## Registry Schema
+## Registry Schema (What Gets Written)
 
 All values are `REG_SZ` strings under both `HKCU\SOFTWARE\Policies\Claude` and
 `HKLM\SOFTWARE\Policies\Claude`. The registry path comes from

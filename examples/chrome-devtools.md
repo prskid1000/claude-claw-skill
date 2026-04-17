@@ -2,11 +2,12 @@
 
 ## Contents
 
-- [1. Launch Edge with User's Real Profile](#1-launch-edge-with-users-real-profile)
-- [2. Launch Edge with a Throwaway Profile](#2-launch-edge-with-a-throwaway-profile)
-- [3. Diagnose: Port Won't Open](#3-diagnose-port-wont-open)
+- **AUTOMATE browser** — Chrome DevTools MCP launch recipes
+  - [Launch Edge with user's real profile](#1-launch-edge-with-users-real-profile)
+  - [Launch Edge with a throwaway profile](#2-launch-edge-with-a-throwaway-profile)
+  - [Diagnose: port won't open](#3-diagnose-port-wont-open)
 
-> **API reference:** See [references/chrome-devtools.md](../references/chrome-devtools.md)
+> **API reference:** [references/chrome-devtools.md](../references/chrome-devtools.md) · install via [setup.md](../references/setup.md#4-mcp-servers)
 
 ---
 

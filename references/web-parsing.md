@@ -1,5 +1,13 @@
 # Web Parsing Reference (lxml + BeautifulSoup4)
 
+## Contents
+
+- **PARSE / QUERY XML** — `lxml`
+  - [ElementTree API, XPath, XSLT, validation, namespaces](#lxml)
+- **PARSE / QUERY HTML** — `BeautifulSoup4` (lenient) or `lxml.html` (fast)
+  - [BeautifulSoup — parsers, navigation, CSS selectors, modification](#beautifulsoup4)
+  - [lxml.html — DOM, links, forms, Cleaner, HTML diff](#lxml)
+
 ## lxml
 
 ### Installation

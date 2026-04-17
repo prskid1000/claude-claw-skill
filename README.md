@@ -8,9 +8,9 @@ A Claude Code skill that turns Claude into a productivity OS — a single librar
 
 | Folder | Contents | Total |
 |--------|----------|-------|
-| `references/` | API/CLI documentation for each tool | ~6,000 lines across 10 files |
+| `references/` | API/CLI documentation for each tool | ~6,000 lines across 10 files (+ 4 patcher refs) |
 | `examples/` | Copy-paste runnable workflows | ~5,000 lines across 9 files |
-| `scripts/` | Healthcheck + binary patcher | 2 files |
+| `scripts/` | Healthcheck + launch wrappers + patchers for third-party apps | healthcheck, 4 wrappers, 4 patchers |
 
 **Tools covered:** openpyxl · python-docx · python-pptx · PyMuPDF · PyPDF2 · pdfplumber · reportlab · Pillow · ImageMagick · FFmpeg · Pandoc · lxml · BeautifulSoup4 · gws (Google Workspace) · clickup · MIME/Gmail.
 
@@ -29,37 +29,32 @@ The skill auto-loads when Claude detects a relevant task (creating a document, s
 
 ## Optional: LSP-First Code Navigation + Auto-Load
 
-To enable LSP-first code navigation AND auto-load of the File Map on every conversation, add this block to your global `~/.claude/CLAUDE.md`:
+To auto-load the File Map and LSP-first code-navigation rules on every conversation, install the canonical block into your global `~/.claude/CLAUDE.md` via the markdown section patcher:
 
-```markdown
-**Before responding to ANY user request, ensure the claude-claw skill and its instructions are loaded into this conversation.**
-
-Check your context for both of the following:
-
-1. **`SKILL.md` content from the claude-claw skill** — if not visible in your context, load it by invoking: `Skill(skill: "claude-claw")`.
-2. **`~/.claude/skills/claude-claw/CLAUDE.md` content** — if not visible in your context, load it by calling: `Read(file_path: "~/.claude/skills/claude-claw/CLAUDE.md")`.
-
-Both must be loaded. If either is missing, load it FIRST before doing anything else — even for simple greetings. Invoking the skill does NOT automatically load the skill's `CLAUDE.md`; that is a separate file requiring a separate `Read` call.
-
-Once both are loaded, they stay in context for the rest of the session — you do not need to reload them.
+```bash
+python ~/.claude/skills/claude-claw/scripts/patchers/md-section-patcher.py apply \
+  --target ~/.claude/CLAUDE.md \
+  --section claude-claw \
+  --source ~/.claude/skills/claude-claw/references/patchers/claude-md-block.md
 ```
 
-The `Skill` step loads [SKILL.md](SKILL.md) (the File Map); the `Read` step loads this directory's [CLAUDE.md](CLAUDE.md) (LSP-First Navigation rules). Both files contain distinct content — invoking the skill does NOT auto-load its `CLAUDE.md`. See [references/setup.md](references/setup.md#claudemd-integration) for details.
+The block is wrapped in `<!-- claude-claw:begin -->` / `<!-- claude-claw:end -->` markers and prepended to the top of your file; re-runs are idempotent. See [references/setup.md](references/setup.md#claudemd-integration) and [references/patchers/md-section-patcher.md](references/patchers/md-section-patcher.md) for details.
 
 ## Structure
 
 ```
 claude-claw/
 ├── SKILL.md                    # File map index (auto-loaded into Claude's context)
-├── CLAUDE.md                   # Optional LSP-first instructions
 ├── README.md                   # This file
 ├── scripts/
 │   ├── healthcheck.py          # Verify all deps + auto-fix Windows LSP
+│   ├── _TEMPLATE.py            # Template for new scripts
 │   ├── patchers/               # Binary/config patchers for third-party apps
-│   │   ├── claude-patcher.js       # Claude Code binary patcher
-│   │   ├── claude-desktop-3p.py    # Claude Desktop 3P/BYOM toggle
-│   │   └── lm-studio-white-tray.py # LM Studio tray-icon whitener
-│   └── wrappers/               # Local-model launch wrappers (codel / claudel / ...)
+│   │   ├── claude-patcher.js       # Claude Code binary patcher (context/output)
+│   │   ├── claude-desktop-3p.py    # Claude Desktop 3P/BYOM registry toggle
+│   │   ├── lm-studio-white-tray.py # LM Studio tray-icon whitener
+│   │   └── md-section-patcher.py   # Idempotent markdown-section injector
+│   └── wrappers/               # Local-model launch wrappers (codel / claudel / claudedl / codexl)
 ├── references/
 │   ├── _TEMPLATE.md            # Template for new reference files
 │   ├── gws-cli.md              # Google Workspace CLI (Drive/Sheets/Docs/Slides/Gmail/Calendar)
@@ -74,7 +69,8 @@ claude-claw/
 │   ├── patchers/               # Per-patcher reference docs
 │   │   ├── claude-patcher.md       # Claude Code binary patcher
 │   │   ├── claude-desktop-3p.md    # Claude Desktop 3P registry toggle
-│   │   └── lm-studio-white-tray.md # LM Studio tray-icon whitener
+│   │   ├── lm-studio-white-tray.md # LM Studio tray-icon whitener
+│   │   └── md-section-patcher.md   # Idempotent markdown-section injector
 │   └── setup.md                # Installation guide
 └── examples/
     ├── _TEMPLATE.md            # Template for new example files

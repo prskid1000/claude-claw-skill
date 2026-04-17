@@ -6,6 +6,17 @@ Run the healthcheck to verify everything at once:
 python ~/.claude/skills/claude-claw/scripts/healthcheck.py
 ```
 
+## Contents
+
+- **SETUP / INSTALL** — canonical install reference
+  - [Python packages (openpyxl, pymupdf, reportlab, ...)](#1-python-packages)
+  - [CLI tools (gws, clickup, git, ffmpeg, pandoc, magick, node)](#2-cli-tools)
+  - [Google Workspace auth (OAuth, multi-account)](#3-google-workspace-gws-auth)
+  - [MCP servers (MySQL, Chrome DevTools, ClickUp)](#4-mcp-servers)
+  - [LSP plugins (Pyright, TypeScript, jdtls, Kotlin) + Windows fix](#5-lsp-plugins)
+  - [CLAUDE.md integration (md-section-patcher)](#claudemd-integration)
+  - [Notes & gotchas](#6-notes)
+
 ---
 
 ## 1. Python Packages

@@ -2,12 +2,15 @@
 
 ## Contents
 
-- [Critical Rules](#critical-rules)
-- [Edge — Default Profile](#edge--default-profile)
-- [Edge — Isolated Profile](#edge--isolated-profile)
-- [Chrome](#chrome)
-- [Verification](#verification)
-- [Quick Reference](#quick-reference)
+- **AUTOMATE browser** — Chrome DevTools MCP
+  - [Critical rules (debug port, `--user-data-dir` gotcha)](#critical-rules)
+  - [Edge — default profile (preserves cookies/logins)](#edge--default-profile)
+  - [Edge — isolated profile (no kill needed)](#edge--isolated-profile)
+  - [Chrome — same flags, different binary](#chrome)
+  - [Verification (`/json/version` check)](#verification)
+  - [Quick reference (kill / verify / MCP args)](#quick-reference)
+
+> Examples: [examples/chrome-devtools.md](../examples/chrome-devtools.md) · install via [setup.md](setup.md#4-mcp-servers)
 
 ---
 

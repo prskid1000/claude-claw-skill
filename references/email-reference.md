@@ -1,5 +1,15 @@
 # Email / MIME Composition + Gmail CLI Reference
 
+## Contents
+
+- **SEND email (Gmail CLI)** — `gws gmail +send` / `+reply` / `+forward`
+  - [Helper commands for send, triage, reply, forward](#gmail-cli-gws-gmail)
+  - Full raw API: [gws-cli.md — Gmail](gws-cli.md#gmail)
+- **BUILD MIME message** — Python `email.mime`
+  - [Critical rules (encoding, Content-ID, Gmail gotchas)](#critical-rules)
+  - [MIMEText, MIMEMultipart, attachments, inline images, headers, threading](#python-mime-emailmime)
+- Ex: [Working examples](../examples/email-workflows.md#python-email-composition-mime)
+
 ## CRITICAL RULES
 
 1. **For simple emails, use `gws gmail +send`** — don't build MIME manually unless you need attachments or inline images.

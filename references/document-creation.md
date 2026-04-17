@@ -2,6 +2,27 @@
 
 Comprehensive API reference for `openpyxl`, `python-docx`, and `python-pptx`.
 
+## Contents
+
+- **CREATE / EDIT Excel (.xlsx)** — `openpyxl`
+  - [Workbook & worksheet operations](#11-workbook--worksheet-operations) · [Cell read / write / iterate](#12-cell-operations) · [Fonts, borders, fills, alignment](#13-styling--formatting)
+  - [Conditional formatting rules](#14-conditional-formatting) · [Data validation dropdowns](#15-data-validation) · [Bar / line / pie / scatter charts](#16-charts)
+  - [Excel tables with built-in styles](#17-tables) · [Named ranges & defined names](#18-defined-names--named-ranges) · [Auto-filter & sorting](#19-auto-filter--sorting)
+  - [Embed images in cells](#110-images) · [Page setup, margins, print area](#111-page-setup--print) · [Worksheet protection & passwords](#112-worksheet-protection)
+  - [Freeze panes](#113-freeze-panes) · [Column width / row height](#114-column-width--row-height)
+- **CREATE / EDIT Word (.docx)** — `python-docx`
+  - [Open / save / create documents](#21-document-operations) · [Paragraphs & runs (text formatting)](#22-paragraphs--runs) · [Headings & numbered / bulleted lists](#23-headings--lists)
+  - [Table rows, cells, styling](#24-tables) · [Inline images](#25-images) · [Sections, margins, orientation](#26-sections--page-layout)
+  - [Headers & footers per section](#27-headers--footers) · [Page / column / section breaks](#28-breaks) · [Hyperlinks (run-level XML)](#29-hyperlinks)
+  - [Built-in & custom styles](#210-styles) · [Core document properties](#211-core-properties) · [Length unit helpers (Pt, Inches, Cm)](#212-length-units)
+- **CREATE / EDIT PowerPoint (.pptx)** — `python-pptx`
+  - [Presentation & slide creation](#31-presentation--slides) · [Shape geometry (rect / oval / line / connector)](#32-shapes) · [Text frame formatting](#33-text-frames--formatting)
+  - [Bar / line / pie charts in slides](#34-charts) · [Fill colors, gradients, line styles](#35-fill--line-formatting) · [Layout placeholders](#36-placeholders)
+  - [Slide background fill / image](#37-slide-background) · [Hyperlinks & click actions](#38-hyperlinks--click-actions) · [OLE objects, video / audio embed](#39-ole-embedding--media)
+  - [Core deck properties](#310-core-properties) · [Length unit helpers (Emu, Pt, Inches)](#311-length-units)
+
+Examples: [examples/office-documents.md](../examples/office-documents.md) · Cross-tool pipelines (CSV → Excel → Sheets, etc.): [examples/data-pipelines.md](../examples/data-pipelines.md).
+
 # 1. openpyxl (Excel .xlsx)
 
 ```python

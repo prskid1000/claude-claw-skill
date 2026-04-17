@@ -2,7 +2,23 @@
 
 > Task management, sprints, comments, time tracking, and git integration from the terminal.
 
-**Reference:** [references/clickup-cli.md](../references/clickup-cli.md)
+**Reference:** [references/clickup-cli.md](../references/clickup-cli.md) · install via [setup.md](../references/setup.md#2-cli-tools)
+
+## Contents
+
+- **MANAGE tasks** — `clickup` CLI workflows
+  - [Read a task](#read-a-task)
+  - [Search tasks](#search-tasks)
+  - [List tasks in a list](#list-tasks-in-a-list)
+  - [Create a task](#create-a-task)
+  - [Update task status](#update-task-status)
+  - [Sprint view](#sprint-view)
+  - [Comments](#comments)
+  - [Time tracking](#time-tracking)
+  - [Custom fields](#custom-fields)
+  - [Git integration (branch workflow)](#git-integration)
+  - [Workspace navigation](#workspace)
+  - [Development workflow pattern](#development-workflow-pattern)
 
 ## Read a Task
 

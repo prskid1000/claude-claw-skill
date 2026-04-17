@@ -2,6 +2,32 @@
 
 Complete command reference for the `gws` CLI tool (version **0.16.0**). Covers Drive, Sheets, Docs, Slides, Gmail, Calendar, and Tasks.
 
+## Contents
+
+- **READ FIRST**
+  - [Critical rules — params vs JSON, positional args, per-service gotchas](#critical-rules-read-first--violations-cause-errors)
+  - [General command syntax + Windows/Python subprocess notes](#general-syntax)
+  - [Global CLI flags (`--params`, `--json`, `--format`, `--upload`, ...)](#global-cli-flags)
+  - [Ergonomic `+helper` commands (`+send`, `+triage`, `+reply`, `+write`, `+append`, ...)](#ergonomic-helper-commands)
+  - [Auth — login, status, logout, scope picker, multi-account](#auth)
+- **MANAGE Drive files** — `gws drive`
+  - [Files — list, get, create, update, delete, copy, export](#drive)
+- **READ / WRITE Sheets** — `gws sheets`
+  - [Spreadsheets + values (get / update / append / clear / batch)](#sheets)
+- **EDIT Docs** — `gws docs`
+  - [Documents — create, get (tabs!), batchUpdate (insertText / styles / tables)](#docs)
+- **EDIT Slides** — `gws slides`
+  - [Presentations + pages — create, batchUpdate, thumbnails](#slides)
+- **SEND / READ Gmail** — `gws gmail users ...`
+  - [Messages, drafts, labels, threads, history, search operators](#gmail)
+- **SCHEDULE Calendar** — `gws calendar`
+  - [Events, calendarList, settings, freebusy](#calendar)
+- **TRACK Tasks** — `gws tasks`
+  - [Tasklists, tasks (insert / complete / move / clear)](#tasks)
+- **REFERENCE tables**
+  - [Common MIME types (Google-native, export, upload)](#common-mime-types)
+  - [Sharing patterns (public, user, ownership transfer)](#sharing-patterns)
+
 ## CRITICAL RULES (READ FIRST — VIOLATIONS CAUSE ERRORS)
 
 ### Rule 0: Prefer Helper Commands When Possible

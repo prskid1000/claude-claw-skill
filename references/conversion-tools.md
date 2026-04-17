@@ -1,5 +1,19 @@
 # Pandoc Conversion Reference
 
+## Contents
+
+- **CONVERT format (Any ↔ Any)** — `pandoc`
+  - [Command syntax & basics](#command-syntax) · [Input formats (~45)](#input-formats-45) · [Output formats (~60+)](#output-formats-60)
+  - [Custom templates](#templates) · [Reference docs (.docx / .pptx style)](#reference-documents)
+  - [Auto-generate table of contents](#table-of-contents) · [Bibliography & citations (CSL, BibTeX)](#bibliography--citations)
+  - [Math rendering (KaTeX, MathJax)](#math-rendering) · [Code syntax highlighting](#syntax-highlighting)
+  - [Lua filters / pandoc-citeproc](#filters) · [PDF engines (xelatex, weasyprint, etc.)](#pdf-engines)
+  - [Slide shows (reveal.js, beamer, pptx)](#slide-shows) · [EPUB creation](#epub-creation)
+  - [Key CLI flags](#key-cli-flags) · [Markdown extensions system](#extensions-system)
+  - [Custom readers / writers (Lua)](#custom-readers--writers) · [Metadata blocks](#metadata) · [Include files](#include-files) · [Defaults YAML files](#defaults-files)
+
+---
+
 ## Command Syntax
 
 ```

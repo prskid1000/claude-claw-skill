@@ -1,6 +1,13 @@
 # Google Workspace — Working Examples
 
-Complete, runnable code blocks for Google Docs, Sheets, Slides, Gmail, and Calendar via `gws` CLI.
+End-to-end workflows using the `gws` CLI. CLI syntax (flags, params, helpers) lives in [gws-cli.md](../references/gws-cli.md) — this file only shows runnable pipelines.
+
+## Contents
+
+- **CREATE + POPULATE a Google Doc** — `gws docs`
+  - [Headings, paragraphs, styled sections via batchUpdate (chunked, Windows-safe)](#google-docs-gws-cli)
+- **SEND email workflows** — see [email-workflows.md](email-workflows.md#gmail-via-gws-cli)
+- **CROSS-TOOL pipelines** (DB → Excel → Drive → Gmail, Sheets round-trip, etc.) — see [data-pipelines.md](data-pipelines.md)
 
 ## Google Docs (gws CLI)
 

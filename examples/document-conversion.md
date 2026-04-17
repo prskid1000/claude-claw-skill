@@ -2,6 +2,19 @@
 
 Working code blocks for document conversion with pandoc CLI and Python integration.
 
+## Contents
+
+- **CONVERT format (Any ↔ Any)** — `pandoc`
+  - [Basic conversions (md ↔ docx ↔ pdf ↔ html ↔ pptx)](#basic-conversions) · [Table of contents](#table-of-contents)
+  - [Custom styling (CSS, templates, reference docs)](#custom-styling) · [Bibliography & citations](#bibliography-and-citations) · [Math equations](#math-support)
+  - [Multi-file input concatenation](#multi-file-input) · [Metadata frontmatter](#metadata) · [Lua filters](#filters)
+  - [Slide decks (reveal.js, beamer, pptx)](#slide-shows) · [EPUB books](#epub-creation)
+  - [Advanced options](#advanced-options) · [Python integration (pypandoc / subprocess)](#python-integration)
+- **CONVERT to PDF without LaTeX**
+  - [PyMuPDF as Pandoc alternative (fitz.Story)](#pymupdf-as-pdf-alternative-no-latex-required)
+
+---
+
 ## Basic Conversions
 
 ### Markdown to Word (.docx)
