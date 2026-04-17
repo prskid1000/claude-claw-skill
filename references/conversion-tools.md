@@ -1,16 +1,32 @@
 # Pandoc Conversion Reference
 
+> **TL;DR: use `claw convert <verb>` for common tasks.** See [references/claw/convert.md](claw/convert.md). This reference documents `pandoc`'s own CLI surface for escape-hatch / advanced workflows not covered by `claw convert` — custom templates, Lua filters, defaults YAML, citation pipelines, custom readers/writers, and the full format / extension / PDF-engine matrix.
+
 ## Contents
 
 - **CONVERT format (Any ↔ Any)** — `pandoc`
-  - [Command syntax & basics](#command-syntax) · [Input formats (~45)](#input-formats-45) · [Output formats (~60+)](#output-formats-60)
-  - [Custom templates](#templates) · [Reference docs (.docx / .pptx style)](#reference-documents)
-  - [Auto-generate table of contents](#table-of-contents) · [Bibliography & citations (CSL, BibTeX)](#bibliography--citations)
-  - [Math rendering (KaTeX, MathJax)](#math-rendering) · [Code syntax highlighting](#syntax-highlighting)
-  - [Lua filters / pandoc-citeproc](#filters) · [PDF engines (xelatex, weasyprint, etc.)](#pdf-engines)
-  - [Slide shows (reveal.js, beamer, pptx)](#slide-shows) · [EPUB creation](#epub-creation)
-  - [Key CLI flags](#key-cli-flags) · [Markdown extensions system](#extensions-system)
-  - [Custom readers / writers (Lua)](#custom-readers--writers) · [Metadata blocks](#metadata) · [Include files](#include-files) · [Defaults YAML files](#defaults-files)
+  - [Command syntax](#command-syntax) *(covered by `claw convert`)*
+  - [Input formats (~45)](#input-formats-45) · [Output formats (~60+)](#output-formats-60)
+  - [Markdown extensions system](#extensions-system) *(partial coverage via `claw convert --extensions`)*
+  - [Key CLI flags](#key-cli-flags)
+- **STYLE the output** — templates, reference docs, defaults
+  - [Custom Pandoc templates](#templates)
+  - [Reference docs (.docx / .pptx style)](#reference-documents) *(basic use covered by `claw convert --reference`)*
+  - [Defaults YAML files](#defaults-files)
+  - [Metadata blocks](#metadata) · [Include files](#include-files)
+- **BUILD long-form docs** — TOC, citations, math, code
+  - [Auto-generate table of contents](#table-of-contents) *(covered by `claw convert --toc`)*
+  - [Bibliography & citations (CSL, BibTeX)](#bibliography--citations)
+  - [Math rendering (KaTeX, MathJax)](#math-rendering)
+  - [Syntax highlighting](#syntax-highlighting)
+- **OUTPUT targets**
+  - [PDF engines](#pdf-engines) *(default choice covered by `claw convert`)*
+  - [Slide shows (reveal.js, beamer, pptx)](#slide-shows) *(covered by `claw convert slides`)*
+  - [EPUB creation](#epub-creation) *(covered by `claw convert book`)*
+- **EXTEND pandoc** — filters, custom readers/writers
+  - [Lua filters / pandoc-crossref](#filters)
+  - [Custom readers / writers (Lua)](#custom-readers--writers)
+- **Escape-hatch recipes** — [defaults pipelines, Lua filters, crossref+citeproc order, custom writers](#escape-hatch-recipes)
 
 ---
 
@@ -21,8 +37,6 @@ pandoc [OPTIONS] [INPUT-FILES]
 pandoc input.md -o output.pdf
 pandoc -f FORMAT -t FORMAT -o OUTPUT INPUT
 ```
-
----
 
 ## Input Formats (~45)
 
@@ -71,12 +85,9 @@ Specify with `-f FORMAT` or `--from FORMAT`.
 | RIS | `ris` | Research Info Systems |
 | EndNote XML | `endnotexml` | EndNote XML bibliography |
 | BITS | `bits` | BITS (Book Interchange Tag Suite) |
-| CslJson | `csljson` | Citation Style Language JSON |
 | fb2 | `fb2` | FictionBook2 e-book |
 | ipynb | `ipynb` | Jupyter notebook |
 | t2t | `t2t` | txt2tags |
-
----
 
 ## Output Formats (~60+)
 
@@ -123,9 +134,7 @@ Specify with `-t FORMAT` or `--to FORMAT`. Extension auto-detection works with `
 | Textile | `textile` | .textile |
 | DocBook5 | `docbook` / `docbook5` | .xml |
 | DocBook4 | `docbook4` | .xml |
-| JATS (archiving) | `jats` / `jats_archiving` | .xml |
-| JATS (articleauthoring) | `jats_articleauthoring` | .xml |
-| JATS (publishing) | `jats_publishing` | .xml |
+| JATS variants | `jats_archiving` / `jats_articleauthoring` / `jats_publishing` | .xml |
 | TEI | `tei` | .xml |
 | OPML | `opml` | .opml |
 | Haddock | `haddock` | .hs |
@@ -136,22 +145,20 @@ Specify with `-t FORMAT` or `--to FORMAT`. Extension auto-detection works with `
 | ICML | `icml` | .icml (InDesign) |
 | FB2 | `fb2` | .fb2 |
 | ipynb | `ipynb` | .ipynb |
-| BibTeX | `bibtex` | .bib |
-| BibLaTeX | `biblatex` | .bib |
-| CSL JSON | `csljson` | .json |
-| CSL YAML | `cslyaml` | .yaml |
+| BibTeX / BibLaTeX | `bibtex` / `biblatex` | .bib |
+| CSL JSON / YAML | `csljson` / `cslyaml` | .json / .yaml |
 
 ---
 
 ## Templates
 
-### Use a template
 ```
 pandoc --template=mytemplate.tex -o output.pdf input.md
 pandoc --print-default-template=html > default.html
 ```
 
 ### Template syntax
+
 | Syntax | Purpose |
 |--------|---------|
 | `$variable$` | Insert variable value |
@@ -163,21 +170,19 @@ pandoc --print-default-template=html > default.html
 | `$variable/uppercase$` | Pipe function (uppercase) |
 | `$variable/lowercase$` | Pipe function (lowercase) |
 | `$variable/pairs$` | Iterate key-value pairs |
-| `$variable/first$` | First item of list |
-| `$variable/last$` | Last item of list |
-| `$variable/rest$` | All but first |
-| `$variable/allbutlast$` | All but last |
+| `$variable/first$` · `$variable/last$` · `$variable/rest$` · `$variable/allbutlast$` | List slicers |
 | `$variable/length$` | Length of list |
 | `$~` / `~$` | Strip whitespace (left/right) |
 
-### Template variables (common)
-`title`, `author`, `date`, `lang`, `dir`, `header-includes`, `toc`, `toc-title`, `body`, `include-before`, `include-after`, `highlighting-css`, `css`, `math`, `documentclass`, `classoption`, `geometry`, `fontsize`, `mainfont`, `monofont`
+### Common template variables
+
+`title`, `author`, `date`, `lang`, `dir`, `header-includes`, `toc`, `toc-title`, `body`, `include-before`, `include-after`, `highlighting-css`, `css`, `math`, `documentclass`, `classoption`, `geometry`, `fontsize`, `mainfont`, `monofont`.
 
 ---
 
 ## Reference Documents
 
-Use a styled document as template for formatting:
+Use a styled document as template for formatting (basic use covered by `claw convert --reference`):
 
 ```
 pandoc --reference-doc=template.docx -o output.docx input.md
@@ -206,11 +211,6 @@ pandoc -o custom-reference.pptx --print-default-data-file reference.pptx
 
 ## Bibliography / Citations
 
-```
-pandoc --citeproc --bibliography=refs.bib -o output.pdf input.md
-pandoc --citeproc --csl=ieee.csl --bibliography=refs.bib input.md -o out.pdf
-```
-
 | Flag | Purpose |
 |------|---------|
 | `--citeproc` | Process citations (replaces pandoc-citeproc filter) |
@@ -220,7 +220,12 @@ pandoc --citeproc --csl=ieee.csl --bibliography=refs.bib input.md -o out.pdf
 | `--natbib` | Use natbib for LaTeX output (instead of citeproc) |
 | `--biblatex` | Use biblatex for LaTeX output |
 
-Cite in Markdown: `[@key]`, `[@key, p. 10]`, `[-@key]` (suppress author), `@key` (in-text)
+Cite in Markdown: `[@key]`, `[@key, p. 10]`, `[-@key]` (suppress author), `@key` (in-text).
+
+Example:
+```
+pandoc --citeproc --csl=ieee.csl --bibliography=refs.bib input.md -o out.pdf
+```
 
 ---
 
@@ -246,8 +251,7 @@ pandoc --print-highlight-style=pygments > my-style.theme
 pandoc --highlight-style=my-style.theme input.md -o output.html
 ```
 
-### Built-in styles
-`pygments` (default), `kate`, `breezedark`, `espresso`, `haddock`, `monochrome`, `tango`, `zenburn`
+Built-in styles: `pygments` (default), `kate`, `breezedark`, `espresso`, `haddock`, `monochrome`, `tango`, `zenburn`.
 
 | Flag | Purpose |
 |------|---------|
@@ -271,13 +275,15 @@ pandoc --filter=pandoc-crossref input.md -o output.pdf
 ```
 
 ### pandoc-crossref
-Cross-referencing for figures, tables, equations, sections:
+
+Cross-referencing for figures, tables, equations, sections. **Always place `--filter pandoc-crossref` BEFORE `--citeproc`** — filter execution is left-to-right and crossref must run first.
+
 ```
 pandoc --filter pandoc-crossref --citeproc input.md -o output.pdf
 ```
-Always place `--filter pandoc-crossref` BEFORE `--citeproc`.
 
 ### Filter execution order
+
 Filters run left-to-right in command-line order. Lua filters and JSON filters can be intermixed.
 
 ---
@@ -311,28 +317,23 @@ pandoc --pdf-engine=xelatex --pdf-engine-opt=-shell-escape input.md -o out.pdf
 ## Slide Shows
 
 ### Reveal.js
+Themes: `beige`, `black`, `blood`, `league`, `moon`, `night`, `serif`, `simple`, `sky`, `solarized`, `white`.
+
 ```
-pandoc -t revealjs -s -o slides.html input.md
-pandoc -t revealjs -s -V revealjs-url=https://unpkg.com/reveal.js/ -o slides.html input.md
 pandoc -t revealjs -s -V theme=moon -o slides.html input.md
 ```
-Themes: `beige`, `black`, `blood`, `league`, `moon`, `night`, `serif`, `simple`, `sky`, `solarized`, `white`
 
 ### Beamer (LaTeX PDF slides)
+Themes include `default`, `AnnArbor`, `Berlin`, `Copenhagen`, `Darmstadt`, `Frankfurt`, `Madrid`, `Montpellier`, `Singapore`, `Warsaw`, etc.
+
 ```
-pandoc -t beamer -o slides.pdf input.md
 pandoc -t beamer -V theme=Madrid -V colortheme=dolphin -o slides.pdf input.md
 ```
-Themes: `default`, `AnnArbor`, `Berlin`, `Copenhagen`, `Darmstadt`, `Frankfurt`, `Madrid`, `Montpellier`, `Singapore`, `Warsaw`, etc.
 
-### PowerPoint
+### PowerPoint / Slidy / DZSlides / S5
+
 ```
-pandoc -o slides.pptx input.md
 pandoc --reference-doc=template.pptx -o slides.pptx input.md
-```
-
-### Slidy / DZSlides / S5
-```
 pandoc -t slidy -s -o slides.html input.md
 pandoc -t dzslides -s -o slides.html input.md
 pandoc -t s5 -s -o slides.html input.md
@@ -343,11 +344,6 @@ Slide separation: `---` (horizontal rule) or heading level set by `--slide-level
 ---
 
 ## EPUB Creation
-
-```
-pandoc -o book.epub input.md
-pandoc --epub-cover-image=cover.jpg --epub-metadata=metadata.xml -o book.epub input.md
-```
 
 | Flag | Purpose |
 |------|---------|
@@ -375,28 +371,26 @@ pandoc --epub-cover-image=cover.jpg --epub-metadata=metadata.xml -o book.epub in
 | `--resource-path=DIRS` | Search paths for resources (separated by `:` or `;`) |
 | `--data-dir=DIR` | Custom data directory |
 | `--defaults=FILE` | YAML defaults file |
-| `--verbose` | Verbose output |
-| `--quiet` | Suppress warnings |
+| `--verbose` · `--quiet` · `--trace` | Logging |
 | `--fail-if-warnings` | Exit with error on warnings |
 | `--log=FILE` | Write JSON log |
-| `--list-input-formats` | List all input formats |
-| `--list-output-formats` | List all output formats |
-| `--list-extensions[=FORMAT]` | List extensions for format |
+| `--list-input-formats` · `--list-output-formats` · `--list-extensions[=FORMAT]` | Capability enumeration |
 | `--strip-comments` | Strip HTML comments |
 | `--ascii` | ASCII-only output |
-| `--trace` | Debug: trace document transformations |
 
 ---
 
 ## Extensions System
 
-Enable/disable per format:
+Enable/disable per format with `+ext` / `-ext`:
+
 ```
 pandoc -f markdown+hard_line_breaks-smart -o output.html input.md
 pandoc -f gfm+footnotes input.md -o output.html
 ```
 
 ### Key extensions
+
 | Extension | Default on | Purpose |
 |-----------|-----------|---------|
 | `smart` | markdown | Typographic quotes, dashes, ellipses |
@@ -415,24 +409,21 @@ pandoc -f gfm+footnotes input.md -o output.html
 | `definition_lists` | markdown | Definition lists |
 | `task_lists` | gfm | `- [x]` checkboxes |
 | `strikeout` | markdown, gfm | `~~text~~` |
-| `superscript` | markdown | `^text^` |
-| `subscript` | markdown | `~text~` |
+| `superscript` · `subscript` | markdown | `^text^` / `~text~` |
 | `tex_math_dollars` | markdown | `$...$` and `$$...$$` |
 | `raw_html` | markdown, gfm | Pass through raw HTML |
 | `raw_tex` | markdown | Pass through raw LaTeX |
 | `hard_line_breaks` | (off) | Treat newlines as `<br>` |
 | `emoji` | gfm | `:emoji:` shortcodes |
 | `implicit_figures` | markdown | Solo image in paragraph becomes figure |
-| `link_attributes` | markdown | `[text](url){.class}` |
-| `header_attributes` | markdown | `# Heading {#id .class}` |
+| `link_attributes` · `header_attributes` | markdown | `{.class}` / `{#id .class}` |
 | `fenced_divs` | markdown | `:::` div blocks |
 | `bracketed_spans` | markdown | `[text]{.class}` |
-| `native_divs` | markdown | `<div>` becomes Div |
-| `native_spans` | markdown | `<span>` becomes Span |
+| `native_divs` · `native_spans` | markdown | `<div>` / `<span>` passthrough |
 | `abbreviations` | (off) | `*[abbr]: expansion` |
 | `lists_without_preceding_blankline` | (off) | Lists without blank line before |
 
-List all extensions: `pandoc --list-extensions=markdown`
+List all extensions: `pandoc --list-extensions=markdown`.
 
 ---
 
@@ -501,6 +492,7 @@ Repeat flags to include multiple files (inserted in order).
 ## Defaults Files
 
 YAML file combining all CLI options:
+
 ```yaml
 # defaults.yaml
 from: markdown
@@ -526,4 +518,63 @@ bibliography: refs.bib
 csl: ieee.csl
 ```
 
-Invoke: `pandoc --defaults=defaults.yaml input.md`
+Invoke: `pandoc --defaults=defaults.yaml input.md`.
+
+---
+
+## Escape-hatch recipes
+
+### 1. Filter order that actually works (crossref → citeproc)
+
+`--citeproc` and `pandoc-crossref` trade blows if sequenced wrong. Crossref must renumber figures/tables/equations *before* citeproc rewrites bracketed `[@key]` tokens:
+
+```
+pandoc --filter pandoc-crossref --citeproc \
+  --bibliography=refs.bib --csl=ieee.csl \
+  paper.md -o paper.pdf
+```
+
+Fails subtly if you reverse them — figure references become `[?]`.
+
+### 2. Lua filter: demote all H1s, promote code blocks to figures
+
+```lua
+-- demote-promote.lua
+function Header(h)
+  h.level = h.level + 1
+  return h
+end
+function CodeBlock(cb)
+  return pandoc.Figure(cb, { caption = pandoc.Caption(pandoc.Plain "Listing") })
+end
+```
+
+Run: `pandoc --lua-filter=demote-promote.lua in.md -o out.html`.
+
+### 3. Defaults YAML + shared `header-includes`
+
+For a "house style" pipeline you reuse across many documents:
+
+```yaml
+# house.yaml
+standalone: true
+pdf-engine: xelatex
+variables: { mainfont: "Inter", monofont: "JetBrains Mono", geometry: "margin=1in" }
+include-in-header:
+  - header.tex
+highlight-style: tango
+```
+
+`pandoc --defaults=house.yaml --metadata-file=meta.yaml paper.md -o paper.pdf`.
+
+### 4. Sandbox mode for untrusted input
+
+Disable reading/writing arbitrary files, disable shell escape, limit tree depth:
+
+```
+pandoc --sandbox --no-network --pdf-engine=tectonic untrusted.md -o out.pdf
+```
+
+### 5. Custom Lua writer for CRM-style output
+
+When no output format ships what you need (e.g. custom XML for a CMS), write a minimal `Writer(doc, opts)` — the skeleton above is already enough to emit plain concatenated text, which you then wrap in the destination's tag set. No rebuild required; invoke with `-t your-writer.lua`.

@@ -1,18 +1,22 @@
 # PDF Tools Reference
 
-Comprehensive API reference for PyMuPDF (fitz), PyPDF2/pypdf, pdfplumber, and reportlab.
+> **TL;DR: use `claw pdf <verb>` for common tasks.** See [references/claw/pdf.md](claw/pdf.md). This reference documents the Python library APIs (`PyMuPDF`, `PyPDF2`/`pypdf`, `pdfplumber`, `reportlab`) for escape-hatch / advanced workflows not covered by `claw pdf` — custom `reportlab.Canvas` layouts, bespoke annotation stacks, fine-grained pdfplumber table tuning, `TextPage` reuse, OCR integration, XMP metadata, layer / OCG authoring.
 
 ## Contents
 
-- **Which tool?** — [Quick selection guide (capability matrix)](#quick-selection-guide)
-- **READ / EDIT / RENDER PDF** — `PyMuPDF (fitz)`
-  - [Text extraction, page rendering, search, annotate, redact, draw](#1-pymupdf-fitz----pdf-read--edit--render)
-- **MERGE / SPLIT / TRANSFORM PDF** — `PyPDF2` / `pypdf`
-  - [Merge, split, rotate, encrypt, bookmarks, forms](#2-pypdf2----pdf-merge--split--transform)
-- **EXTRACT tables / positional data** — `pdfplumber`
-  - [Table extraction with bounding boxes](#3-pdfplumber----pdf-data-extraction)
-- **CREATE PDF from scratch** — `reportlab`
-  - [Canvas, PLATYPUS, tables, fonts, charts, forms](#4-reportlab----pdf-generation)
+- **Which tool?** — [Quick selection guide (capability matrix)](#quick-selection-guide) *(keep — decision-guide content `claw` does not replace)*
+- **READ text / images / tables** *(common cases covered by `claw pdf extract-text/extract-tables/extract-images`)*
+  - [PyMuPDF (fitz): extraction modes, TextPage reuse, search, image extract, table find](#1-pymupdf-fitz----pdf-read--edit--render)
+  - [pdfplumber: positional data, crop, within_bbox, table tuning](#3-pdfplumber----pdf-data-extraction)
+- **RENDER pages to images** — PyMuPDF `get_pixmap` *(covered by `claw pdf render`)*
+- **EDIT (annotate / redact / draw / watermark)** — PyMuPDF *(`claw pdf watermark/stamp/redact` covers the common cases; annotation-stack authoring stays here)*
+- **MERGE / SPLIT / ROTATE / ENCRYPT / FORMS** *(covered by `claw pdf merge/split/rotate/encrypt/form-fill`)*
+  - [PyMuPDF merge/split, encryption, TOC, links](#19-merge--split)
+  - [PyPDF2 core ops, transforms, bookmarks, annotations, forms](#2-pypdf2----pdf-merge--split--transform)
+- **CREATE PDF from scratch** — `reportlab` *(simple HTML/MD → PDF covered by `claw convert` and `claw pdf from-html/from-md`; `Canvas` + PLATYPUS stay here)*
+  - [Canvas drawing, PLATYPUS flowables, fonts, charts, barcodes, AcroForms](#4-reportlab----pdf-generation)
+- **OCR scanned PDFs** — PyMuPDF + Tesseract *(covered by `claw pdf ocr`)*
+- **Escape-hatch recipes** — [custom Canvas templates, per-annotation replies, pdfplumber tuning, AcroForm auth, Story HTML→PDF, CID fonts](#escape-hatch-recipes)
 
 Examples: [examples/pdf-workflows.md](../examples/pdf-workflows.md) · Cross-tool pipelines (PDF → tables → Excel, etc.): [examples/data-pipelines.md](../examples/data-pipelines.md).
 
@@ -448,49 +452,18 @@ doc.insert_pdf(
     final=1,                       # 1 = last insert call (optimizes)
 )
 
-# Split: save individual pages
-for i in range(doc.page_count):
-    new_doc = fitz.open()
-    new_doc.insert_pdf(doc, from_page=i, to_page=i)
-    new_doc.save(f"page_{i}.pdf")
-    new_doc.close()
+# Split: open new empty doc, insert_pdf single page, save (covered by `claw pdf split`)
 ```
 
 ---
 
 ### 1.10 Watermarks & Overlays
 
-#### Show PDF page (overlay)
+> Use `claw pdf watermark` / `claw pdf stamp` for the common cases. Three escape-hatch APIs:
 
-```python
-page.show_pdf_page(
-    rect,                          # target rectangle on this page
-    src_doc,                       # source document
-    pno=0,                         # source page number
-    keep_proportion=True,
-    overlay=True,                  # True=foreground, False=background
-    oc=0,                          # optional content group xref
-    rotation=0,
-    clip=None,                     # clip source page
-)
-```
-
-#### Shape-based watermark
-
-```python
-shape = page.new_shape()
-shape.insert_text(fitz.Point(200, 400), "DRAFT", fontsize=60, fontname="helv", color=(0.8, 0, 0), rotate=45)
-shape.finish(color=(0.8, 0, 0), fill=None, width=1, opacity=0.3)
-shape.commit(overlay=True)
-```
-
-#### TextWriter watermark
-
-```python
-tw = fitz.TextWriter(page.rect)
-tw.append(fitz.Point(100, 300), "CONFIDENTIAL", fontsize=50, font=fitz.Font("helv"))
-tw.write_text(page, opacity=0.3, overlay=True, color=(1, 0, 0))
-```
+- **`page.show_pdf_page(rect, src_doc, pno=0, keep_proportion=True, overlay=True, oc=0, rotation=0, clip=None)`** — overlay any page from any source PDF (best for image stamps).
+- **Shape-based** — `page.new_shape()` → `insert_text(point, text, fontsize, color, rotate)` → `finish(color, fill, width, opacity)` → `commit(overlay=True)`.
+- **TextWriter** — `fitz.TextWriter(page.rect)` → `append(point, text, fontsize, font)` → `write_text(page, opacity, overlay, color)` — most precise control over fonts and position.
 
 ---
 
@@ -1037,24 +1010,14 @@ from PyPDF2.annotations import (
     Text, FreeText, Line, PolyLine, Polygon, Rectangle, Circle,
     Highlight, Underline, Squiggly, StrikeOut, Stamp, Ink, Link,
 )
-
-# Create annotations
-annot = Highlight(rect=(x1,y1,x2,y2), quad_points=None)
-annot = Text(rect=(x1,y1,x2,y2), text="note", open=True)
-annot = FreeText(rect=(x1,y1,x2,y2), text="text", font="Helvetica", font_size="12pt", font_color="000000", border_color="000000", background_color="ffffff")
-annot = Line(p1=(x1,y1), p2=(x2,y2))
-annot = PolyLine(vertices=[(x1,y1),(x2,y2),(x3,y3)])
-annot = Polygon(vertices=[(x1,y1),(x2,y2),(x3,y3)])
-annot = Rectangle(rect=(x1,y1,x2,y2), interiour_color="ff0000")
-annot = Circle(rect=(x1,y1,x2,y2), interiour_color="00ff00")
-annot = Underline(rect=(x1,y1,x2,y2))
-annot = Squiggly(rect=(x1,y1,x2,y2))
-annot = StrikeOut(rect=(x1,y1,x2,y2))
-annot = Stamp(rect=(x1,y1,x2,y2), name="Approved")
-annot = Ink(paths=[[(x1,y1),(x2,y2),(x3,y3)]], color="ff0000")
-annot = Link(rect=(x1,y1,x2,y2), url="https://example.com")
-annot = Link(rect=(x1,y1,x2,y2), target_page_index=3)
-
+# Each takes rect + class-specific kwargs. Examples:
+#   Highlight(rect=(x1,y1,x2,y2), quad_points=None)
+#   FreeText(rect=..., text=..., font="Helvetica", font_size="12pt", font_color="000000",
+#            border_color="000000", background_color="ffffff")
+#   Stamp(rect=..., name="Approved")
+#   Ink(paths=[[(x1,y1),(x2,y2)]], color="ff0000")
+#   Link(rect=..., url="https://example.com")   # external
+#   Link(rect=..., target_page_index=3)          # internal
 writer.add_annotation(page_number=0, annotation=annot)
 ```
 
@@ -1152,15 +1115,17 @@ page.mediabox, page.cropbox, page.trimbox, page.artbox, page.bleedbox
 
 Access underlying PDF objects as lists of dicts:
 
-```python
-page.chars           # each char: {"text", "fontname", "size", "adv", "upright", "height", "width", "x0", "y0", "x1", "y1", "top", "bottom", "doctop", "stroking_color", "non_stroking_color", ...}
-page.lines           # each line: {"x0", "y0", "x1", "y1", "width", "height", "top", "bottom", "doctop", "orientation", "stroking_color", "linewidth", "dash", ...}
-page.rects           # each rect: {"x0", "y0", "x1", "y1", "width", "height", "top", "bottom", "doctop", "stroking_color", "non_stroking_color", "fill", "stroke", "linewidth", ...}
-page.curves          # each curve: {"points", "x0", "y0", "x1", "y1", "width", "height", "top", "bottom", "doctop", "stroking_color", "non_stroking_color", "fill", "stroke", ...}
-page.images          # each image: {"x0", "y0", "x1", "y1", "width", "height", "top", "bottom", "doctop", "srcsize", "name", "stream", "colorspace", ...}
-page.annots          # each annotation
-page.hyperlinks      # filtered annots with URI
-```
+Each page exposes lists of dicts with positional data:
+
+| Attribute | Dict keys (highlights) |
+|---|---|
+| `page.chars` | `text`, `fontname`, `size`, `x0`, `y0`, `x1`, `y1`, `top`, `bottom`, `doctop`, `stroking_color`, `non_stroking_color` |
+| `page.lines` | `x0`/`y0`/`x1`/`y1`, `width`, `orientation`, `linewidth`, `dash` |
+| `page.rects` | `x0`/`y0`/`x1`/`y1`, `fill`, `stroke`, `linewidth` |
+| `page.curves` | `points`, bbox, fill/stroke colors |
+| `page.images` | bbox, `srcsize`, `name`, `stream`, `colorspace` |
+| `page.annots` | annotation dicts |
+| `page.hyperlinks` | filtered annots with URI |
 
 ---
 
@@ -1549,116 +1514,24 @@ Supported inline tags:
 - `<greek>`, `<unichar code="0xNNNN"/>`
 - `<span>` with style attributes
 
-**ParagraphStyle:**
+**ParagraphStyle** — full kwarg list (extends `parent=styles["Normal"]`):
 
-```python
-style = ParagraphStyle(
-    name="Custom",
-    parent=styles["Normal"],
-    fontName="Helvetica",
-    fontSize=12,
-    leading=14.4,                  # line height
-    alignment=TA_LEFT,             # TA_LEFT, TA_CENTER, TA_RIGHT, TA_JUSTIFY
-    leftIndent=0,
-    rightIndent=0,
-    firstLineIndent=0,
-    spaceBefore=0,
-    spaceAfter=0,
-    textColor=colors.black,
-    backColor=None,
-    borderWidth=0,
-    borderColor=None,
-    borderPadding=0,
-    borderRadius=None,
-    wordWrap=None,                 # "CJK" for CJK word wrapping
-    bulletFontName="Helvetica",
-    bulletFontSize=12,
-    bulletIndent=0,
-    bulletColor=colors.black,
-    bulletAnchor="start",
-    bulletText=None,
-    endDots=None,                  # "." or custom string for TOC-style dots
-    splitLongWords=True,
-    underlineWidth=None,
-    strikeWidth=None,
-    underlineColor=None,
-    strikeColor=None,
-    underlineOffset=None,
-    strikeOffset=None,
-    textTransform=None,            # "uppercase", "lowercase", "capitalize", None
-    allowWidows=1,
-    allowOrphans=0,
-)
-```
+`name`, `parent`, `fontName`, `fontSize`, `leading` (line height), `alignment` (TA_LEFT/CENTER/RIGHT/JUSTIFY), `leftIndent`, `rightIndent`, `firstLineIndent`, `spaceBefore`, `spaceAfter`, `textColor`, `backColor`, `borderWidth`, `borderColor`, `borderPadding`, `borderRadius`, `wordWrap` (`"CJK"` for CJK), `bulletFontName`, `bulletFontSize`, `bulletIndent`, `bulletColor`, `bulletAnchor`, `bulletText`, `endDots` (TOC dot leader), `splitLongWords`, `underlineWidth`, `strikeWidth`, `underlineColor`, `strikeColor`, `underlineOffset`, `strikeOffset`, `textTransform` (`"uppercase"`/`"lowercase"`/`"capitalize"`), `allowWidows`, `allowOrphans`.
 
-**Table:**
+**Table** kwargs: `data` (2D list), `colWidths` (list or `None`=auto), `rowHeights`, `style`, `splitByRow=1` (row-wise page split), `splitInRow=0` (split inside a row), `repeatRows=0` (header rows repeated per page), `repeatCols=0`, `hAlign` (LEFT/CENTER/RIGHT), `vAlign` (TOP/MIDDLE/BOTTOM), `cellStyles`, `cornerRadii=[tl,tr,bl,br]`.
 
-```python
-data = [
-    ["Header 1", "Header 2", "Header 3"],
-    ["A", "B", "C"],
-    ["D", "E", "F"],
-]
-t = Table(
-    data,
-    colWidths=[100, 150, 100],     # None = auto-calculate
-    rowHeights=None,
-    style=None,
-    splitByRow=1,                  # allow split across pages by row
-    splitInRow=0,                  # allow split within a row
-    repeatRows=0,                  # rows to repeat on each page (header)
-    repeatCols=0,
-    hAlign="CENTER",               # LEFT, CENTER, RIGHT
-    vAlign="MIDDLE",               # TOP, MIDDLE, BOTTOM
-    normalizedData=0,
-    cellStyles=None,
-    cornerRadii=None,              # [topLeft, topRight, bottomLeft, bottomRight]
-)
-```
+**TableStyle commands** — cell refs `(col, row)` 0-based, `-1` = last:
 
-**TableStyle commands** (cell references as (col, row), 0-based; -1 = last):
+| Category | Commands |
+|---|---|
+| Color | `BACKGROUND`, `TEXTCOLOR`, `ROWBACKGROUNDS` (alternating list), `COLBACKGROUNDS` |
+| Alignment | `ALIGN` (LEFT/CENTER/RIGHT/DECIMAL), `VALIGN` (TOP/MIDDLE/BOTTOM) |
+| Font | `FONT`, `FONTNAME`, `FONTSIZE`, `LEADING` |
+| Borders | `GRID`, `BOX`, `LINEBELOW`, `LINEABOVE`, `LINEBEFORE`, `LINEAFTER` |
+| Padding | `TOPPADDING`, `BOTTOMPADDING`, `LEFTPADDING`, `RIGHTPADDING` |
+| Layout | `SPAN` (merge cells), `NOSPLIT` (no row split), `ROUNDEDCORNERS [tl,tr,bl,br]` |
 
-```python
-style = TableStyle([
-    # Background & text color
-    ("BACKGROUND", (0, 0), (-1, 0), colors.grey),
-    ("TEXTCOLOR", (0, 0), (-1, 0), colors.white),
-    ("ROWBACKGROUNDS", (0, 1), (-1, -1), [colors.white, colors.lightgrey]),  # alternating
-    ("COLBACKGROUNDS", (0, 0), (-1, -1), [colors.white, colors.beige]),
-
-    # Alignment
-    ("ALIGN", (0, 0), (-1, -1), "CENTER"),      # LEFT, CENTER, RIGHT, DECIMAL
-    ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),      # TOP, MIDDLE, BOTTOM
-
-    # Font
-    ("FONT", (0, 0), (-1, 0), "Helvetica-Bold"),
-    ("FONTNAME", (0, 0), (-1, 0), "Helvetica-Bold"),
-    ("FONTSIZE", (0, 0), (-1, 0), 14),
-    ("LEADING", (0, 0), (-1, -1), 14),
-
-    # Borders
-    ("GRID", (0, 0), (-1, -1), 1, colors.black),
-    ("BOX", (0, 0), (-1, -1), 2, colors.black),
-    ("LINEBELOW", (0, 0), (-1, 0), 2, colors.black),
-    ("LINEABOVE", (0, 0), (-1, 0), 1, colors.black),
-    ("LINEBEFORE", (0, 0), (0, -1), 1, colors.black),
-    ("LINEAFTER", (-1, 0), (-1, -1), 1, colors.black),
-
-    # Padding
-    ("TOPPADDING", (0, 0), (-1, -1), 6),
-    ("BOTTOMPADDING", (0, 0), (-1, -1), 6),
-    ("LEFTPADDING", (0, 0), (-1, -1), 6),
-    ("RIGHTPADDING", (0, 0), (-1, -1), 6),
-
-    # Span
-    ("SPAN", (0, 0), (2, 0)),                     # merge cells
-
-    # Misc
-    ("NOSPLIT", (0, 0), (-1, -1)),                 # prevent row splitting
-    ("ROUNDEDCORNERS", [5, 5, 5, 5]),              # corner radii
-])
-t.setStyle(style)
-```
+Usage: `TableStyle([(cmd, (c0,r0), (c1,r1), *args), ...])` then `table.setStyle(style)`.
 
 **Other Flowables:**
 
@@ -1785,95 +1658,13 @@ from reportlab.graphics.charts.legends import Legend
 from reportlab.graphics import renderPDF, renderSVG
 ```
 
-#### Bar Charts
+Chart classes share the same shape — set `x`/`y`/`width`/`height`, assign `.data` (list of series lists), configure axes via `chart.valueAxis` / `chart.categoryAxis`, then `drawing.add(chart)`.
 
-```python
-d = Drawing(400, 200)
-bc = VerticalBarChart()            # or HorizontalBarChart()
-bc.x = 50
-bc.y = 50
-bc.height = 125
-bc.width = 300
-bc.data = [[10, 20, 30, 40], [15, 25, 35, 45]]  # grouped series
-bc.strokeColor = colors.black
-bc.valueAxis.valueMin = 0
-bc.valueAxis.valueMax = 50
-bc.valueAxis.valueStep = 10
-bc.categoryAxis.labels.boxAnchor = "ne"
-bc.categoryAxis.labels.dx = 8
-bc.categoryAxis.labels.dy = -2
-bc.categoryAxis.labels.angle = 30
-bc.categoryAxis.categoryNames = ["Q1", "Q2", "Q3", "Q4"]
-bc.bars[0].fillColor = colors.red
-bc.bars[1].fillColor = colors.blue
-bc.barWidth = 10                   # individual bar width
-bc.groupSpacing = 15               # space between groups
-bc.barSpacing = 2                  # space within groups
-
-# Stacked: bc.style = "stacked"
-
-d.add(bc)
-renderPDF.drawToFile(d, "chart.pdf", "Bar Chart")
-```
-
-#### Line Charts
-
-```python
-lc = HorizontalLineChart()
-lc.x = 50; lc.y = 50; lc.height = 125; lc.width = 300
-lc.data = [[10, 20, 15, 30], [5, 15, 25, 20]]
-lc.categoryAxis.categoryNames = ["Jan", "Feb", "Mar", "Apr"]
-lc.lines[0].strokeColor = colors.red
-lc.lines[0].strokeWidth = 2
-lc.lines[0].symbol = makeMarker("Circle")
-lc.lines[1].strokeColor = colors.blue
-lc.joinedLines = 1
-```
-
-#### Pie Charts
-
-```python
-pie = Pie()
-pie.x = 100; pie.y = 50; pie.width = 200; pie.height = 200
-pie.data = [30, 25, 20, 15, 10]
-pie.labels = ["A", "B", "C", "D", "E"]
-pie.slices.strokeWidth = 0.5
-pie.slices[0].popout = 10          # explode first slice
-pie.slices[0].fillColor = colors.red
-pie.sideLabels = True              # labels outside
-pie.simpleLabels = False           # use smart label placement
-# 3D effect:
-from reportlab.graphics.charts.piecharts import Pie3d
-pie3d = Pie3d()
-pie3d.perspective = 70
-```
-
-#### Spider / Radar Charts
-
-```python
-sc = SpiderChart()
-sc.x = 50; sc.y = 50; sc.width = 200; sc.height = 200
-sc.data = [[8, 7, 6, 5, 4], [6, 8, 4, 7, 5]]
-sc.labels = ["Speed", "Power", "Range", "Defense", "Skill"]
-sc.strands[0].fillColor = Color(1, 0, 0, 0.3)
-sc.strands[0].strokeColor = colors.red
-```
-
-#### Legend
-
-```python
-legend = Legend()
-legend.x = 350; legend.y = 150
-legend.alignment = "right"
-legend.colorNamePairs = [
-    (colors.red, "Series 1"),
-    (colors.blue, "Series 2"),
-]
-legend.columnMaximum = 10
-legend.fontName = "Helvetica"
-legend.fontSize = 10
-d.add(legend)
-```
+- **VerticalBarChart / HorizontalBarChart** — `.data` grouped series, `.bars[i].fillColor`, `.barWidth`, `.groupSpacing`, `.barSpacing`. Stacked via `chart.style = "stacked"`. Axis config: `valueAxis.valueMin/Max/Step`, `categoryAxis.labels.{boxAnchor,dx,dy,angle}`, `categoryAxis.categoryNames`.
+- **HorizontalLineChart** — `.lines[i].{strokeColor,strokeWidth,symbol}`, `.joinedLines = 1`. Use `makeMarker("Circle")` for symbols.
+- **Pie / Pie3d** — `.data`, `.labels`, `.slices[i].{popout,fillColor}`, `.sideLabels`, `.simpleLabels`, `Pie3d.perspective`.
+- **SpiderChart** — `.data`, `.labels`, `.strands[i].{fillColor,strokeColor}` (use `Color(r,g,b,a)` for RGBA).
+- **Legend** — `.x`, `.y`, `.alignment`, `.colorNamePairs`, `.columnMaximum`, `.fontName`, `.fontSize`. Add with `drawing.add(legend)`.
 
 #### Render to various formats
 
@@ -2016,56 +1807,15 @@ doc = SimpleDocTemplate("encrypted.pdf", encrypt=enc)
 
 #### AcroForms (Interactive Forms)
 
-```python
-c.acroForm.textfield(
-    name="field1", tooltip="Enter name",
-    x=100, y=700, width=200, height=20,
-    fontName="Helvetica", fontSize=12,
-    borderColor=colors.black, fillColor=colors.white,
-    textColor=colors.black, forceBorder=True,
-    value="default", maxlen=50,
-    fieldFlags="",                 # "readOnly", "required", "noExport", "multiline", "password", "fileSelect", "doNotSpellCheck", "doNotScroll", "comb", "richText"
-)
+All `c.acroForm.*()` calls share common kwargs: `name`, `tooltip`, `x`, `y`, `width`, `height` (or `size` for buttons), `fontName`, `fontSize`, `borderColor`, `fillColor`, `textColor`, `forceBorder`.
 
-c.acroForm.checkbox(
-    name="cb1", tooltip="Check this",
-    x=100, y=650, size=20,
-    borderColor=colors.black, fillColor=colors.white,
-    buttonStyle="check",           # "check", "circle", "cross", "diamond", "square", "star"
-    checked=False, forceBorder=True,
-)
-
-c.acroForm.radio(
-    name="radio1", tooltip="Option A",
-    x=100, y=600, size=20,
-    value="optA",                  # unique value per radio in group
-    selected=False,
-    buttonStyle="circle",
-    borderColor=colors.black, fillColor=colors.white,
-    forceBorder=True,
-)
-
-c.acroForm.choice(
-    name="dropdown1", tooltip="Select",
-    x=100, y=550, width=200, height=20,
-    value="opt1",
-    options=[("opt1", "Option 1"), ("opt2", "Option 2"), ("opt3", "Option 3")],
-    fontName="Helvetica", fontSize=12,
-    borderColor=colors.black, fillColor=colors.white,
-    textColor=colors.black, forceBorder=True,
-    fieldFlags="combo",            # "combo" for dropdown, "" for listbox, "combo|edit" for editable combo
-)
-
-c.acroForm.listbox(
-    name="list1", tooltip="Select items",
-    x=100, y=450, width=200, height=80,
-    value=["opt1"],
-    options=[("opt1", "Option 1"), ("opt2", "Option 2"), ("opt3", "Option 3")],
-    fontName="Helvetica", fontSize=12,
-    borderColor=colors.black, fillColor=colors.white,
-    fieldFlags="multiSelect",      # allow multiple selections
-)
-```
+| Call | Extra kwargs |
+|---|---|
+| `textfield` | `value`, `maxlen`, `fieldFlags` ∈ {`readOnly`, `required`, `noExport`, `multiline`, `password`, `fileSelect`, `doNotSpellCheck`, `doNotScroll`, `comb`, `richText`} |
+| `checkbox` | `buttonStyle` ∈ {`check`, `circle`, `cross`, `diamond`, `square`, `star`}, `checked` |
+| `radio` | `value` (unique per group), `selected`, `buttonStyle` |
+| `choice` | `options=[(val, label), ...]`, `value`, `fieldFlags` ∈ {`combo`, `""` (listbox), `combo\|edit`} |
+| `listbox` | `options`, `value` (list), `fieldFlags="multiSelect"` |
 
 #### SVG Support
 
@@ -2105,3 +1855,113 @@ renderPDF.draw(drawing, canvas, x, y)
 | Charts in PDF | reportlab.graphics |
 | Barcodes / QR codes | reportlab.graphics.barcode |
 | Watermarks/overlays | PyMuPDF or pypdf |
+
+---
+
+## Escape-hatch recipes
+
+Things `claw pdf` doesn't wrap and that genuinely need the library APIs above.
+
+### 1. Custom reportlab `Canvas` layout with per-page header/footer callback
+
+PLATYPUS documents with a branded header/footer require a `PageTemplate` callback — `claw pdf from-md` won't express this shape:
+
+```python
+from reportlab.platypus import BaseDocTemplate, Frame, PageTemplate, Paragraph
+from reportlab.lib.pagesizes import A4
+
+def chrome(canvas, doc):
+    canvas.saveState()
+    canvas.setFont("Helvetica-Bold", 9)
+    canvas.drawString(36, A4[1] - 24, "Quarterly Report — Confidential")
+    canvas.drawRightString(A4[0] - 36, 24, f"Page {doc.page}")
+    canvas.restoreState()
+
+doc = BaseDocTemplate("out.pdf", pagesize=A4)
+frame = Frame(36, 36, A4[0]-72, A4[1]-72, id="body")
+doc.addPageTemplates([PageTemplate(id="main", frames=[frame], onPage=chrome)])
+doc.build([Paragraph("Body goes here.")])
+```
+
+### 2. pdfplumber table tuning — merged-cell invoice scans
+
+Default strategies miss tables with invisible separators + merged cells. Tune `text_tolerance` + `intersection_tolerance` + explicit lines:
+
+```python
+import pdfplumber
+with pdfplumber.open("invoice.pdf") as pdf:
+    page = pdf.pages[0]
+    table = page.find_tables(table_settings={
+        "vertical_strategy": "text",
+        "horizontal_strategy": "lines",
+        "snap_tolerance": 5,
+        "intersection_tolerance": 8,
+        "text_tolerance": 2,
+        "explicit_vertical_lines": [50, 140, 320, 420, 540],
+    })[0].extract()
+```
+
+### 3. PyMuPDF reply-thread annotations
+
+A "review stack" with popups and reply threads — not wrappable via flags:
+
+```python
+import fitz
+doc = fitz.open("manuscript.pdf")
+page = doc[0]
+parent = page.add_text_annot((72, 72), "Tighten wording?", icon="Comment")
+parent.set_info(title="Reviewer A")
+parent.update()
+# Reply (IRT) — point back via /IRT reference in the XML
+reply = page.add_text_annot((72, 90), "Agreed — will redraft.", icon="Comment")
+reply.set_info(title="Reviewer B")
+reply._irt_xref = parent.xref       # /IRT = In Reply To
+reply.update()
+doc.saveIncr()
+```
+
+### 4. AcroForm-signed fill + flatten with `reportlab` + `pypdf`
+
+Fill in reportlab (adds fields), sign externally, flatten via pypdf — a pipeline claw won't reconstruct.
+
+```python
+from PyPDF2 import PdfReader, PdfWriter, generic
+reader = PdfReader("filled.pdf")
+writer = PdfWriter(clone_from=reader)
+for page in writer.pages:
+    for annot in page.get("/Annots", []):
+        a = annot.get_object()
+        if a.get("/Subtype") == "/Widget":
+            a[generic.NameObject("/Ff")] = generic.NumberObject(1)   # read-only
+writer.write("flattened.pdf")
+```
+
+### 5. PyMuPDF `Story` — HTML/CSS → PDF with multi-page flow
+
+The escape hatch for "I want HTML+CSS without LaTeX/weasyprint":
+
+```python
+import fitz
+story = fitz.Story(html=open("report.html").read(),
+                   user_css="h1 { color: #036; } table td { padding: 4px; }")
+wr = fitz.DocumentWriter("report.pdf")
+while True:
+    dev = wr.begin_page(fitz.paper_rect("a4"))
+    more, _ = story.place(fitz.Rect(56, 56, 539, 786))
+    story.draw(dev)
+    wr.end_page()
+    if not more: break
+wr.close()
+```
+
+### 6. CID fonts for CJK in reportlab
+
+CJK doesn't work with Base14; register a `UnicodeCIDFont` before drawing:
+
+```python
+from reportlab.pdfbase import pdfmetrics
+from reportlab.pdfbase.cidfonts import UnicodeCIDFont
+pdfmetrics.registerFont(UnicodeCIDFont("HeiseiMin-W3"))   # Japanese
+c.setFont("HeiseiMin-W3", 12)
+c.drawString(72, 720, "こんにちは世界")
+```

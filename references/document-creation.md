@@ -1,25 +1,50 @@
 # Document Creation Libraries Reference
 
-Comprehensive API reference for `openpyxl`, `python-docx`, and `python-pptx`.
+> **TL;DR: use `claw xlsx`, `claw docx`, `claw pptx` for common tasks.** See [references/claw/xlsx.md](claw/xlsx.md), [references/claw/docx.md](claw/docx.md), [references/claw/pptx.md](claw/pptx.md). This reference documents the full Python library APIs (`openpyxl`, `python-docx`, `python-pptx`) for escape-hatch / advanced workflows not covered by `claw` — combo / dual-axis charts, rich-text runs, overlapping conditional-formatting stacks with `stopIfTrue` ordering, bespoke `python-pptx` dashboards, run-level hyperlink XML, section-scoped headers, custom NamedStyles with inheritance, and VBA preservation.
 
 ## Contents
 
 - **CREATE / EDIT Excel (.xlsx)** — `openpyxl`
-  - [Workbook & worksheet operations](#11-workbook--worksheet-operations) · [Cell read / write / iterate](#12-cell-operations) · [Fonts, borders, fills, alignment](#13-styling--formatting)
-  - [Conditional formatting rules](#14-conditional-formatting) · [Data validation dropdowns](#15-data-validation) · [Bar / line / pie / scatter charts](#16-charts)
-  - [Excel tables with built-in styles](#17-tables) · [Named ranges & defined names](#18-defined-names--named-ranges) · [Auto-filter & sorting](#19-auto-filter--sorting)
-  - [Embed images in cells](#110-images) · [Page setup, margins, print area](#111-page-setup--print) · [Worksheet protection & passwords](#112-worksheet-protection)
-  - [Freeze panes](#113-freeze-panes) · [Column width / row height](#114-column-width--row-height)
+  - [Workbook & worksheet operations](#11-workbook--worksheet-operations) *(covered by `claw xlsx new/read`)*
+  - [Cell read / write / iterate](#12-cell-operations) *(covered by `claw xlsx read/append`)*
+  - [Fonts, borders, fills, alignment](#13-styling--formatting) *(basic runs covered by `claw xlsx style/format`; rich text + NamedStyle escape-hatch)*
+  - [Conditional formatting rules](#14-conditional-formatting) *(single-rule cases covered by `claw xlsx conditional`; overlapping stacks with `stopIfTrue` stay here)*
+  - [Data validation dropdowns](#15-data-validation) *(covered by `claw xlsx validate`)*
+  - [Bar / line / pie / scatter charts](#16-charts) *(basic charts covered by `claw xlsx chart`; combo/dual-axis, trendlines, error bars escape-hatch)*
+  - [Excel tables with built-in styles](#17-tables) *(covered by `claw xlsx table`)*
+  - [Named ranges & defined names](#18-defined-names--named-ranges) *(covered by `claw xlsx name add`)*
+  - [Auto-filter & sorting](#19-auto-filter--sorting) *(covered by `claw xlsx filter`)*
+  - [Embed images in cells](#110-images) *(covered by `claw xlsx image add`)*
+  - [Page setup, margins, print area](#111-page-setup--print) *(covered by `claw xlsx print-setup`)*
+  - [Worksheet protection & passwords](#112-worksheet-protection) *(covered by `claw xlsx protect`)*
+  - [Freeze panes](#113-freeze-panes) *(covered by `claw xlsx freeze`)*
+  - [Column width / row height](#114-column-width--row-height) *(escape-hatch — not wrapped)*
 - **CREATE / EDIT Word (.docx)** — `python-docx`
-  - [Open / save / create documents](#21-document-operations) · [Paragraphs & runs (text formatting)](#22-paragraphs--runs) · [Headings & numbered / bulleted lists](#23-headings--lists)
-  - [Table rows, cells, styling](#24-tables) · [Inline images](#25-images) · [Sections, margins, orientation](#26-sections--page-layout)
-  - [Headers & footers per section](#27-headers--footers) · [Page / column / section breaks](#28-breaks) · [Hyperlinks (run-level XML)](#29-hyperlinks)
-  - [Built-in & custom styles](#210-styles) · [Core document properties](#211-core-properties) · [Length unit helpers (Pt, Inches, Cm)](#212-length-units)
+  - [Open / save / create documents](#21-document-operations) *(covered by `claw docx new/from-md`)*
+  - [Paragraphs & runs (text formatting)](#22-paragraphs--runs) *(basic covered by `claw docx add-paragraph`)*
+  - [Headings & numbered / bulleted lists](#23-headings--lists) *(covered by `claw docx add-heading`)*
+  - [Table rows, cells, styling](#24-tables) *(basic covered by `claw docx add-table/table fit`; nested tables + XML-level border/shading escape-hatch)*
+  - [Inline images](#25-images) *(covered by `claw docx add-image`)*
+  - [Sections, margins, orientation](#26-sections--page-layout) *(covered by `claw docx section add`)*
+  - [Headers & footers per section](#27-headers--footers) *(basic covered by `claw docx header set/footer set`)*
+  - [Page / column / section breaks](#28-breaks) *(page break covered by `claw docx insert pagebreak`)*
+  - [Hyperlinks (run-level XML)](#29-hyperlinks) *(basic covered by `claw docx hyperlink add`; the XML helper stays here)*
+  - [Built-in & custom styles](#210-styles) *(basic covered by `claw docx style define/apply`)*
+  - [Core document properties](#211-core-properties) *(covered by `claw docx meta get/set`)*
+  - [Length unit helpers (Pt, Inches, Cm)](#212-length-units)
 - **CREATE / EDIT PowerPoint (.pptx)** — `python-pptx`
-  - [Presentation & slide creation](#31-presentation--slides) · [Shape geometry (rect / oval / line / connector)](#32-shapes) · [Text frame formatting](#33-text-frames--formatting)
-  - [Bar / line / pie charts in slides](#34-charts) · [Fill colors, gradients, line styles](#35-fill--line-formatting) · [Layout placeholders](#36-placeholders)
-  - [Slide background fill / image](#37-slide-background) · [Hyperlinks & click actions](#38-hyperlinks--click-actions) · [OLE objects, video / audio embed](#39-ole-embedding--media)
-  - [Core deck properties](#310-core-properties) · [Length unit helpers (Emu, Pt, Inches)](#311-length-units)
+  - [Presentation & slide creation](#31-presentation--slides) *(covered by `claw pptx new/add-slide/from-outline`)*
+  - [Shape geometry (rect / oval / line / connector)](#32-shapes) *(basic shapes covered by `claw pptx add-shape`; freeform / group / connector stay here)*
+  - [Text frame formatting](#33-text-frames--formatting) *(basic covered by `claw pptx fill`)*
+  - [Bar / line / pie charts in slides](#34-charts) *(basic covered by `claw pptx add-chart/chart refresh`)*
+  - [Fill colors, gradients, line styles](#35-fill--line-formatting) *(solid/brand covered by `claw pptx brand`; gradients, pattern fills stay here)*
+  - [Layout placeholders](#36-placeholders) *(covered by `claw pptx fill --placeholder`)*
+  - [Slide background fill / image](#37-slide-background)
+  - [Hyperlinks & click actions](#38-hyperlinks--click-actions) *(covered by `claw pptx link add`)*
+  - [OLE objects, video / audio embed](#39-ole-embedding--media) *(escape-hatch — XML-level only)*
+  - [Core deck properties](#310-core-properties) *(covered by `claw pptx meta`)*
+  - [Length unit helpers (Emu, Pt, Inches)](#311-length-units)
+- **Escape-hatch recipes** — [combo chart, pivot-as-template, rich text, KPI dashboard, section-scoped header, VBA preserve](#escape-hatch-recipes)
 
 Examples: [examples/office-documents.md](../examples/office-documents.md) · Cross-tool pipelines (CSV → Excel → Sheets, etc.): [examples/data-pipelines.md](../examples/data-pipelines.md).
 
@@ -268,36 +293,11 @@ Alignment(
 
 ### Number Formats
 
-```python
-cell.number_format = "0.00"                  # Two decimals
-cell.number_format = "#,##0"                 # Thousands separator
-cell.number_format = "#,##0.00"              # Thousands + decimals
-cell.number_format = "0%"                    # Percentage
-cell.number_format = "0.00%"                 # Percentage with decimals
-cell.number_format = "$#,##0.00"             # Currency
-cell.number_format = "yyyy-mm-dd"            # Date
-cell.number_format = "dd/mm/yyyy"            # Date
-cell.number_format = "hh:mm:ss"              # Time
-cell.number_format = "yyyy-mm-dd hh:mm:ss"  # Datetime
-cell.number_format = '0.00E+00'              # Scientific
-cell.number_format = '@'                     # Text (force text)
-cell.number_format = '[Red]0.00;[Blue]-0.00' # Conditional colors
-
-# Built-in format constants
-from openpyxl.styles.numbers import FORMAT_PERCENTAGE, FORMAT_DATE_DATETIME, \
-    FORMAT_NUMBER_COMMA_SEPARATED1, FORMAT_CURRENCY_USD_SIMPLE
-```
+Common format strings: `"0.00"`, `"#,##0"`, `"#,##0.00"`, `"0%"`, `"$#,##0.00"`, `"yyyy-mm-dd"`, `"hh:mm:ss"`, `"0.00E+00"`, `"@"` (force text), `"[Red]0.00;[Blue]-0.00"` (conditional colors). Constants live in `openpyxl.styles.numbers` (`FORMAT_PERCENTAGE`, `FORMAT_DATE_DATETIME`, `FORMAT_NUMBER_COMMA_SEPARATED1`, `FORMAT_CURRENCY_USD_SIMPLE`, ...). `claw xlsx format` wraps the single-cell case.
 
 ### Applying Styles
 
-```python
-cell.font = Font(bold=True, size=14)
-cell.fill = PatternFill(patternType="solid", fgColor="FFFF00")
-cell.border = Border(bottom=Side(border_style="thick", color="000000"))
-cell.alignment = Alignment(horizontal="center", vertical="center", wrapText=True)
-cell.number_format = "#,##0.00"
-cell.protection = Protection(locked=True, hidden=False)
-```
+Assign `Font`, `PatternFill`, `Border`, `Alignment`, `Protection`, or `cell.number_format` directly to the cell attribute. `claw xlsx style` wraps the common combo.
 
 ### Named Styles
 
@@ -1345,18 +1345,12 @@ shape = slide.shapes.add_shape(
     width=Inches(3), height=Inches(2),
 )
 
-# Common MSO_SHAPE values:
-# RECTANGLE, ROUNDED_RECTANGLE, OVAL, DIAMOND, TRIANGLE,
-# RIGHT_TRIANGLE, PARALLELOGRAM, TRAPEZOID, PENTAGON, HEXAGON,
-# OCTAGON, CROSS, STAR_5_POINT, STAR_6_POINT, STAR_4_POINT,
-# HEART, LIGHTNING_BOLT, SUN, MOON, CLOUD,
-# RIGHT_ARROW, LEFT_ARROW, UP_ARROW, DOWN_ARROW,
-# LEFT_RIGHT_ARROW, UP_DOWN_ARROW, CURVED_RIGHT_ARROW,
-# CHEVRON, CALLOUT_1, CALLOUT_2, CALLOUT_3,
+# Common MSO_SHAPE values: RECTANGLE, ROUNDED_RECTANGLE, OVAL, DIAMOND, TRIANGLE,
+# RIGHT_TRIANGLE, PARALLELOGRAM, TRAPEZOID, PENTAGON, HEXAGON, OCTAGON, CROSS,
+# STAR_{4,5,6}_POINT, HEART, LIGHTNING_BOLT, SUN, MOON, CLOUD, {LEFT,RIGHT,UP,DOWN}_ARROW,
+# LEFT_RIGHT_ARROW, UP_DOWN_ARROW, CURVED_RIGHT_ARROW, CHEVRON, CALLOUT_{1,2,3},
 # ROUNDED_RECTANGLE_CALLOUT, OVAL_CALLOUT, CLOUD_CALLOUT,
-# FLOWCHART_PROCESS, FLOWCHART_DECISION, FLOWCHART_DATA,
-# FLOWCHART_TERMINATOR, FLOWCHART_DOCUMENT, etc.
-# See full list: pptx.enum.shapes.MSO_SHAPE (187 members)
+# FLOWCHART_{PROCESS,DECISION,DATA,TERMINATOR,DOCUMENT}, etc. — 187 members total.
 ```
 
 ### TextBox
@@ -1564,63 +1558,13 @@ chart = chart_frame.chart
 
 ### Chart Types (XL_CHART_TYPE)
 
-```python
-# Bar / Column
-XL_CHART_TYPE.BAR_CLUSTERED                   # Horizontal bars
-XL_CHART_TYPE.BAR_STACKED
-XL_CHART_TYPE.BAR_STACKED_100
-XL_CHART_TYPE.COLUMN_CLUSTERED                # Vertical columns
-XL_CHART_TYPE.COLUMN_STACKED
-XL_CHART_TYPE.COLUMN_STACKED_100
-XL_CHART_TYPE.THREE_D_BAR_CLUSTERED
-XL_CHART_TYPE.THREE_D_BAR_STACKED
-XL_CHART_TYPE.THREE_D_BAR_STACKED_100
-XL_CHART_TYPE.THREE_D_COLUMN
-XL_CHART_TYPE.THREE_D_COLUMN_CLUSTERED
-XL_CHART_TYPE.THREE_D_COLUMN_STACKED
-XL_CHART_TYPE.THREE_D_COLUMN_STACKED_100
-
-# Line
-XL_CHART_TYPE.LINE
-XL_CHART_TYPE.LINE_MARKERS
-XL_CHART_TYPE.LINE_MARKERS_STACKED
-XL_CHART_TYPE.LINE_MARKERS_STACKED_100
-XL_CHART_TYPE.LINE_STACKED
-XL_CHART_TYPE.LINE_STACKED_100
-XL_CHART_TYPE.THREE_D_LINE
-
-# Pie / Doughnut
-XL_CHART_TYPE.PIE
-XL_CHART_TYPE.PIE_EXPLODED
-XL_CHART_TYPE.THREE_D_PIE
-XL_CHART_TYPE.THREE_D_PIE_EXPLODED
-XL_CHART_TYPE.DOUGHNUT
-XL_CHART_TYPE.DOUGHNUT_EXPLODED
-
-# Area
-XL_CHART_TYPE.AREA
-XL_CHART_TYPE.AREA_STACKED
-XL_CHART_TYPE.AREA_STACKED_100
-XL_CHART_TYPE.THREE_D_AREA
-XL_CHART_TYPE.THREE_D_AREA_STACKED
-XL_CHART_TYPE.THREE_D_AREA_STACKED_100
-
-# Scatter / XY
-XL_CHART_TYPE.XY_SCATTER
-XL_CHART_TYPE.XY_SCATTER_LINES
-XL_CHART_TYPE.XY_SCATTER_LINES_NO_MARKERS
-XL_CHART_TYPE.XY_SCATTER_SMOOTH
-XL_CHART_TYPE.XY_SCATTER_SMOOTH_NO_MARKERS
-
-# Bubble
-XL_CHART_TYPE.BUBBLE
-XL_CHART_TYPE.BUBBLE_THREE_D_EFFECT
-
-# Radar
-XL_CHART_TYPE.RADAR
-XL_CHART_TYPE.RADAR_FILLED
-XL_CHART_TYPE.RADAR_MARKERS
-```
+- **Bar / Column**: `BAR_CLUSTERED` / `BAR_STACKED` / `BAR_STACKED_100`, `COLUMN_CLUSTERED` / `COLUMN_STACKED` / `COLUMN_STACKED_100`, plus `THREE_D_*` variants.
+- **Line**: `LINE`, `LINE_MARKERS`, `LINE_MARKERS_STACKED`, `LINE_MARKERS_STACKED_100`, `LINE_STACKED`, `LINE_STACKED_100`, `THREE_D_LINE`.
+- **Pie / Doughnut**: `PIE`, `PIE_EXPLODED`, `THREE_D_PIE`, `THREE_D_PIE_EXPLODED`, `DOUGHNUT`, `DOUGHNUT_EXPLODED`.
+- **Area**: `AREA`, `AREA_STACKED`, `AREA_STACKED_100`, plus `THREE_D_*` variants.
+- **Scatter / XY**: `XY_SCATTER`, `XY_SCATTER_LINES`, `XY_SCATTER_LINES_NO_MARKERS`, `XY_SCATTER_SMOOTH`, `XY_SCATTER_SMOOTH_NO_MARKERS`.
+- **Bubble**: `BUBBLE`, `BUBBLE_THREE_D_EFFECT`.
+- **Radar**: `RADAR`, `RADAR_FILLED`, `RADAR_MARKERS`.
 
 ### XY / Scatter Chart Data
 
@@ -1926,4 +1870,125 @@ from pptx.enum.shapes import MSO_SHAPE, MSO_SHAPE_TYPE
 from pptx.enum.chart import XL_CHART_TYPE, XL_LEGEND_POSITION, XL_LABEL_POSITION, XL_TICK_MARK, XL_TICK_LABEL_POSITION
 from pptx.enum.dml import MSO_THEME_COLOR, MSO_LINE_DASH_STYLE, MSO_PATTERN
 from pptx.chart.data import CategoryChartData, XyChartData, BubbleChartData
+```
+
+---
+
+## Escape-hatch recipes
+
+Five patterns `claw` deliberately doesn't wrap. Use the library APIs above.
+
+### 1. Combo chart (bar + line on dual axis)
+
+`claw xlsx chart` picks one series shape. Multi-plot combo charts require merging charts directly:
+
+```python
+from openpyxl.chart import BarChart, LineChart, Reference
+bar = BarChart(); bar.add_data(Reference(ws, min_col=2, max_col=2, min_row=1, max_row=13),
+                                titles_from_data=True)
+bar.set_categories(Reference(ws, min_col=1, min_row=2, max_row=13))
+bar.y_axis.title = "Revenue"
+
+line = LineChart(); line.add_data(Reference(ws, min_col=3, max_col=3, min_row=1, max_row=13),
+                                  titles_from_data=True)
+line.y_axis.axId = 200           # unique ID for secondary axis
+line.y_axis.crosses = "max"      # put it on the right
+line.y_axis.title = "Margin %"
+
+bar += line                      # combine
+ws.add_chart(bar, "E2")
+```
+
+### 2. Overlapping conditional-formatting rules with `stopIfTrue`
+
+`claw xlsx conditional` adds one rule at a time. Stacks where order matters (e.g. "red if <0, then yellow if <10 else green") need explicit `stopIfTrue` sequencing:
+
+```python
+from openpyxl.formatting.rule import CellIsRule
+from openpyxl.styles import PatternFill, Font
+
+rng = "C2:C200"
+ws.conditional_formatting.add(rng, CellIsRule(
+    operator="lessThan", formula=["0"],
+    fill=PatternFill(bgColor="FFC7CE"), font=Font(color="9C0006"),
+    stopIfTrue=True,            # negatives stop here; next rules don't run
+))
+ws.conditional_formatting.add(rng, CellIsRule(
+    operator="lessThan", formula=["10"],
+    fill=PatternFill(bgColor="FFEB9C"), stopIfTrue=True,
+))
+ws.conditional_formatting.add(rng, CellIsRule(
+    operator="greaterThanOrEqual", formula=["10"],
+    fill=PatternFill(bgColor="C6EFCE"), font=Font(color="006100"),
+))
+```
+
+### 3. Rich text runs in a single cell
+
+`claw xlsx richtext set` accepts a JSON run list, which works until you need `rFont` / `vertAlign` / `scheme` overrides. Raw:
+
+```python
+from openpyxl.cell.rich_text import CellRichText, TextBlock
+from openpyxl.cell.text import InlineFont
+rt = CellRichText(
+    "Result: ",
+    TextBlock(InlineFont(b=True, sz=14, color="006100"), "OK"),
+    "  (",
+    TextBlock(InlineFont(vertAlign="superscript", color="9C0006"), "2"),
+    " errors)",
+)
+ws["A1"].value = rt
+```
+
+### 4. python-pptx KPI dashboard — per-shape positioning DSL
+
+`claw pptx add-shape` wraps one shape per call. A 6-KPI grid is cleaner authored directly:
+
+```python
+from pptx import Presentation
+from pptx.util import Inches, Pt
+from pptx.enum.shapes import MSO_SHAPE
+from pptx.dml.color import RGBColor
+
+prs = Presentation("brand.pptx")
+slide = prs.slides.add_slide(prs.slide_layouts[6])   # Blank
+kpis = [("Revenue", "$4.2M"), ("Churn", "1.1%"), ("NPS", "68"),
+        ("ARR", "$52M"), ("CAC", "$280"), ("LTV", "$4.3k")]
+for i, (label, value) in enumerate(kpis):
+    col, row = i % 3, i // 3
+    tile = slide.shapes.add_shape(MSO_SHAPE.ROUNDED_RECTANGLE,
+        Inches(0.4 + col * 4.3), Inches(1.2 + row * 2.6),
+        Inches(4.0), Inches(2.2))
+    tile.fill.solid(); tile.fill.fore_color.rgb = RGBColor(0x1F, 0x4E, 0x79)
+    tile.line.fill.background()
+    tf = tile.text_frame; tf.word_wrap = True
+    tf.paragraphs[0].text = label
+    tf.paragraphs[0].font.size = Pt(14); tf.paragraphs[0].font.color.rgb = RGBColor(0xB5, 0xC9, 0xE3)
+    p = tf.add_paragraph(); p.text = value
+    p.font.size = Pt(40); p.font.bold = True; p.font.color.rgb = RGBColor(0xFF, 0xFF, 0xFF)
+prs.save("kpi-dashboard.pptx")
+```
+
+### 5. Section-scoped header + page-numbered footer (python-docx)
+
+`claw docx header set` defaults to all sections. Different headers per section need `is_linked_to_previous = False` on each after the first:
+
+```python
+from docx import Document
+doc = Document("report.docx")
+for i, section in enumerate(doc.sections):
+    header = section.header
+    header.is_linked_to_previous = (i == 0)      # first inherits; rest independent
+    header.paragraphs[0].text = f"Part {i+1} — Confidential"
+    # Add PAGE field in footer via XML:
+    footer = section.footer
+    footer.is_linked_to_previous = (i == 0)
+```
+
+### 6. VBA-preserving round-trip
+
+```python
+wb = load_workbook("macro.xlsm", keep_vba=True)
+# mutate sheets as usual; save as .xlsm to preserve macros
+wb.save("updated.xlsm")
 ```

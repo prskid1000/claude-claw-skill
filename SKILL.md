@@ -36,294 +36,140 @@ Copy [references/_TEMPLATE.md](references/_TEMPLATE.md) or [examples/_TEMPLATE.m
 
 ## File Map
 
+Primary entry point: the **`claw`** CLI. Library-level references are escape hatches — use when `claw` doesn't expose what you need. See [references/claw/README.md](references/claw/README.md) for install, global flags, help UX, exit codes, and plugin model.
+
 - **CREATE a document**
-  - Excel (.xlsx) — `openpyxl`
-    - Ref:
-      - [Workbook & worksheet operations](references/document-creation.md#11-workbook--worksheet-operations)
-      - [Cell read / write / iterate](references/document-creation.md#12-cell-operations)
-      - [Fonts, borders, fills, alignment](references/document-creation.md#13-styling--formatting)
-      - [Conditional formatting rules](references/document-creation.md#14-conditional-formatting)
-      - [Data validation dropdowns](references/document-creation.md#15-data-validation)
-      - [Bar / line / pie / scatter charts](references/document-creation.md#16-charts)
-      - [Excel tables with built-in styles](references/document-creation.md#17-tables)
-      - [Named ranges & defined names](references/document-creation.md#18-defined-names--named-ranges)
-      - [Auto-filter & sorting](references/document-creation.md#19-auto-filter--sorting)
-      - [Embed images in cells](references/document-creation.md#110-images)
-      - [Page setup, margins, print area](references/document-creation.md#111-page-setup--print)
-      - [Worksheet protection & passwords](references/document-creation.md#112-worksheet-protection)
-      - [Freeze panes](references/document-creation.md#113-freeze-panes)
-      - [Column width / row height](references/document-creation.md#114-column-width--row-height)
-    - Ex: [Workbooks, styled reports, conditional formatting, charts, validation](examples/office-documents.md#excel-openpyxl)
-  - Word (.docx) — `python-docx`
-    - Ref:
-      - [Open / save / create documents](references/document-creation.md#21-document-operations)
-      - [Paragraphs & runs (text formatting)](references/document-creation.md#22-paragraphs--runs)
-      - [Headings & numbered / bulleted lists](references/document-creation.md#23-headings--lists)
-      - [Table rows, cells, styling](references/document-creation.md#24-tables)
-      - [Inline images](references/document-creation.md#25-images)
-      - [Sections, margins, orientation](references/document-creation.md#26-sections--page-layout)
-      - [Headers & footers per section](references/document-creation.md#27-headers--footers)
-      - [Page / column / section breaks](references/document-creation.md#28-breaks)
-      - [Hyperlinks (run-level XML)](references/document-creation.md#29-hyperlinks)
-      - [Built-in & custom styles](references/document-creation.md#210-styles)
-      - [Core document properties (author, title, etc.)](references/document-creation.md#211-core-properties)
-      - [Length unit helpers (Pt, Inches, Cm)](references/document-creation.md#212-length-units)
-    - Ex: [Documents, tables, styles, images, headers, full templates](examples/office-documents.md#word-python-docx)
-  - PowerPoint (.pptx) — `python-pptx`
-    - Ref:
-      - [Presentation & slide creation](references/document-creation.md#31-presentation--slides)
-      - [Shape geometry (rect / oval / line / connector)](references/document-creation.md#32-shapes)
-      - [Text frame formatting](references/document-creation.md#33-text-frames--formatting)
-      - [Bar / line / pie charts in slides](references/document-creation.md#34-charts)
-      - [Fill colors, gradients, line styles](references/document-creation.md#35-fill--line-formatting)
-      - [Layout placeholders (title / body / etc.)](references/document-creation.md#36-placeholders)
-      - [Slide background fill / image](references/document-creation.md#37-slide-background)
-      - [Hyperlinks & click actions](references/document-creation.md#38-hyperlinks--click-actions)
-      - [OLE objects, video / audio embed](references/document-creation.md#39-ole-embedding--media)
-      - [Core deck properties](references/document-creation.md#310-core-properties)
-      - [Length unit helpers (Emu, Pt, Inches)](references/document-creation.md#311-length-units)
-    - Ex: [Slides, shapes, charts, tables, multi-slide decks](examples/office-documents.md#powerpoint-python-pptx)
-  - PDF from scratch — `reportlab`
-    - Ref: [Canvas, PLATYPUS, tables, fonts, charts, forms](references/pdf-tools.md#4-reportlab----pdf-generation)
-    - Ex: [Simple PDFs, styled reports, multi-column, encrypted, AcroForm](examples/pdf-workflows.md#reportlab--generate-pdfs-from-scratch)
-  - Google Doc / Sheet / Slides — `gws` CLI
-    - Ref:
-      - [Docs (create, insert, export)](references/gws-cli.md#docs)
-      - [Sheets (read / write / append)](references/gws-cli.md#sheets)
-      - [Slides (pages, shapes, images)](references/gws-cli.md#slides)
-    - Ex: [Create + populate via gws CLI](examples/google-workspace.md#google-docs-gws-cli)
+  - Excel (.xlsx) — `claw xlsx`
+    - Ref: [claw xlsx](references/claw/xlsx.md) — `new`, `from-csv`, `from-json`, `from-html`, `from-pdf`, `append`, `style`, `chart`, `table`, `validate`, `protect`, `richtext`, `freeze`, `filter`, `conditional`, `meta`
+    - Escape hatch: [openpyxl API](references/document-creation.md#11-workbook--worksheet-operations) — custom chart construction, overlapping conditional-formatting rule stacks, VBA preservation, pivot-table read, worksheet-scoped styles
+    - Ex: [recipes — xlsx](examples/claw-recipes.md)
+  - Word (.docx) — `claw docx`
+    - Ref: [claw docx](references/claw/docx.md) — `new`, `from-md`, `add-heading|paragraph|table|image`, `header`, `footer`, `toc`, `style`, `section`, `comments`, `custom-xml`
+    - Escape hatch: [python-docx API](references/document-creation.md#21-document-operations) — SmartArt, embedded Excel/chart objects, numbering.xml, track-changes write
+    - Ex: [recipes — docx](examples/claw-recipes.md)
+  - PowerPoint (.pptx) — `claw pptx`
+    - Ref: [claw pptx](references/claw/pptx.md) — `new`, `add-slide`, `add-chart`, `add-table`, `add-image`, `brand`, `chart refresh`, `notes`, `reorder`
+    - Escape hatch: [python-pptx API](references/document-creation.md#31-presentation--slides) — KPI dashboards, animations, SmartArt, master-slide construction
+    - Ex: [recipes — pptx](examples/claw-recipes.md)
+  - PDF from scratch — `claw pdf from-html|from-md|qr|barcode`
+    - Ref: [claw pdf § CREATE](references/claw/pdf.md)
+    - Escape hatch: [reportlab API](references/pdf-tools.md#4-reportlab----pdf-generation) — freeform Canvas drawing, custom NumberedCanvas, AcroForm authoring, custom Flowables
+  - Google Doc — `claw doc`
+    - Ref: [claw doc](references/claw/doc.md) — `create`, `build` (markdown → chunked batchUpdate), `read`, `export`
+    - Escape hatch: [gws docs commands](references/gws-cli.md#docs)
+  - Google Sheet / Drive upload — `claw sheet`
+    - Ref: [claw sheet](references/claw/sheet.md) — `upload --convert`, `download`, `share`, `list`, `move`, `copy`, `rename`, `delete`
+    - Escape hatch: [gws sheets / drive commands](references/gws-cli.md#sheets)
+
 - **READ / EXTRACT**
-  - PDF → text — `PyMuPDF (fitz)`
-    - Ref: [Text extraction, page rendering, search](references/pdf-tools.md#1-pymupdf-fitz----pdf-read--edit--render)
-    - Ex: [Extract text in all modes (plain / blocks / dict)](examples/pdf-workflows.md#pymupdf-fitz--readeditmanipulate)
-  - PDF → tables — `pdfplumber`
-    - Ref: [Table extraction with positional data](references/pdf-tools.md#3-pdfplumber----pdf-data-extraction)
-    - Ex: [Extract tables, regions, search with bbox](examples/pdf-workflows.md#pdfplumber----extract-data)
-  - PDF → images — [Render pages or extract embedded images](references/pdf-tools.md#1-pymupdf-fitz----pdf-read--edit--render) (`fitz`)
-  - Excel → data — [Read cells, iterate rows, evaluate formulas](references/document-creation.md#12-cell-operations) (`openpyxl`)
-  - HTML / XML
-    - [lxml — fast ElementTree, XPath queries, XSLT, schema validation](references/web-parsing.md#lxml)
-    - [BeautifulSoup4 — CSS selectors, tree navigation, lenient HTML](references/web-parsing.md#beautifulsoup4)
-- **EDIT a document**
-  - PDF annotate / redact / draw — [PyMuPDF: highlights, comments, redactions, ink, stamps](references/pdf-tools.md#1-pymupdf-fitz----pdf-read--edit--render)
-  - PDF merge / split / rotate
-    - Ref: [PyPDF2: merge, split, rotate, encrypt, bookmarks](references/pdf-tools.md#2-pypdf2----pdf-merge--split--transform)
-    - Ex: [Merge PDFs, watermark, encrypt, fill forms](examples/pdf-workflows.md#pypdf2pypdf----mergesplittransform)
-  - Excel / Word / PPT — same libs as CREATE (all support open → modify → save)
-  - Which PDF tool to use? — [Quick selection guide (capability matrix)](references/pdf-tools.md#quick-selection-guide)
-- **CONVERT format** — `pandoc`
-  - Any ↔ Any (Markdown, Word, PDF, HTML, EPUB, Slides, LaTeX, ...)
-    - Ref:
-      - [Command syntax & basics](references/conversion-tools.md#command-syntax)
-      - [Input formats (~45)](references/conversion-tools.md#input-formats-45)
-      - [Output formats (~60+)](references/conversion-tools.md#output-formats-60)
-      - [Custom Pandoc templates](references/conversion-tools.md#templates)
-      - [Reference docs (.docx / .pptx style)](references/conversion-tools.md#reference-documents)
-      - [Auto-generate table of contents](references/conversion-tools.md#table-of-contents)
-      - [Bibliography & citations (CSL, BibTeX)](references/conversion-tools.md#bibliography--citations)
-      - [Math rendering (KaTeX, MathJax)](references/conversion-tools.md#math-rendering)
-      - [Code syntax highlighting](references/conversion-tools.md#syntax-highlighting)
-      - [Lua filters / pandoc-citeproc](references/conversion-tools.md#filters)
-      - [PDF engines (xelatex, weasyprint, etc.)](references/conversion-tools.md#pdf-engines)
-      - [Slide shows (reveal.js, beamer, pptx)](references/conversion-tools.md#slide-shows)
-      - [EPUB creation](references/conversion-tools.md#epub-creation)
-      - [Key CLI flags reference](references/conversion-tools.md#key-cli-flags)
-      - [Markdown extensions system](references/conversion-tools.md#extensions-system)
-      - [Custom readers / writers (Lua)](references/conversion-tools.md#custom-readers--writers)
-      - [Metadata blocks](references/conversion-tools.md#metadata)
-      - [Include files](references/conversion-tools.md#include-files)
-      - [Defaults YAML files](references/conversion-tools.md#defaults-files)
-    - Ex:
-      - [Basic conversions (md ↔ docx ↔ pdf ↔ html ↔ pptx)](examples/document-conversion.md#basic-conversions)
-      - [Table of contents](examples/document-conversion.md#table-of-contents)
-      - [Custom styling with CSS / templates](examples/document-conversion.md#custom-styling)
-      - [Bibliography rendering](examples/document-conversion.md#bibliography-and-citations)
-      - [Math equations](examples/document-conversion.md#math-support)
-      - [Multi-file input concatenation](examples/document-conversion.md#multi-file-input)
-      - [Metadata frontmatter](examples/document-conversion.md#metadata)
-      - [Lua filters](examples/document-conversion.md#filters)
-      - [Slide deck creation](examples/document-conversion.md#slide-shows)
-      - [EPUB books](examples/document-conversion.md#epub-creation)
-      - [Advanced options](examples/document-conversion.md#advanced-options)
-      - [Python integration (pypandoc)](examples/document-conversion.md#python-integration)
-  - PDF without LaTeX dependency — [Use PyMuPDF as Pandoc alternative](examples/document-conversion.md#pymupdf-as-pdf-alternative-no-latex-required)
-- **SEND / COMPOSE email**
-  - Build MIME (plain text, HTML, attachments, inline images, reply threading)
-    - Ref:
-      - [Critical rules (encoding, Content-ID, Gmail gotchas)](references/email-reference.md#critical-rules)
-      - [Python `email.mime` (MIMEText, MIMEMultipart, attachments)](references/email-reference.md#python-mime-emailmime)
-    - Ex: [Plain, HTML, attachments, inline images, reply threading](examples/email-workflows.md#python-email-composition-mime)
-  - Send / reply / forward via Gmail
-    - Ref: [Helper commands (`+send`, `+triage`, `+reply`, `+forward`)](references/email-reference.md#gmail-cli-gws-gmail)
-    - Full API: [Gmail messages, drafts, labels, threads, search operators](references/gws-cli.md#gmail)
-    - Ex:
-      - [Sending and reading via gws CLI](examples/email-workflows.md#gmail-via-gws-cli)
-      - [Full workflow: generate report → compose → send with attachment](examples/email-workflows.md#full-workflow-generate-report-compose-email-send-with-attachment)
-- **PROCESS images**
-  - Pillow (Python)
-    - Ref:
-      - [Supported image formats](references/media-tools.md#11-supported-formats)
-      - [Image modes (RGB, RGBA, L, P, CMYK, ...)](references/media-tools.md#12-image-modes)
-      - [Image class — all methods & properties](references/media-tools.md#13-image-class----all-methods-and-properties)
-      - [ImageDraw — shapes, text, polygons](references/media-tools.md#14-imagedraw)
-      - [ImageFont — TTF/OTF font loading](references/media-tools.md#15-imagefont)
-      - [ImageFilter — blur, sharpen, edge detect](references/media-tools.md#16-imagefilter)
-      - [ImageEnhance — brightness, contrast, color, sharpness](references/media-tools.md#17-imageenhance)
-      - [ImageOps — autocontrast, equalize, fit, pad](references/media-tools.md#18-imageops)
-      - [ImageChops — channel ops (add, subtract, blend)](references/media-tools.md#19-imagechops-channel-operations)
-      - [Other modules (Plugins, Sequence, Stat)](references/media-tools.md#110-other-modules)
-    - Ex: [Resize, crop, watermark, filters, enhancement, batch](examples/image-processing.md#pillow-python)
-  - ImageMagick (CLI)
-    - Ref:
-      - [Core CLI tools (magick, identify, convert)](references/media-tools.md#21-core-cli-tools)
-      - [Geometry syntax (`100x200+0+0`, `50%`, etc.)](references/media-tools.md#22-geometry-syntax)
-      - [Resize filters (Lanczos, Mitchell, Cubic)](references/media-tools.md#23-resize-filters)
-      - [Format conversion (PNG ↔ JPEG ↔ WebP ↔ PDF)](references/media-tools.md#24-format-conversion)
-      - [Color operations (channel, colorspace, levels)](references/media-tools.md#25-color-operations)
-      - [Drawing & text annotation](references/media-tools.md#26-drawing-and-text)
-      - [Effects & filters (blur, sharpen, oil paint)](references/media-tools.md#27-effects-and-filters)
-      - [Compositing (over, multiply, screen, blend)](references/media-tools.md#28-compositing)
-      - [Distortions (perspective, barrel, polar)](references/media-tools.md#29-distortions)
-      - [Morphology operations](references/media-tools.md#210-morphology)
-      - [Montage & batch processing](references/media-tools.md#211-montage-and-batch-processing)
-      - [Animation (animated GIF, APNG)](references/media-tools.md#212-animation)
-      - [Image comparison & diff](references/media-tools.md#213-image-comparison)
-      - [PDF operations (rasterize, combine)](references/media-tools.md#214-pdf-operations)
-      - [Metadata (EXIF, IPTC, XMP)](references/media-tools.md#215-metadata)
-      - [Miscellaneous operators](references/media-tools.md#216-miscellaneous-operators)
-    - Ex: [Resize, convert, composite, montage, batch (mogrify)](examples/image-processing.md#imagemagick-magick-cli)
-- **PROCESS video / audio** — `ffmpeg`
-  - Ref:
-    - [Video codecs (h264, h265, vp9, av1)](references/media-tools.md#31-video-codecs)
-    - [Audio codecs (aac, mp3, opus, flac)](references/media-tools.md#32-audio-codecs)
-    - [Container formats (mp4, mkv, webm, mov)](references/media-tools.md#33-container-formats)
-    - [Rate control (CRF, bitrate, two-pass)](references/media-tools.md#34-rate-control)
-    - [Video filters (scale, crop, overlay, fps)](references/media-tools.md#35-video-filters--vf---filterv)
-    - [Audio filters (volume, normalize, atempo)](references/media-tools.md#36-audio-filters--af---filtera)
-    - [Device capture (screen, webcam, microphone)](references/media-tools.md#37-device-capture)
-    - [Subtitles (burn-in, soft, extract)](references/media-tools.md#38-subtitles)
-    - [Image operations (frame extract, slideshow)](references/media-tools.md#39-image-operations)
-    - [Advanced features (HW accel, streaming)](references/media-tools.md#310-advanced-features)
-    - [ffprobe — inspect streams & metadata](references/media-tools.md#311-ffprobe)
-  - Ex:
-    - [Video conversion (format, codec, container)](examples/video-audio.md#video-conversion)
-    - [Extraction & trimming (audio, frames, ranges)](examples/video-audio.md#extraction--trimming)
-    - [Merging & concatenation](examples/video-audio.md#merging--concatenation)
-    - [Thumbnails & frame extraction](examples/video-audio.md#thumbnails--frames)
-    - [GIF & animated formats](examples/video-audio.md#gif--animated-formats)
-    - [Compression & scaling](examples/video-audio.md#compression--scaling)
-    - [Overlays & effects](examples/video-audio.md#overlays--effects)
-    - [Speed & direction (timelapse, slow-mo, reverse)](examples/video-audio.md#speed--direction)
-    - [Audio operations (extract, normalize, mix)](examples/video-audio.md#audio-operations)
-    - [Advanced workflows](examples/video-audio.md#advanced)
-- **GOOGLE WORKSPACE** — `gws` CLI
-  - General reference
-    - [Critical rules (params vs JSON, positional args, gotchas)](references/gws-cli.md#critical-rules-read-first--violations-cause-errors)
-    - [General command syntax](references/gws-cli.md#general-syntax)
-    - [Global CLI flags](references/gws-cli.md#global-cli-flags)
-    - [Ergonomic `+helper` commands (`+send`, `+triage`, `+reply`)](references/gws-cli.md#ergonomic-helper-commands)
-    - [Auth (login, status, refresh, multi-account)](references/gws-cli.md#auth)
-  - Services
-    - [Drive — files, folders, upload, download, share](references/gws-cli.md#drive)
-    - [Sheets — read, write, append, format](references/gws-cli.md#sheets)
-    - [Docs — create, insert, update, export](references/gws-cli.md#docs)
-    - [Slides — pages, shapes, text, images](references/gws-cli.md#slides)
-    - [Gmail — messages, drafts, labels, threads, search operators](references/gws-cli.md#gmail)
-    - [Calendar — events, attendees, recurring](references/gws-cli.md#calendar)
-    - [Tasks — task lists, completion](references/gws-cli.md#tasks)
-    - [Common MIME types](references/gws-cli.md#common-mime-types)
-    - [Sharing patterns (public, domain, user)](references/gws-cli.md#sharing-patterns)
-  - Ex: [Working examples (Docs creation, chunking strategy)](examples/google-workspace.md#google-docs-gws-cli)
-- **MANAGE tasks (ClickUp)** — `clickup` CLI
-  - Ref:
-    - [Conventions (positional task IDs, priorities, dates)](references/clickup-cli.md#conventions-important)
-    - [Setup & authentication](references/clickup-cli.md#setup)
-    - [Output flags (most commands)](references/clickup-cli.md#output-flags-most-commands)
-    - [Task management (view, create, edit, search, bulk)](references/clickup-cli.md#task-management)
-    - [Status management (transitions, list statuses)](references/clickup-cli.md#status-management)
-    - [Sprint management (current sprint, sprint view)](references/clickup-cli.md#sprint-management)
-    - [Comments (add, list, mention teammates)](references/clickup-cli.md#comments)
-    - [Time tracking (start, stop, log, list)](references/clickup-cli.md#time-tracking)
-    - [Custom fields (discover, set, clear)](references/clickup-cli.md#custom-fields)
-    - [Git integration (branch auto-detect)](references/clickup-cli.md#git-integration)
-    - [Checklists, dependencies, tags](references/clickup-cli.md#checklists-dependencies-tags-on-tasks)
-    - [Workspace (spaces, lists, members)](references/clickup-cli.md#workspace)
-    - [Misc / less-used commands](references/clickup-cli.md#more)
-  - Ex:
-    - [Read a task](examples/clickup-workflows.md#read-a-task)
-    - [Search tasks](examples/clickup-workflows.md#search-tasks)
-    - [List tasks in a list](examples/clickup-workflows.md#list-tasks-in-a-list)
-    - [Create a task](examples/clickup-workflows.md#create-a-task)
-    - [Update task status](examples/clickup-workflows.md#update-task-status)
-    - [Sprint view](examples/clickup-workflows.md#sprint-view)
-    - [Comments](examples/clickup-workflows.md#comments)
-    - [Time tracking](examples/clickup-workflows.md#time-tracking)
-    - [Custom fields](examples/clickup-workflows.md#custom-fields)
-    - [Git integration (branch workflow)](examples/clickup-workflows.md#git-integration)
-    - [Workspace navigation](examples/clickup-workflows.md#workspace)
-    - [Development workflow pattern](examples/clickup-workflows.md#development-workflow-pattern)
-- **DATA PIPELINE**
-  - Working examples
-    - [CSV → styled Excel → Google Sheets](examples/data-pipelines.md#csv-to-styled-excel-to-google-sheets)
-    - [PDF → extract tables → Excel](examples/data-pipelines.md#pdf-to-extract-tables-to-excel)
-    - [Google Sheet → download → modify → upload back](examples/data-pipelines.md#google-sheet-download-modify-upload-back)
-    - [Database → styled Excel report](examples/data-pipelines.md#database-to-excel-report-styled)
-    - [Database → Google Sheets (direct)](examples/data-pipelines.md#database-to-google-sheets-direct)
-    - [JSON → Excel](examples/data-pipelines.md#json-to-excel)
-    - [HTML table → Excel (BeautifulSoup)](examples/data-pipelines.md#html-table-to-excel-beautifulsoup)
-    - [Excel → PDF (reportlab Table)](examples/data-pipelines.md#excel-to-pdf-reportlab-table)
-    - [Markdown → PDF (Pandoc)](examples/data-pipelines.md#markdown-to-pdf-pandoc)
-    - [Full pipeline: DB query → process → Excel + PDF → upload Drive → email](examples/data-pipelines.md#full-pipeline-db-query-to-process-to-excel--pdf-to-upload-drive-to-email)
-- **QUERY database**
-  - MySQL MCP — [setup instructions](references/setup.md#4-mcp-servers)
-- **AUTOMATE browser (Chrome DevTools MCP)**
-  - Ref:
-    - [Critical rules (debug port, --user-data-dir gotcha)](references/chrome-devtools.md#critical-rules)
-    - [Edge — default profile (preserves cookies/logins)](references/chrome-devtools.md#edge--default-profile)
-    - [Edge — isolated profile (no kill needed)](references/chrome-devtools.md#edge--isolated-profile)
-    - [Chrome](references/chrome-devtools.md#chrome)
-    - [Verification](references/chrome-devtools.md#verification)
-  - Ex:
-    - [Launch Edge with user's real profile](examples/chrome-devtools.md#1-launch-edge-with-users-real-profile)
-    - [Launch Edge with throwaway profile](examples/chrome-devtools.md#2-launch-edge-with-a-throwaway-profile)
-    - [Diagnose: port won't open](examples/chrome-devtools.md#3-diagnose-port-wont-open)
+  - PDF → text — `claw pdf extract-text [--mode plain|blocks|dict|html]`
+    - Ref: [claw pdf § READ](references/claw/pdf.md) · [OCR](references/claw/pdf.md)
+    - Escape hatch: [PyMuPDF API](references/pdf-tools.md#1-pymupdf-fitz----pdf-read--edit--render)
+  - PDF → tables — `claw pdf extract-tables [--strategy text --vlines …]`
+    - Ref: [claw pdf § extract-tables](references/claw/pdf.md)
+    - Escape hatch: [pdfplumber API](references/pdf-tools.md#3-pdfplumber----pdf-data-extraction)
+  - PDF → images — `claw pdf extract-images | render`
+    - Escape hatch: [PyMuPDF render API](references/pdf-tools.md#1-pymupdf-fitz----pdf-read--edit--render)
+  - Excel → data — `claw xlsx read | sql | stat | to-csv`
+  - HTML — `claw html select | text | strip | sanitize | absolutize | rewrite`
+    - Ref: [claw html](references/claw/html.md)
+    - Escape hatch: [BeautifulSoup4 reference](references/web-parsing.md#beautifulsoup4)
+  - XML — `claw xml xpath | xslt | validate | canonicalize | stream-xpath | to-json`
+    - Ref: [claw xml](references/claw/xml.md)
+    - Escape hatch: [lxml reference](references/web-parsing.md#lxml) — XSLT params, Schematron, custom element classes, resolver registration
+  - Web page → article — `claw web fetch | extract | table | links | snapshot`
+    - Ref: [claw web](references/claw/web.md)
+  - Email — `claw email search | download-attachment`
+
+- **EDIT**
+  - PDF annotate / redact / watermark — `claw pdf annotate|redact|watermark|stamp|flatten`
+    - Ref: [claw pdf § STAMP / SECURE / ANNOTATE](references/claw/pdf.md)
+    - Escape hatch: [PyMuPDF annotation API](references/pdf-tools.md#1-pymupdf-fitz----pdf-read--edit--render)
+  - PDF merge / split / rotate / crop — `claw pdf merge|split|rotate|crop`
+    - Escape hatch: [pypdf API](references/pdf-tools.md#2-pypdf2----pdf-merge--split--transform)
+  - Excel / Word / PPT — same `claw xlsx|docx|pptx` nouns (CREATE verbs also edit in place)
+  - Image — `claw img crop | resize | composite | exif | rename | batch`
+    - Ref: [claw img](references/claw/img.md)
+  - HTML tree — `claw html unwrap | wrap | replace`
+  - XML — `claw xml fmt` (pretty-print) · [canonicalize](references/claw/xml.md)
+
+- **CONVERT format** — `claw convert`
+  - Any ↔ Any (Markdown, Word, PDF, HTML, EPUB, Slides, LaTeX, …) — `claw convert <in> <out> [--toc --template F --ref-doc F --css F --engine xelatex|weasyprint|typst]`
+    - Ref: [claw convert](references/claw/convert.md)
+    - Escape hatch: [Pandoc reference](references/conversion-tools.md) — custom Lua filters, Defaults YAML beyond passthrough
+    - Ex: [recipes — convert](examples/claw-recipes.md)
+  - PDF without LaTeX — `claw convert md2pdf-nolatex` (pandoc → HTML → PyMuPDF Story)
+  - Multi-chapter book — `claw convert book <chapters…> [--csl FILE --bib FILE]`
+  - Slides — `claw convert slides <in.md> --format reveal|beamer|pptx`
+
+- **SEND / COMPOSE email** — `claw email`
+  - Build + send — `claw email send --to … [--attach @PATH] [--html FILE] [--inline CID=…]`
+    - Ref: [claw email](references/claw/email.md)
+    - Escape hatch: [Python MIME + Gmail API reference](references/email-reference.md) — bulk merge >100 recipients, iCalendar, S/MIME
+  - Reply / forward / draft — `claw email reply|forward|draft <msg-id>` (auto In-Reply-To / References)
+  - Search — `claw email search --q "…" [--max N]`
+  - Download attachment — `claw email download-attachment <msg-id> <att-id> --out PATH`
+
+- **PROCESS images** — `claw img`
+  - Resize / fit / pad / thumb / crop — `claw img resize|fit|pad|thumb|crop` (ImageMagick geometry syntax)
+  - Enhance — `claw img enhance [--autocontrast --equalize --posterize --solarize]` · `sharpen` · `composite` · `watermark` · `overlay`
+  - Convert format — `claw img convert | to-jpeg | to-webp [--animated --lossless]`
+  - EXIF — `claw img exif [strip|auto-rotate|set]` · `rename --template "{CreateDate:%Y%m%d}_{Camera}.{ext}"`
+  - Batch — `claw img batch <dir> --op "resize:1024|strip|webp:85" [--recursive]`
+  - Frames → GIF — `claw img gif-from-frames <dir> --fps N`
+    - Ref: [claw img](references/claw/img.md) · Escape hatch: [Pillow / ImageMagick reference](references/media-tools.md)
+
+- **PROCESS video / audio** — `claw media`
+  - Trim / compress / scale / concat — `claw media trim|compress|scale|concat`
+  - Extract audio / frames — `claw media extract-audio|thumbnail|gif`
+  - Normalize / effects — `claw media loudnorm|speed|fade|burn-subs|crop-auto`
+  - Info — `claw media info <file> [--json]` (jc-style normalized ffprobe output)
+    - Ref: [claw media](references/claw/media.md) · Escape hatch: [ffmpeg reference](references/media-tools.md#3-ffmpeg)
+
+- **GOOGLE WORKSPACE** — `claw doc | claw sheet | claw email` (plus raw `gws` for uncovered APIs)
+  - Docs — see CREATE / READ branches above
+  - Sheets / Drive — see CREATE branch above
+  - Gmail — see SEND branch above
+  - Escape hatch (all services): [gws CLI reference](references/gws-cli.md) — Drive permissions, Calendar events, Tasks, batch-update request shapes
+
+- **MANAGE tasks (ClickUp)** — `clickup` CLI (already a CLI — `claw` does not wrap)
+  - Ref: [clickup-cli reference](references/clickup-cli.md)
+  - Ex: [clickup-workflows.md](examples/clickup-workflows.md)
+
+- **AUTOMATE browser** — `claw browser launch` + Chrome DevTools MCP
+  - Launch — `claw browser launch [--profile default|throwaway] [--port 9222]`
+    - Ref: [claw browser](references/claw/browser.md)
+  - Post-launch automation — Chrome DevTools MCP tool calls
+    - Ref: [chrome-devtools.md](references/chrome-devtools.md) · Ex: [chrome-devtools.md examples](examples/chrome-devtools.md)
+
+- **QUERY database** — MySQL MCP
+  - Ref: [MCP server setup](references/setup.md#4-mcp-servers)
+
+- **ORCHESTRATE (multi-step pipelines)** — `claw pipeline run <recipe.yaml>`
+  - Ref: [claw pipeline](references/claw/pipeline.md) — YAML DSL with `${vars.*}`, `${step.output}`, `${env:…}`, `${file:…}` interpolation; Nextflow-style content-hash cache + `--resume`; parallel execution; `retries`, `on-error`, `when:` guards
+  - Commands: `run` · `validate` · `list-steps` · `graph`
+  - Ex: [claw-pipelines.md](examples/claw-pipelines.md) — 10+ worked recipes (DB→XLSX+PDF→Drive→Gmail, CSV→Sheet, PDF tables→multi-sheet XLSX+summary, photo batch, video pipeline, book build)
+
+- **DIAGNOSE environment** — `claw doctor`
+  - Ref: [claw doctor](references/claw/doctor.md) — Python packages, CLI tools, LaTeX packages, Gmail scopes, config validation, cache health
+  - Output modes: human · `--json` · `--prometheus`
+
+- **SHELL COMPLETIONS** — `claw completion bash|zsh|fish|pwsh`
+  - Ref: [claw completion](references/claw/completion.md)
+
 - **SETUP / INSTALL**
-  - [Python packages (openpyxl, pymupdf, reportlab, ...)](references/setup.md#1-python-packages)
-  - [CLI tools (gws, clickup, git, ffmpeg, pandoc, magick, node)](references/setup.md#2-cli-tools)
-  - [Google Workspace auth (OAuth, multiple accounts)](references/setup.md#3-google-workspace-gws-auth)
-  - [MCP servers (MySQL, Chrome DevTools)](references/setup.md#4-mcp-servers)
-  - [LSP plugins (Pyright, TypeScript, jdtls, Kotlin) + Windows fix](references/setup.md#5-lsp-plugins)
-  - [Notes & gotchas](references/setup.md#6-notes)
+  - [Python packages](references/setup.md#1-python-packages) · [CLI tools](references/setup.md#2-cli-tools) · [Google Workspace auth](references/setup.md#3-google-workspace-gws-auth) · [MCP servers](references/setup.md#4-mcp-servers) · [LSP plugins](references/setup.md#5-lsp-plugins) · [CLAUDE.md integration](references/setup.md#claudemd-integration) · [Notes](references/setup.md#6-notes)
   - [Run healthcheck (verify + auto-fix everything)](scripts/healthcheck.py)
+
 - **CUSTOMIZE Claude apps (Code + Desktop) for local-model use**
-  - [Overview & comparison table](references/claude-customization.md#at-a-glance)
-  - [Why two different approaches](references/claude-customization.md#why-two-different-approaches)
-  - [Launch wrappers (codel/claudel/claudedl/codexl)](references/claude-customization.md#launch-wrappers)
-  - [Installing wrappers to PATH](references/claude-customization.md#installing-the-wrappers)
-  - [When to use what](references/claude-customization.md#when-to-use-what)
+  - [Overview & comparison table](references/claude-customization.md#at-a-glance) · [Why two different approaches](references/claude-customization.md#why-two-different-approaches) · [Launch wrappers (codel/claudel/claudedl/codexl)](references/claude-customization.md#launch-wrappers) · [Installing wrappers to PATH](references/claude-customization.md#installing-the-wrappers) · [When to use what](references/claude-customization.md#when-to-use-what)
   - **PATCH Claude Code binary** — bigger context/output ([detail](references/patchers/claude-patcher.md))
     - [Patchable constants](references/patchers/claude-patcher.md#patchable-constants) · [Usage](references/patchers/claude-patcher.md#usage) · [After updates](references/patchers/claude-patcher.md#after-claude-code-updates) · [How it works](references/patchers/claude-patcher.md#how-it-works)
   - **TOGGLE Claude Desktop Custom 3P (BYOM)** — registry policy, no binary changes ([detail](references/patchers/claude-desktop-3p.md))
-    - [Requirements (HTTPS gateway, UAC)](references/patchers/claude-desktop-3p.md#requirements) · [Usage](references/patchers/claude-desktop-3p.md#usage) · [Verifying via main.log](references/patchers/claude-desktop-3p.md#verifying-it-worked) · [Registry schema](references/patchers/claude-desktop-3p.md#registry-schema-what-gets-written)
+    - [Requirements](references/patchers/claude-desktop-3p.md#requirements) · [Usage](references/patchers/claude-desktop-3p.md#usage) · [Verifying via main.log](references/patchers/claude-desktop-3p.md#verifying-it-worked) · [Registry schema](references/patchers/claude-desktop-3p.md#registry-schema-what-gets-written)
 - **PATCH third-party apps**
   - **WHITEN LM Studio tray icon** — on-demand `apply` / `restore`; re-run after each LM Studio update ([detail](references/patchers/lm-studio-white-tray.md))
     - [How it works](references/patchers/lm-studio-white-tray.md#how-it-works) · [Usage](references/patchers/lm-studio-white-tray.md#usage) · [Customize icon](references/patchers/lm-studio-white-tray.md#customize-icon-design) · [Troubleshooting](references/patchers/lm-studio-white-tray.md#troubleshooting)
+  - **INJECT markdown section into any file** — generic, idempotent ([detail](references/patchers/md-section-patcher.md))
+    - [Worked example](references/patchers/md-section-patcher.md#worked-example)
 
-## Templates
-
-- Reference: [references/_TEMPLATE.md](references/_TEMPLATE.md) — Critical Rules → numbered API sections → Quick Reference
-- Example: [examples/_TEMPLATE.md](examples/_TEMPLATE.md) — Numbered workflows (Basic → Styled → Pipeline)
-- Script: [scripts/_TEMPLATE.py](scripts/_TEMPLATE.py) — exit codes, status prefixes, cross-platform conventions
-- To add: copy template → fill placeholders → add to File Map above → update healthcheck + setup.md
-
-## Scripts
-
-- [healthcheck.py](scripts/healthcheck.py) — verify packages, CLI tools, MCP servers, LSP plugins; auto-fix Windows patches
-- [claude-patcher.js](scripts/patchers/claude-patcher.js) — Claude Code binary patcher (context window, output limits)
-- [claude-desktop-3p.py](scripts/patchers/claude-desktop-3p.py) — Claude Desktop 3P/BYOM toggle (registry policy, no binary changes)
-- [wrappers/codel.bat](scripts/wrappers/codel.bat) — VS Code Insiders + local-model env
-- [wrappers/claudel.bat](scripts/wrappers/claudel.bat) — Claude Code CLI + local-model env
-- [wrappers/claudedl.bat](scripts/wrappers/claudedl.bat) — Claude Desktop launcher + dynamic MSIX path + local-model env
-- [wrappers/codexl.bat](scripts/wrappers/codexl.bat) — Codex CLI in OSS mode
-- [patchers/lm-studio-white-tray.py](scripts/patchers/lm-studio-white-tray.py) — LM Studio white tray icon patcher (on-demand apply/restore)
-- [patchers/md-section-patcher.py](scripts/patchers/md-section-patcher.py) — generic idempotent markdown-section injector (used by setup.md to maintain the `claude-claw` block in `~/.claude/CLAUDE.md`)

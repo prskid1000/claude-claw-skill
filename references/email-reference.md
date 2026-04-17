@@ -1,18 +1,20 @@
 # Email / MIME Composition + Gmail CLI Reference
 
+> **TL;DR: use `claw email <verb>` for common tasks.** See [references/claw/email.md](claw/email.md). This reference documents the library API (Python `email.mime`) and raw `gws gmail` surface for escape-hatch / advanced workflows not covered by `claw email` — mail-merge with per-recipient variables, iCalendar invites, S/MIME / PGP, label mutations, batch message delete, streaming new-email watchers, and the Gmail API auth model.
+
 ## Contents
 
-- **SEND email (Gmail CLI)** — `gws gmail +send` / `+reply` / `+forward`
-  - [Helper commands for send, triage, reply, forward](#gmail-cli-gws-gmail)
+- **SEND / REPLY / FORWARD** *(covered by `claw email send/reply/forward/draft`)*
+  - [Helper commands (`+send`, `+triage`, `+reply`, `+forward`)](#gmail-cli-gws-gmail)
   - Full raw API: [gws-cli.md — Gmail](gws-cli.md#gmail)
-- **BUILD MIME message** — Python `email.mime`
+- **BUILD MIME message directly** — Python `email.mime`
   - [Critical rules (encoding, Content-ID, Gmail gotchas)](#critical-rules)
   - [MIMEText, MIMEMultipart, attachments, inline images, headers, threading](#python-mime-emailmime)
-- Ex: [Working examples](../examples/email-workflows.md#python-email-composition-mime)
+- **Escape-hatch recipes** — [iCalendar invites, mail-merge, S/MIME, batch label ops](#escape-hatch-recipes)
 
 ## CRITICAL RULES
 
-1. **For simple emails, use `gws gmail +send`** — don't build MIME manually unless you need attachments or inline images.
+1. **For simple sends, prefer `claw email send`** — it does MIME assembly, base64url, and threading for you. This reference is for the escape hatches.
 2. **MIME composition is Python code** — NOT a CLI command. Build the message in Python, then send via Gmail API.
 3. **Gmail API send requires base64url encoding** — use `base64.urlsafe_b64encode(msg.as_bytes()).decode("ascii")`.
 4. **Content-ID for inline images** must match the `cid:` reference in HTML exactly (including angle brackets in the header).
@@ -25,13 +27,11 @@ WRONG: MIMEText("Hello")                              # Missing subtype and char
 WRONG: MIMEText("Hello", "text")                       # Subtype is "plain" not "text"
 WRONG: base64.b64encode(msg.as_bytes())                # Gmail needs urlsafe, not standard
 WRONG: img.add_header("Content-ID", "logo_id")         # Missing angle brackets
-WRONG: gws gmail users messages send ... --body "Hi"   # --body is for +send helper only
 
 RIGHT: MIMEText("Hello", "plain", "utf-8")
 RIGHT: MIMEText("<b>Hi</b>", "html", "utf-8")
 RIGHT: base64.urlsafe_b64encode(msg.as_bytes()).decode("ascii")
 RIGHT: img.add_header("Content-ID", "<logo_id>")       # Angle brackets required
-RIGHT: gws gmail +send --to user@x.com --subject 'Hi' --body 'Hello'
 ```
 
 ---
@@ -49,11 +49,8 @@ from email import encoders
 import base64
 ```
 
----
-
 ### MIMEText — Create a text message part
 
-**Constructor:**
 | Param | Type | Required | Default | Description |
 |-------|------|----------|---------|-------------|
 | `_text` | string | YES | — | The text content |
@@ -61,72 +58,28 @@ import base64
 | `_charset` | string | no | `"us-ascii"` | Always use `"utf-8"` |
 
 ```python
-# Plain text
-msg = MIMEText("Hello, world!", "plain", "utf-8")
-
-# HTML
-msg = MIMEText("<h1>Hello</h1><p>World</p>", "html", "utf-8")
+msg = MIMEText("Hello", "plain", "utf-8")
+msg = MIMEText("<h1>Hello</h1>", "html", "utf-8")
 ```
 
----
+### MIMEMultipart — container subtypes
 
-### MIMEMultipart — Create a container for multiple parts
-
-**Constructor:**
-| Param | Type | Required | Default | Description |
-|-------|------|----------|---------|-------------|
-| `_subtype` | string | no | `"mixed"` | Container type (see table below) |
-
-**Subtype values (choose the RIGHT one):**
 | Subtype | Purpose | When to use |
 |---------|---------|-------------|
 | `"mixed"` | Attachments alongside text body | Email with file attachments |
 | `"alternative"` | Multiple representations (plain + HTML) | Email with both plain text and HTML versions |
 | `"related"` | HTML with inline images (Content-ID refs) | HTML email with embedded images |
 
-```python
-# Mixed (text + attachments)
-msg = MIMEMultipart("mixed")
-msg.attach(MIMEText("Body text", "plain"))
+### Attachments
 
-# Alternative (plain + HTML)
-msg = MIMEMultipart("alternative")
-msg.attach(MIMEText("Plain body", "plain"))
-msg.attach(MIMEText("<h1>HTML body</h1>", "html"))
+`MIMEBase` + `encoders.encode_base64` is the general form; `MIMEApplication` is the shortcut for the common case.
 
-# Related (HTML with inline images)
-msg = MIMEMultipart("related")
-html = MIMEText('<img src="cid:logo_id">', "html")
-msg.attach(html)
-with open("logo.png", "rb") as f:
-    img = MIMEImage(f.read())
-    img.add_header("Content-ID", "<logo_id>")
-    img.add_header("Content-Disposition", "inline", filename="logo.png")
-    msg.attach(img)
-```
-
----
-
-### Attachments (MIMEBase + encode_base64)
-
-```python
-with open("report.pdf", "rb") as f:
-    part = MIMEBase("application", "octet-stream")
-    part.set_payload(f.read())
-    encoders.encode_base64(part)
-    part.add_header("Content-Disposition", "attachment", filename="report.pdf")
-    msg.attach(part)
-```
-
-#### Shortcut with MIMEApplication
 ```python
 with open("report.xlsx", "rb") as f:
     part = MIMEApplication(f.read(), Name="report.xlsx")
     part["Content-Disposition"] = 'attachment; filename="report.xlsx"'
     msg.attach(part)
 ```
-
----
 
 ### Headers
 
@@ -143,57 +96,20 @@ with open("report.xlsx", "rb") as f:
 | `Date` | Send date | `msg["Date"] = email.utils.formatdate(localtime=True)` |
 | `Message-ID` | Unique message ID | `msg["Message-ID"] = email.utils.make_msgid()` |
 
----
-
 ### Gmail API Raw Format (base64url)
 
 ```python
 raw = base64.urlsafe_b64encode(msg.as_bytes()).decode("ascii")
-# Use as: {"raw": raw} in Gmail API send
+# {"raw": raw} in Gmail API send
 ```
 
----
+### Inline image pattern (Content-ID)
 
-### Multiple Attachments Pattern
-
-```python
-msg = MIMEMultipart("mixed")
-msg["To"] = "recipient@example.com"
-msg["From"] = "sender@example.com"
-msg["Subject"] = "Monthly Reports"
-
-# Body
-msg.attach(MIMEText("Please find the reports attached.", "plain"))
-
-# Attach multiple files
-for filepath in ["report.pdf", "data.xlsx", "chart.png"]:
-    with open(filepath, "rb") as f:
-        part = MIMEBase("application", "octet-stream")
-        part.set_payload(f.read())
-        encoders.encode_base64(part)
-        part.add_header("Content-Disposition", "attachment",
-                        filename=os.path.basename(filepath))
-        msg.attach(part)
-```
-
----
-
-### Inline Images (Content-ID for HTML email)
+The `cid:` in the HTML must exactly match the `Content-ID` header (angle-bracket-wrapped).
 
 ```python
 msg = MIMEMultipart("related")
-
-html_body = """\
-<html>
-<body>
-  <h1>Report</h1>
-  <img src="cid:chart_img">
-  <p>See the chart above.</p>
-</body>
-</html>
-"""
-msg.attach(MIMEText(html_body, "html"))
-
+msg.attach(MIMEText('<img src="cid:chart_img">', "html"))
 with open("chart.png", "rb") as f:
     img = MIMEImage(f.read(), _subtype="png")
     img.add_header("Content-ID", "<chart_img>")
@@ -201,24 +117,16 @@ with open("chart.png", "rb") as f:
     msg.attach(img)
 ```
 
----
+### Reply threading
 
-### Reply Threading
+For Gmail API, set `threadId` in the send request **and** set `In-Reply-To` + `References`:
 
 ```python
-# Replying to an existing message
-original_message_id = "<original-id@mail.gmail.com>"
-original_references = "<ref1@mail.gmail.com> <ref2@mail.gmail.com>"
-
-msg["In-Reply-To"] = original_message_id
+msg["In-Reply-To"] = original_message_id        # "<original-id@mail.gmail.com>"
 msg["References"] = f"{original_references} {original_message_id}"
 msg["Subject"] = "Re: Original Subject"
-
-# For Gmail API, also set threadId in the send request:
-# {"raw": raw, "threadId": "thread_id_here"}
+# Gmail API: {"raw": raw, "threadId": "thread_id_here"}
 ```
-
----
 
 ---
 
@@ -229,8 +137,6 @@ All raw Gmail API commands live under `gws gmail users ...` and take `userId` in
 > **Windows note:** `gws` is a `.cmd` shim on Windows. When calling it from Python `subprocess.run([...])` without `shell=True`, resolve the full path first: `GWS = shutil.which("gws") or "gws"`. Otherwise you'll get `FileNotFoundError`.
 
 ### Convenience helpers (no MIME plumbing required)
-
-For common flows, prefer these helpers over the raw API — they handle RFC 2822 / base64url / threading automatically:
 
 ```bash
 # Send a new email
@@ -251,4 +157,100 @@ gws gmail +forward   --message-id <MESSAGE_ID> --to dave@x.com --body 'FYI'
 
 For attachments, custom headers, or batch operations, fall through to the raw API.
 
-> Full Gmail API command reference (messages, drafts, labels, threads, attachments, history, search operators): [gws-cli.md -- Gmail](gws-cli.md#gmail)
+> Full Gmail API command reference (messages, drafts, labels, threads, attachments, history, search operators): [gws-cli.md — Gmail](gws-cli.md#gmail).
+
+### Scope model (Gmail API)
+
+| Scope | Enables |
+|---|---|
+| `gmail.send` | Send only. Cannot read. |
+| `gmail.readonly` | Read messages, search, list labels/threads. Does **not** reliably fetch attachment bodies on some org tenants. |
+| `gmail.modify` | Read + label mutation + attachment download (org-portable). Required for `claw email download-attachment` on most tenants. |
+| `gmail.labels` | Label CRUD only. |
+| `gmail.compose` | Draft creation only. |
+
+`gmail.send` does **not** imply `gmail.readonly`. Replies, forwards, and search need their own scopes. `claw doctor` prompts to re-login when a scope is missing. Gmail API enablement in Cloud Console is a separate step from the OAuth consent screen.
+
+---
+
+## Escape-hatch recipes
+
+The snippets below are what `claw email` explicitly doesn't wrap. Use them when the CLI flag surface can't express what you need.
+
+### 1. Calendar invite (iCalendar `METHOD:REQUEST`)
+
+`claw email` has no `text/calendar` surface. Build it by hand:
+
+```python
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
+
+ical = (
+    "BEGIN:VCALENDAR\r\nVERSION:2.0\r\nMETHOD:REQUEST\r\n"
+    "BEGIN:VEVENT\r\nUID:evt-123@x.com\r\nSUMMARY:Kickoff\r\n"
+    "DTSTART:20260420T140000Z\r\nDTEND:20260420T150000Z\r\n"
+    "ORGANIZER:mailto:me@x.com\r\nATTENDEE;RSVP=TRUE:mailto:alice@x.com\r\n"
+    "END:VEVENT\r\nEND:VCALENDAR\r\n"
+)
+msg = MIMEMultipart("mixed")
+msg.attach(MIMEText("Kickoff invite attached.", "plain", "utf-8"))
+cal_part = MIMEText(ical, "calendar", "utf-8")
+cal_part.replace_header("Content-Type", 'text/calendar; charset="utf-8"; method=REQUEST')
+msg.attach(cal_part)
+```
+
+### 2. Mail-merge with per-recipient variables + 429 backoff
+
+`claw email send` sends one RFC 2822 per call. Loop with jittered backoff for bulk sends — Gmail rate-limits at around 250 messages/day for personal and tighter bursts per minute:
+
+```python
+import time, random, subprocess, json
+
+for row in recipients:                      # each row: {"to": ..., "name": ...}
+    body = template.format(**row)
+    for attempt in range(5):
+        p = subprocess.run(
+            ["claw", "email", "send", "--to", row["to"],
+             "--subject", "Hi", "--body", body, "--json"],
+            capture_output=True, text=True,
+        )
+        if p.returncode == 0:
+            break
+        err = json.loads(p.stderr or "{}")
+        if err.get("code") != "RATE_LIMIT":
+            raise RuntimeError(err)
+        time.sleep((2 ** attempt) + random.random())
+```
+
+### 3. S/MIME signed body (`multipart/signed`)
+
+```python
+from email.mime.multipart import MIMEMultipart
+from email.mime.application import MIMEApplication
+# sig_bytes = PKCS#7 detached signature over body.as_bytes()
+signed = MIMEMultipart("signed", protocol="application/pkcs7-signature",
+                       micalg="sha-256")
+signed.attach(body)
+sig = MIMEApplication(sig_bytes, _subtype="pkcs7-signature", name="smime.p7s")
+sig["Content-Disposition"] = 'attachment; filename="smime.p7s"'
+signed.attach(sig)
+```
+
+### 4. Batch label mutation on fetched messages
+
+`claw email` doesn't mutate labels. Use `gws` directly:
+
+```bash
+gws gmail users messages batchModify \
+  --params '{"userId":"me"}' \
+  --json '{"ids":["18e2f3a","18e2f3b"],"addLabelIds":["Label_123"],"removeLabelIds":["INBOX"]}'
+```
+
+### 5. Streaming new-email watcher (long-running)
+
+Gmail push → Pub/Sub is the scalable path; for small workloads, the `+watch` helper emits NDJSON as new messages arrive:
+
+```bash
+gws gmail +watch --query 'is:unread newer_than:1h' --format json \
+  | while read line; do echo "$line" | jq '.subject'; done
+```

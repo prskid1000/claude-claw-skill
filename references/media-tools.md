@@ -1,25 +1,37 @@
 # Media Processing Tools Reference
 
-Comprehensive API and command reference for Pillow (PIL), ImageMagick, and FFmpeg.
+> **TL;DR: use `claw img <verb>` / `claw media <verb>` for common tasks.** See [references/claw/img.md](claw/img.md) (Pillow + ImageMagick wrapper) and [references/claw/media.md](claw/media.md) (ffmpeg wrapper). This reference documents the Pillow Python API, the full ImageMagick flag / operator surface, and the full ffmpeg encoder / filter / codec matrix — the escape-hatch content `claw` deliberately doesn't wrap (per-channel math, morphology, filter chains, `-fx` expressions, complex filtergraphs, HDR tone-mapping, device capture, etc.).
 
 ## Contents
 
 - **PROCESS images (Python)** — `Pillow`
-  - [Supported formats](#11-supported-formats) · [Image modes](#12-image-modes) · [Image class — all methods](#13-image-class----all-methods-and-properties)
-  - [ImageDraw — shapes/text](#14-imagedraw) · [ImageFont — TTF/OTF](#15-imagefont) · [ImageFilter — blur/sharpen](#16-imagefilter)
-  - [ImageEnhance — brightness/contrast](#17-imageenhance) · [ImageOps — autocontrast/fit](#18-imageops) · [ImageChops — channel ops](#19-imagechops-channel-operations)
-  - [Other modules (Plugins, Sequence, Stat)](#110-other-modules)
+  - [Supported formats](#11-supported-formats) · [Image modes](#12-image-modes) *(escape-hatch only)*
+  - [Image class — all methods](#13-image-class----all-methods-and-properties) *(common ops covered by `claw img resize/crop/convert`)*
+  - [ImageDraw — shapes/text](#14-imagedraw) · [ImageFont — TTF/OTF](#15-imagefont) *(drawing primitives — escape-hatch only; `claw img watermark` wraps the common text/logo case)*
+  - [ImageFilter — blur/sharpen](#16-imagefilter) *(unsharp-mask covered by `claw img sharpen`)*
+  - [ImageEnhance — brightness/contrast](#17-imageenhance) *(common ops covered by `claw img enhance`)*
+  - [ImageOps — autocontrast/fit](#18-imageops) *(`autocontrast`/`equalize`/`fit`/`pad` covered by `claw img`)*
+  - [ImageChops — channel ops](#19-imagechops-channel-operations) *(escape-hatch — not in `claw`)*
+  - [Other modules (Stat, Grab, Sequence, Morph, Path, CMS, Color, Math)](#110-other-modules) *(escape-hatch only)*
 - **PROCESS images (CLI)** — `ImageMagick`
-  - [Core CLI tools (magick, identify, convert)](#21-core-cli-tools) · [Geometry syntax](#22-geometry-syntax) · [Resize filters](#23-resize-filters)
-  - [Format conversion](#24-format-conversion) · [Color operations](#25-color-operations) · [Drawing & text](#26-drawing-and-text)
-  - [Effects & filters](#27-effects-and-filters) · [Compositing](#28-compositing) · [Distortions](#29-distortions) · [Morphology](#210-morphology)
-  - [Montage & batch](#211-montage-and-batch-processing) · [Animation](#212-animation) · [Image comparison](#213-image-comparison)
-  - [PDF operations](#214-pdf-operations) · [Metadata (EXIF/IPTC/XMP)](#215-metadata) · [Misc operators](#216-miscellaneous-operators)
+  - [Core CLI tools (magick, identify, convert)](#21-core-cli-tools) · [Geometry syntax](#22-geometry-syntax) *(geometry strings flow straight through `claw img resize --geometry`)*
+  - [Resize filters](#23-resize-filters) · [Format conversion](#24-format-conversion) *(covered by `claw img convert/to-jpeg/to-webp`)*
+  - [Color operations](#25-color-operations) · [Drawing & text](#26-drawing-and-text) *(escape-hatch — flag DSL that `claw` won't wrap)*
+  - [Effects & filters](#27-effects-and-filters) · [Compositing](#28-compositing) *(basic composite covered by `claw img composite/watermark`)*
+  - [Distortions](#29-distortions) · [Morphology](#210-morphology) *(escape-hatch — not in `claw`)*
+  - [Montage & batch](#211-montage-and-batch-processing) *(basic batch covered by `claw img batch`)*
+  - [Animation](#212-animation) · [Image comparison](#213-image-comparison) *(frame → GIF covered by `claw img gif-from-frames`)*
+  - [PDF operations](#214-pdf-operations) · [Metadata (EXIF/IPTC/XMP)](#215-metadata) *(EXIF read/strip/auto-rotate covered by `claw img exif`)*
+  - [Miscellaneous operators](#216-miscellaneous-operators)
 - **PROCESS video / audio** — `ffmpeg`
-  - [Video codecs](#31-video-codecs) · [Audio codecs](#32-audio-codecs) · [Container formats](#33-container-formats) · [Rate control](#34-rate-control)
-  - [Video filters (-vf)](#35-video-filters--vf---filterv) · [Audio filters (-af)](#36-audio-filters--af---filtera)
-  - [Device capture](#37-device-capture) · [Subtitles](#38-subtitles) · [Image operations](#39-image-operations)
-  - [Advanced features (HW accel, streaming)](#310-advanced-features) · [ffprobe — inspect streams](#311-ffprobe)
+  - [Video codecs](#31-video-codecs) · [Audio codecs](#32-audio-codecs) · [Container formats](#33-container-formats) · [Rate control](#34-rate-control) *(common CRF presets covered by `claw media compress`)*
+  - [Video filters (-vf)](#35-video-filters--vf---filterv) · [Audio filters (-af)](#36-audio-filters--af---filtera) *(basic scale/crop/overlay/loudnorm covered by `claw media scale/compress/loudnorm`)*
+  - [Device capture](#37-device-capture) *(escape-hatch — not in `claw`)*
+  - [Subtitles](#38-subtitles) *(burn-in covered by `claw media burn-subs`)*
+  - [Image operations](#39-image-operations) *(frame extract / slideshow / GIF covered by `claw media thumbnail/gif`)*
+  - [Advanced features (HW accel, streaming, complex filtergraphs)](#310-advanced-features) *(escape-hatch — not in `claw`)*
+  - [ffprobe — inspect streams](#311-ffprobe) *(covered by `claw media info`)*
+- **Escape-hatch recipes** — [Pillow channel math, morphology, complex filtergraphs, two-pass loudnorm, device capture](#escape-hatch-recipes)
 
 ---
 
@@ -33,54 +45,20 @@ from PIL import Image, ImageDraw, ImageFont, ImageFilter, ImageEnhance, ImageOps
 
 ## 1.1 Supported Formats
 
-| Format | Read | Write | Notes |
-|--------|------|-------|-------|
-| PNG | Y | Y | Lossless, alpha support, optimize/compress_level params |
-| JPEG | Y | Y | Lossy, quality=1-95, progressive, optimize, subsampling |
-| JPEG 2000 | Y | Y | .jp2/.j2k, quality_mode, quality_layers, irreversible |
-| GIF | Y | Y | Animated (multi-frame), transparency, loop, duration |
-| BMP | Y | Y | Windows bitmap |
-| TIFF | Y | Y | Multi-page, compression (raw/tiff_lzw/tiff_deflate/jpeg/etc.) |
-| WebP | Y | Y | Lossy/lossless, quality, method, animated, exact |
-| ICO | Y | Y | Multi-size icon, sizes parameter on save |
-| PDF | N | Y | Write-only, multi-page via append_images, resolution |
-| EPS | Y | Y | Requires Ghostscript for rasterization |
-| PPM | Y | Y | Netpbm formats (.pbm/.pgm/.ppm/.pnm) |
-| TGA | Y | Y | Targa, RLE compression option |
-| PCX | Y | Y | ZSoft Paintbrush |
-| DDS | Y | Y | DirectDraw Surface (DXT1/DXT3/DXT5/BC5/BC7) |
-| FITS | Y | N | Flexible Image Transport System |
-| IM | Y | Y | IFUNC Image Memory |
-| SGI | Y | Y | Silicon Graphics Image |
-| SPIDER | Y | Y | SPIDER image format |
-| XBM | Y | Y | X BitMap |
-| XPM | Y | N | X PixMap |
-| PALM | N | Y | Palm pixmap |
-| MSP | Y | N | Microsoft Paint (v1/v2) |
-| FLI/FLC | Y | N | Autodesk animation |
-| BUFR | Y | N | WMO Binary Universal Form |
-| GRIB | Y | N | WMO GRIB |
-| HDF5 | Y | N | Hierarchical Data Format |
-| WMF/EMF | Y | N | Windows Metafile (requires additional renderer) |
-| CUR | Y | N | Windows cursor |
-| DCX | Y | N | Multi-page PCX |
-| DIB | Y | Y | Device Independent Bitmap |
-| FTEX | Y | N | Texture format |
-| GBR | Y | N | GIMP brush |
-| GD | Y | N | GD uncompressed |
-| ICNS | Y | Y | macOS icon format |
-| IMT | Y | N | IM Tools |
-| IPTC/NAA | Y | N | IPTC/NAA newsphoto |
-| MCIDAS | Y | N | McIDAS area file |
-| MIC | Y | N | Microsoft Image Composer |
-| MPO | Y | Y | Multi-Picture Object (stereoscopic) |
-| PCD | Y | N | Kodak PhotoCD |
-| PIXAR | Y | N | PIXAR raster |
-| PSD | Y | N | Adobe Photoshop (flattened composite only) |
-| QOI | Y | Y | Quite OK Image format |
-| SUN | Y | N | Sun raster |
-| WAL | Y | N | Quake 2 texture |
-| BLPS | Y | Y | Blizzard Mipmap |
+**Common R/W** (full support): PNG, JPEG, JPEG 2000, GIF (animated), BMP, TIFF (multi-page), WebP (animated), ICO (multi-size), PDF (write-only), EPS (needs Ghostscript), PPM, TGA, PCX, DDS (DXT1/3/5/BC5/BC7), IM, SGI, SPIDER, XBM, ICNS, MPO (stereoscopic), QOI, DIB, BLPS.
+
+**Read-only**: FITS, XPM, MSP, FLI/FLC, BUFR, GRIB, HDF5, WMF/EMF, CUR, DCX, FTEX, GBR, GD, IMT, IPTC/NAA, MCIDAS, MIC, PCD, PIXAR, PSD (flattened composite), SUN, WAL.
+
+**Write-only**: PALM.
+
+Key save params by format:
+- **JPEG**: `quality` (1-95), `progressive`, `optimize`, `subsampling` (0/1/2), `exif`, `icc_profile`.
+- **PNG**: `optimize`, `compress_level` (0-9), `bits` (1/2/4/8), `transparency`, `icc_profile`.
+- **WebP**: `quality` (1-100), `lossless`, `method` (0-6), `exact`, `icc_profile`.
+- **GIF**: `save_all`, `append_images`, `duration` (ms), `loop` (0=infinite), `optimize`, `transparency`, `disposal` (0-3).
+- **TIFF**: `compression` (`tiff_lzw`/`tiff_deflate`/`jpeg`/...), `dpi`, `resolution_unit`.
+- **PDF**: `save_all`, `append_images`, `resolution`, `title`/`author`/`subject`/`keywords`/`creator`/`producer`.
+- **ICO**: `sizes=[(16,16),(32,32),(48,48),(256,256)]`.
 
 ## 1.2 Image Modes
 
@@ -124,14 +102,7 @@ img.close()                                       # Release resources
 img.show(title=None)                              # Display with system viewer
 ```
 
-Save parameters by format:
-- **JPEG**: `quality` (1-95), `optimize` (bool), `progressive` (bool), `subsampling` (0/1/2), `exif` (bytes), `icc_profile` (bytes)
-- **PNG**: `optimize` (bool), `compress_level` (0-9), `bits` (1/2/4/8), `transparency`, `icc_profile`
-- **WebP**: `quality` (1-100), `lossless` (bool), `method` (0-6), `exact` (bool), `icc_profile`
-- **GIF**: `save_all` (bool), `append_images` (list), `duration` (ms), `loop` (0=infinite), `optimize` (bool), `transparency` (index), `disposal` (0-3)
-- **TIFF**: `compression` ("tiff_lzw"/"tiff_deflate"/"jpeg"/etc.), `dpi` (tuple), `resolution_unit`
-- **PDF**: `save_all` (bool), `append_images` (list), `resolution` (float), `title`, `author`, `subject`, `keywords`, `creator`, `producer`
-- **ICO**: `sizes` (list of tuples, e.g., [(16,16),(32,32),(48,48),(256,256)])
+Save parameters by format: see the format table in §1.1.
 
 ### Geometry Operations
 
@@ -1607,21 +1578,13 @@ ffmpeg -i video.mp4 -vf "fps=15,scale=480:-1" -loop 0 output.webp
 
 ### Complex Filtergraphs
 
-```bash
-# Multi-input/output with -filter_complex
-ffmpeg -i video.mp4 -i overlay.png -filter_complex \
-  "[0:v]scale=1920:1080[scaled]; \
-   [scaled][1:v]overlay=W-w-10:10[out]" \
-  -map "[out]" -map 0:a output.mp4
+`-filter_complex` for multi-stream graphs. Syntax: label each link `[name]`; chain filters with `;`; reference labels by name. Example shape:
 
-# Split and merge
-ffmpeg -i input.mp4 -filter_complex \
-  "[0:v]split=2[v1][v2]; \
-   [v1]crop=iw/2:ih:0:0[left]; \
-   [v2]crop=iw/2:ih:iw/2:0,hflip[right]; \
-   [left][right]hstack[out]" \
-  -map "[out]" output.mp4
 ```
+[0:v]scale=1920:1080[scaled]; [scaled][1:v]overlay=W-w-10:10[out]
+```
+
+See the "complex filtergraph" escape-hatch recipe below for a realistic PIP example.
 
 ### Concatenation
 
@@ -1801,3 +1764,75 @@ ffprobe -v quiet -count_frames -select_streams v:0 -show_entries stream=nb_read_
 | Overlay | `img.paste(overlay, pos)` | `magick base overlay -composite out` | `-filter_complex overlay=X:Y` |
 | Brightness | `ImageEnhance.Brightness(img)` | `magick in -brightness-contrast B out` | `-vf eq=brightness=B` |
 | Thumbnail | `img.thumbnail((w,h))` | `magick in -thumbnail WxH out` | `-vf thumbnail=N -frames:v 1` |
+
+---
+
+## Escape-hatch recipes
+
+These are flows `claw` explicitly doesn't wrap — use the library / raw CLI directly.
+
+### 1. Pillow channel math — isolate red, cancel green
+
+`ImageChops` + `split()` + `merge()` is how you do per-channel arithmetic. No flag surface wraps this:
+
+```python
+from PIL import Image, ImageChops
+r, g, b = Image.open("in.png").split()
+r = ImageChops.add(r, ImageChops.constant(r, 40))     # +40 red
+g = ImageChops.multiply(g, ImageChops.constant(g, 0))  # zero green
+Image.merge("RGB", (r, g, b)).save("out.png")
+```
+
+### 2. ImageMagick morphology — seam-thin then prune
+
+Custom kernel chains are why `magick` exists. `claw` won't try to flagify this:
+
+```bash
+magick in.png -threshold 50% \
+  -morphology Thinning:-1 Skeleton \
+  -morphology Pruning:-1 1 \
+  skeleton.png
+```
+
+### 3. Complex ffmpeg filtergraph — picture-in-picture with fade
+
+Multi-input + split + overlay + fade all in one `-filter_complex` — `claw media` covers compress/scale/trim but not this shape:
+
+```bash
+ffmpeg -i main.mp4 -i webcam.mp4 -filter_complex "
+  [1:v]scale=320:180,setpts=PTS-STARTPTS[pip];
+  [0:v][pip]overlay=W-w-20:H-h-20:enable='between(t,2,60)'[v];
+  [v]fade=in:0:30,fade=out:st=58:d=2[vfaded]
+" -map "[vfaded]" -map 0:a -c:v libx264 -crf 20 out.mp4
+```
+
+### 4. Two-pass EBU R128 loudness normalization
+
+The single-pass approximation is what `claw media loudnorm` emits. For broadcast-grade output you need two passes to feed measured values in:
+
+```bash
+# pass 1 — measure
+ffmpeg -i in.wav -af loudnorm=I=-16:LRA=7:TP=-1.5:print_format=json -f null - 2>meta.log
+# pull measured_I / measured_LRA / measured_TP / measured_thresh from meta.log
+# pass 2 — apply
+ffmpeg -i in.wav -af "loudnorm=I=-16:LRA=7:TP=-1.5:measured_I=-22.31:measured_LRA=10.8:measured_TP=-4.2:measured_thresh=-32.65:linear=true" out.wav
+```
+
+### 5. Device capture on Windows (gdigrab + dshow)
+
+`claw` doesn't spawn capture pipelines — they're long-running and OS-specific:
+
+```bash
+ffmpeg -f gdigrab -framerate 30 -i desktop \
+       -f dshow -i audio="Microphone (USB Mic)" \
+       -c:v libx264 -preset veryfast -crf 23 -c:a aac -b:a 160k \
+       screencast.mkv
+```
+
+### 6. HDR → SDR tone-map with zscale + tonemap
+
+Proper HDR downconversion needs the zimg filter chain, not a preset:
+
+```bash
+ffmpeg -i hdr.mp4 -vf "zscale=t=linear:npl=100,format=gbrpf32le,zscale=p=bt709,tonemap=tonemap=hable:desat=0,zscale=t=bt709:m=bt709:r=tv,format=yuv420p" -c:v libx264 -crf 20 sdr.mp4
+```

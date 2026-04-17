@@ -8,8 +8,9 @@ A Claude Code skill that turns Claude into a productivity OS — a single librar
 
 | Folder | Contents | Total |
 |--------|----------|-------|
-| `references/` | API/CLI documentation for each tool | ~6,000 lines across 10 files (+ 4 patcher refs) |
-| `examples/` | Copy-paste runnable workflows | ~5,000 lines across 9 files |
+| `references/claw/` | `claw` CLI per-noun reference — primary entry point | 17 noun docs (xlsx, docx, pptx, pdf, img, media, convert, email, doc, sheet, web, html, xml, browser, pipeline, doctor, completion) + README |
+| `references/` (library-level) | Escape-hatch API docs — use when `claw` isn't enough | 10 library refs + 5 patcher refs |
+| `examples/` | Copy-paste runnable workflows | 4 files: `claw-recipes.md` (one-liners), `claw-pipelines.md` (YAML recipes), `clickup-workflows.md`, `chrome-devtools.md` |
 | `scripts/` | Healthcheck + launch wrappers + patchers for third-party apps | healthcheck, 4 wrappers, 4 patchers |
 
 **Tools covered:** openpyxl · python-docx · python-pptx · PyMuPDF · PyPDF2 · pdfplumber · reportlab · Pillow · ImageMagick · FFmpeg · Pandoc · lxml · BeautifulSoup4 · gws (Google Workspace) · clickup · MIME/Gmail.
@@ -56,31 +57,35 @@ claude-claw/
 │   │   └── md-section-patcher.py   # Idempotent markdown-section injector
 │   └── wrappers/               # Local-model launch wrappers (codel / claudel / claudedl / codexl)
 ├── references/
-│   ├── _TEMPLATE.md            # Template for new reference files
-│   ├── gws-cli.md              # Google Workspace CLI (Drive/Sheets/Docs/Slides/Gmail/Calendar)
-│   ├── document-creation.md    # Excel, Word, PowerPoint APIs
-│   ├── pdf-tools.md            # PyMuPDF, PyPDF2, pdfplumber, reportlab
-│   ├── media-tools.md          # Pillow, ImageMagick, FFmpeg
-│   ├── conversion-tools.md     # Pandoc (45+ input, 60+ output formats)
-│   ├── web-parsing.md          # lxml + BeautifulSoup4
-│   ├── email-reference.md      # Python MIME composition
-│   ├── clickup-cli.md          # ClickUp task management
-│   ├── claude-customization.md # Launch wrappers + patcher overview
-│   ├── patchers/               # Per-patcher reference docs
-│   │   ├── claude-patcher.md       # Claude Code binary patcher
-│   │   ├── claude-desktop-3p.md    # Claude Desktop 3P registry toggle
-│   │   ├── lm-studio-white-tray.md # LM Studio tray-icon whitener
-│   │   └── md-section-patcher.md   # Idempotent markdown-section injector
-│   └── setup.md                # Installation guide
+│   ├── _TEMPLATE.md                 # Template for new reference files
+│   ├── claw/                        # claw CLI per-noun reference (primary entry point)
+│   │   ├── README.md                    # install, global flags, help UX, exit codes
+│   │   ├── xlsx.md | docx.md | pptx.md | pdf.md
+│   │   ├── img.md | media.md | convert.md
+│   │   ├── email.md | doc.md | sheet.md
+│   │   ├── web.md | html.md | xml.md | browser.md
+│   │   ├── pipeline.md | doctor.md | completion.md
+│   ├── gws-cli.md                   # Google Workspace CLI (escape hatch)
+│   ├── document-creation.md         # openpyxl/python-docx/python-pptx (escape hatch)
+│   ├── pdf-tools.md                 # PyMuPDF/PyPDF2/pdfplumber/reportlab (escape hatch)
+│   ├── media-tools.md               # Pillow/ImageMagick/FFmpeg (escape hatch)
+│   ├── conversion-tools.md          # Pandoc (escape hatch)
+│   ├── web-parsing.md               # lxml + BeautifulSoup4 (escape hatch)
+│   ├── email-reference.md           # Python MIME + Gmail API (escape hatch)
+│   ├── clickup-cli.md               # ClickUp CLI
+│   ├── chrome-devtools.md           # Chrome DevTools MCP launch
+│   ├── claude-customization.md      # Launch wrappers + patcher overview
+│   ├── patchers/                    # Per-patcher reference docs
+│   │   ├── claude-patcher.md            # Claude Code binary patcher
+│   │   ├── claude-desktop-3p.md         # Claude Desktop 3P registry toggle
+│   │   ├── lm-studio-white-tray.md      # LM Studio tray-icon whitener
+│   │   ├── md-section-patcher.md        # Idempotent markdown-section injector
+│   │   └── claude-md-block.md           # Canonical block injected into ~/.claude/CLAUDE.md
+│   └── setup.md                     # Installation guide
 └── examples/
-    ├── _TEMPLATE.md            # Template for new example files
-    ├── office-documents.md     # Excel/Word/PowerPoint workflows
-    ├── pdf-workflows.md        # PDF generation, editing, extraction
-    ├── google-workspace.md     # GWS CLI examples
-    ├── image-processing.md     # Pillow + ImageMagick workflows
-    ├── video-audio.md          # FFmpeg workflows
-    ├── email-workflows.md      # MIME composition + Gmail sending
-    ├── data-pipelines.md       # CSV/PDF/DB → Excel/Sheets pipelines
+    ├── _TEMPLATE.md                 # Template for new example files
+    ├── claw-recipes.md              # claw one-liners, keyed by user intent
+    ├── claw-pipelines.md            # claw pipeline YAML recipes
     ├── document-conversion.md  # Pandoc conversions
     └── clickup-workflows.md    # Task management workflows
 ```
