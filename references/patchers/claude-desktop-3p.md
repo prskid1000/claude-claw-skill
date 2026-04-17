@@ -1,6 +1,6 @@
 # Claude Desktop Custom 3P (BYOM) Toggler
 
-Script: `~/.claude/skills/claude-claw/scripts/claude-desktop-3p.py`
+Script: `~/.claude/skills/claude-claw/scripts/patchers/claude-desktop-3p.py`
 
 ## What It Does
 
@@ -53,20 +53,20 @@ The script just writes the registry values that trigger this flow.
 
 ```bash
 # Show current 3P state (no UAC needed)
-python ~/.claude/skills/claude-claw/scripts/claude-desktop-3p.py status
+python ~/.claude/skills/claude-claw/scripts/patchers/claude-desktop-3p.py status
 
 # Enable — auto-detects Tailscale Funnel URL + uses defaults
-python ~/.claude/skills/claude-claw/scripts/claude-desktop-3p.py enable
+python ~/.claude/skills/claude-claw/scripts/patchers/claude-desktop-3p.py enable
 
 # Enable with explicit URL / model / org UUID
-python ~/.claude/skills/claude-claw/scripts/claude-desktop-3p.py enable \
+python ~/.claude/skills/claude-claw/scripts/patchers/claude-desktop-3p.py enable \
     --url https://my-gateway.example.com \
     --model my-local-model-id \
     --api-key arbitrary-string \
     --org-uuid 00000000-0000-0000-0000-000000000000
 
 # Disable (deletes the policy keys, returns to 1P claude.ai login)
-python ~/.claude/skills/claude-claw/scripts/claude-desktop-3p.py disable
+python ~/.claude/skills/claude-claw/scripts/patchers/claude-desktop-3p.py disable
 ```
 
 After enable/disable, **fully quit Claude Desktop and relaunch**. Mode
@@ -144,7 +144,7 @@ new install path dynamically, so it survives updates too.
 
 ```bash
 # Confirm 3P still active after an update
-python ~/.claude/skills/claude-claw/scripts/claude-desktop-3p.py status
+python ~/.claude/skills/claude-claw/scripts/patchers/claude-desktop-3p.py status
 # Then quit + relaunch and check main.log for the [custom-3p] line
 ```
 
@@ -154,7 +154,7 @@ If after a Claude Desktop update 3P stops working, walk this checklist:
 
 ### 1. Confirm registry survived
 ```bash
-python ~/.claude/skills/claude-claw/scripts/claude-desktop-3p.py status
+python ~/.claude/skills/claude-claw/scripts/patchers/claude-desktop-3p.py status
 ```
 If keys are missing (the script prints `(empty)`), re-run `enable`.
 

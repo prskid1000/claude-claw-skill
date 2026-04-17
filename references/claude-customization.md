@@ -96,7 +96,7 @@ To get Claude Desktop fully on local inference (chat UI + bundled subprocesses):
 
 ```bash
 # 1) One-time: enable 3P mode (registry policy → unlocks chat UI + Cowork/Code tabs)
-python ~/.claude/skills/claude-claw/scripts/claude-desktop-3p.py enable
+python ~/.claude/skills/claude-claw/scripts/patchers/claude-desktop-3p.py enable
 
 # 2) Each launch: env wrapper (so bundled Claude Code / Cowork agents see local model)
 claudedl

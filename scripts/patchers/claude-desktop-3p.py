@@ -7,9 +7,9 @@ No binary modification. Pure HKCU + HKLM SOFTWARE\\Policies\\Claude writes,
 so it survives MSIX updates and is fully reversible.
 
 Usage:
-    python ~/.claude/skills/claude-claw/scripts/claude-desktop-3p.py status
-    python ~/.claude/skills/claude-claw/scripts/claude-desktop-3p.py enable [--url URL] [--model MODEL] [--api-key KEY] [--org-uuid UUID]
-    python ~/.claude/skills/claude-claw/scripts/claude-desktop-3p.py disable
+    python ~/.claude/skills/claude-claw/scripts/patchers/claude-desktop-3p.py status
+    python ~/.claude/skills/claude-claw/scripts/patchers/claude-desktop-3p.py enable [--url URL] [--model MODEL] [--api-key KEY] [--org-uuid UUID]
+    python ~/.claude/skills/claude-claw/scripts/patchers/claude-desktop-3p.py disable
 
 Defaults (when --url is omitted):
     1. Auto-detect Tailscale Funnel URL via `tailscale funnel status`

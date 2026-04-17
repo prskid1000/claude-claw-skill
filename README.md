@@ -55,7 +55,11 @@ claude-claw/
 ├── README.md                   # This file
 ├── scripts/
 │   ├── healthcheck.py          # Verify all deps + auto-fix Windows LSP
-│   └── claude-patcher.js       # Claude Code binary patcher
+│   ├── patchers/               # Binary/config patchers for third-party apps
+│   │   ├── claude-patcher.js       # Claude Code binary patcher
+│   │   ├── claude-desktop-3p.py    # Claude Desktop 3P/BYOM toggle
+│   │   └── lm-studio-white-tray.py # LM Studio tray-icon whitener
+│   └── wrappers/               # Local-model launch wrappers (codel / claudel / ...)
 ├── references/
 │   ├── _TEMPLATE.md            # Template for new reference files
 │   ├── gws-cli.md              # Google Workspace CLI (Drive/Sheets/Docs/Slides/Gmail/Calendar)
@@ -66,7 +70,11 @@ claude-claw/
 │   ├── web-parsing.md          # lxml + BeautifulSoup4
 │   ├── email-reference.md      # Python MIME composition
 │   ├── clickup-cli.md          # ClickUp task management
-│   ├── claude-patcher.md       # Binary patcher reference
+│   ├── claude-customization.md # Launch wrappers + patcher overview
+│   ├── patchers/               # Per-patcher reference docs
+│   │   ├── claude-patcher.md       # Claude Code binary patcher
+│   │   ├── claude-desktop-3p.md    # Claude Desktop 3P registry toggle
+│   │   └── lm-studio-white-tray.md # LM Studio tray-icon whitener
 │   └── setup.md                # Installation guide
 └── examples/
     ├── _TEMPLATE.md            # Template for new example files

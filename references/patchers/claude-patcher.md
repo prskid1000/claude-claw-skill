@@ -1,6 +1,6 @@
 # Claude Code Binary Patcher
 
-Script: `~/.claude/skills/claude-claw/scripts/claude-patcher.js`
+Script: `~/.claude/skills/claude-claw/scripts/patchers/claude-patcher.js`
 
 ## What It Does
 
@@ -28,22 +28,22 @@ break detection.
 
 ```bash
 # Scan — show all discovered constants, no changes
-node ~/.claude/skills/claude-claw/scripts/claude-patcher.js --scan
+node ~/.claude/skills/claude-claw/scripts/patchers/claude-patcher.js --scan
 
 # Apply all four with defaults
-node ~/.claude/skills/claude-claw/scripts/claude-patcher.js --all
+node ~/.claude/skills/claude-claw/scripts/patchers/claude-patcher.js --all
 
 # One-off custom value
-node ~/.claude/skills/claude-claw/scripts/claude-patcher.js --context-window 300000
+node ~/.claude/skills/claude-claw/scripts/patchers/claude-patcher.js --context-window 300000
 
 # Preview without writing
-node ~/.claude/skills/claude-claw/scripts/claude-patcher.js --all --dry-run
+node ~/.claude/skills/claude-claw/scripts/patchers/claude-patcher.js --all --dry-run
 
 # Restore from backup
-node ~/.claude/skills/claude-claw/scripts/claude-patcher.js --restore
+node ~/.claude/skills/claude-claw/scripts/patchers/claude-patcher.js --restore
 
 # Different binary path
-node ~/.claude/skills/claude-claw/scripts/claude-patcher.js --all --binary D:/tools/claude.exe
+node ~/.claude/skills/claude-claw/scripts/patchers/claude-patcher.js --all --binary D:/tools/claude.exe
 ```
 
 ## After Claude Code Updates
@@ -56,8 +56,8 @@ keep the old backup, move it before re-patching.
 
 ```bash
 # Typical post-update flow
-node ~/.claude/skills/claude-claw/scripts/claude-patcher.js --scan    # confirm constants still found
-node ~/.claude/skills/claude-claw/scripts/claude-patcher.js --all     # re-apply
+node ~/.claude/skills/claude-claw/scripts/patchers/claude-patcher.js --scan    # confirm constants still found
+node ~/.claude/skills/claude-claw/scripts/patchers/claude-patcher.js --all     # re-apply
 ```
 
 If `--scan` reports `NOT FOUND` for any constant, the anchor broke —
@@ -206,11 +206,11 @@ When `--scan` reports `NOT FOUND` for a constant:
 
 5. **Test.**
    ```bash
-   node ~/.claude/skills/claude-claw/scripts/claude-patcher.js --scan
+   node ~/.claude/skills/claude-claw/scripts/patchers/claude-patcher.js --scan
    # Should now show all four constants found
-   node ~/.claude/skills/claude-claw/scripts/claude-patcher.js --all --dry-run
+   node ~/.claude/skills/claude-claw/scripts/patchers/claude-patcher.js --all --dry-run
    # Confirm patch points before writing
-   node ~/.claude/skills/claude-claw/scripts/claude-patcher.js --all
+   node ~/.claude/skills/claude-claw/scripts/patchers/claude-patcher.js --all
    ```
 
 6. **Update the table at the top of this doc** with the new digit count or

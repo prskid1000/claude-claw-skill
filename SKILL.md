@@ -309,10 +309,13 @@ run("clickup", "task", "view", "ABC-123")
   - [Launch wrappers (codel/claudel/claudedl/codexl)](references/claude-customization.md#launch-wrappers)
   - [Installing wrappers to PATH](references/claude-customization.md#installing-the-wrappers)
   - [When to use what](references/claude-customization.md#when-to-use-what)
-  - **PATCH Claude Code binary** — bigger context/output ([detail](references/claude-patcher.md))
-    - [Patchable constants](references/claude-patcher.md#patchable-constants) · [Usage](references/claude-patcher.md#usage) · [After updates](references/claude-patcher.md#after-claude-code-updates) · [How it works](references/claude-patcher.md#how-it-works)
-  - **TOGGLE Claude Desktop Custom 3P (BYOM)** — registry policy, no binary changes ([detail](references/claude-desktop-3p.md))
-    - [Requirements (HTTPS gateway, UAC)](references/claude-desktop-3p.md#requirements) · [Usage](references/claude-desktop-3p.md#usage) · [Verifying via main.log](references/claude-desktop-3p.md#verifying-it-worked) · [Registry schema](references/claude-desktop-3p.md#registry-schema-what-gets-written)
+  - **PATCH Claude Code binary** — bigger context/output ([detail](references/patchers/claude-patcher.md))
+    - [Patchable constants](references/patchers/claude-patcher.md#patchable-constants) · [Usage](references/patchers/claude-patcher.md#usage) · [After updates](references/patchers/claude-patcher.md#after-claude-code-updates) · [How it works](references/patchers/claude-patcher.md#how-it-works)
+  - **TOGGLE Claude Desktop Custom 3P (BYOM)** — registry policy, no binary changes ([detail](references/patchers/claude-desktop-3p.md))
+    - [Requirements (HTTPS gateway, UAC)](references/patchers/claude-desktop-3p.md#requirements) · [Usage](references/patchers/claude-desktop-3p.md#usage) · [Verifying via main.log](references/patchers/claude-desktop-3p.md#verifying-it-worked) · [Registry schema](references/patchers/claude-desktop-3p.md#registry-schema-what-gets-written)
+- **PATCH third-party apps**
+  - **WHITEN LM Studio tray icon** — on-demand `apply` / `restore`; re-run after each LM Studio update ([detail](references/patchers/lm-studio-white-tray.md))
+    - [How it works](references/patchers/lm-studio-white-tray.md#how-it-works) · [Usage](references/patchers/lm-studio-white-tray.md#usage) · [Customize icon](references/patchers/lm-studio-white-tray.md#customize-icon-design) · [Troubleshooting](references/patchers/lm-studio-white-tray.md#troubleshooting)
 
 ## Templates
 
@@ -324,9 +327,10 @@ run("clickup", "task", "view", "ABC-123")
 ## Scripts
 
 - [healthcheck.py](scripts/healthcheck.py) — verify packages, CLI tools, MCP servers, LSP plugins; auto-fix Windows patches
-- [claude-patcher.js](scripts/claude-patcher.js) — Claude Code binary patcher (context window, output limits)
-- [claude-desktop-3p.py](scripts/claude-desktop-3p.py) — Claude Desktop 3P/BYOM toggle (registry policy, no binary changes)
+- [claude-patcher.js](scripts/patchers/claude-patcher.js) — Claude Code binary patcher (context window, output limits)
+- [claude-desktop-3p.py](scripts/patchers/claude-desktop-3p.py) — Claude Desktop 3P/BYOM toggle (registry policy, no binary changes)
 - [wrappers/codel.bat](scripts/wrappers/codel.bat) — VS Code Insiders + local-model env
 - [wrappers/claudel.bat](scripts/wrappers/claudel.bat) — Claude Code CLI + local-model env
 - [wrappers/claudedl.bat](scripts/wrappers/claudedl.bat) — Claude Desktop launcher + dynamic MSIX path + local-model env
 - [wrappers/codexl.bat](scripts/wrappers/codexl.bat) — Codex CLI in OSS mode
+- [patchers/lm-studio-white-tray.py](scripts/patchers/lm-studio-white-tray.py) — LM Studio white tray icon patcher (on-demand apply/restore)
