@@ -226,8 +226,6 @@ _Primary entry point: the **`claw`** CLI. Library-level references are escape ha
 
 ## PATCH third-party apps
 
-- **WHITEN LM Studio tray icon** — on-demand `apply` / `restore`; re-run after each LM Studio update ([detail](references/patchers/lm-studio-white-tray.md))
-  - [Critical rules](references/patchers/lm-studio-white-tray.md#critical-rules) · [how it works](references/patchers/lm-studio-white-tray.md#how-it-works) · [usage](references/patchers/lm-studio-white-tray.md#usage) · [customize icon](references/patchers/lm-studio-white-tray.md#customize-icon-design) · [troubleshooting](references/patchers/lm-studio-white-tray.md#troubleshooting) · [quick reference](references/patchers/lm-studio-white-tray.md#quick-reference)
 - **INJECT markdown section into any file** — generic, idempotent ([detail](references/patchers/md-section-patcher.md))
   - [Critical rules](references/patchers/md-section-patcher.md#critical-rules) · [markers](references/patchers/md-section-patcher.md#markers) · [usage (`apply` / `status` / `remove`)](references/patchers/md-section-patcher.md#usage) · [worked example](references/patchers/md-section-patcher.md#worked-example) · [status exit codes](references/patchers/md-section-patcher.md#status-exit-codes) · [remove](references/patchers/md-section-patcher.md#remove) · [quick reference](references/patchers/md-section-patcher.md#quick-reference)
 
@@ -246,7 +244,6 @@ _Primary entry point: the **`claw`** CLI. Library-level references are escape ha
 - [scripts/claw/](scripts/claw/) — the `claw` CLI package itself (`pip install -e scripts/claw[all]` registered by healthcheck). Package layout: [scripts/claw/src/claw/](scripts/claw/src/claw/) · entry point [__main__.py](scripts/claw/src/claw/__main__.py) · shared helpers [common/](scripts/claw/src/claw/common/) · metadata [pyproject.toml](scripts/claw/pyproject.toml).
 - [scripts/patchers/claude-patcher.js](scripts/patchers/claude-patcher.js) — Claude Code binary patcher (context window, output limits).
 - [scripts/patchers/claude-desktop-3p.py](scripts/patchers/claude-desktop-3p.py) — Claude Desktop 3P/BYOM toggle (registry policy).
-- [scripts/patchers/lm-studio-white-tray.py](scripts/patchers/lm-studio-white-tray.py) — LM Studio white tray-icon patcher.
 - [scripts/patchers/md-section-patcher.py](scripts/patchers/md-section-patcher.py) — generic idempotent markdown-section injector (used by healthcheck to maintain the `claude-claw` block in `~/.claude/CLAUDE.md`).
 - [scripts/wrappers/codel.bat](scripts/wrappers/codel.bat) — VS Code Insiders + local-model env.
 - [scripts/wrappers/claudel.bat](scripts/wrappers/claudel.bat) — Claude Code CLI + local-model env.

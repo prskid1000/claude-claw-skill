@@ -53,7 +53,6 @@ claude-claw/
 │   ├── patchers/               # Binary/config patchers for third-party apps
 │   │   ├── claude-patcher.js       # Claude Code binary patcher (context/output)
 │   │   ├── claude-desktop-3p.py    # Claude Desktop 3P/BYOM registry toggle
-│   │   ├── lm-studio-white-tray.py # LM Studio tray-icon whitener
 │   │   └── md-section-patcher.py   # Idempotent markdown-section injector
 │   └── wrappers/               # Local-model launch wrappers (codel / claudel / claudedl / codexl)
 ├── references/
@@ -71,7 +70,6 @@ claude-claw/
 │   ├── patchers/                    # Per-patcher reference docs
 │   │   ├── claude-patcher.md            # Claude Code binary patcher
 │   │   ├── claude-desktop-3p.md         # Claude Desktop 3P registry toggle
-│   │   ├── lm-studio-white-tray.md      # LM Studio tray-icon whitener
 │   │   ├── md-section-patcher.md        # Idempotent markdown-section injector
 │   │   └── claude-md-block.md           # Canonical block injected into ~/.claude/CLAUDE.md
 │   # install via `python scripts/healthcheck.py --install` — no separate setup.md

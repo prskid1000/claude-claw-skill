@@ -130,6 +130,5 @@ inheritance for any subprocess Claude Desktop spawns.
   `claude-desktop-3p.py enable` and launch via `claudedl.bat`.
   See [claude-desktop-3p.md](patchers/claude-desktop-3p.md).
 - **Just the VS Code extension on local model?** Use `codel.bat`.
-- **Whiten LM Studio's tray icon?** See [lm-studio-white-tray.md](patchers/lm-studio-white-tray.md).
 - **Roll back any of it?** `--restore` for the patcher, `disable` for the
   desktop toggle, or just don't use the wrapper.
