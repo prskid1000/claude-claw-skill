@@ -752,13 +752,76 @@ def _has_cdm_plugin() -> bool:
 
 
 # ---------------------------------------------------------------------------
-# 6. LSP plugins & Windows fix (preserved from original — not expanded here)
+# 6. LSP plugins & Windows fix
 # ---------------------------------------------------------------------------
+# Claude Code's LSP tool spawns language servers via libuv uv_spawn. On Windows
+# libuv >= 1.49 (Node 22+) refuses to launch .cmd / .bat shims directly, so we
+# rewrite each lspServers entry in marketplace.json to invoke via `cmd /c`.
+
+LSP_MARKETPLACE = (HOME / ".claude" / "plugins" / "marketplaces"
+                   / "claude-plugins-official" / ".claude-plugin" / "marketplace.json")
+
+# Per-server: list of candidate shim paths (first hit wins), and trailing stdio flag (None for jdtls).
+LSP_SERVERS: dict[str, tuple[list[Path], str | None]] = {
+    "typescript": ([Path("C:/nvm4w/nodejs/typescript-language-server.cmd"),
+                    HOME / "AppData/Roaming/npm/typescript-language-server.cmd"], "--stdio"),
+    "pyright":    ([Path("C:/nvm4w/nodejs/pyright-langserver.cmd"),
+                    HOME / "AppData/Roaming/npm/pyright-langserver.cmd"], "--stdio"),
+    "jdtls":      ([HOME / ".local/bin/jdtls.bat", HOME / ".local/bin/jdtls.cmd"], None),
+    "kotlin-lsp": ([HOME / ".local/kls-jetbrains/kotlin-lsp.cmd"], "--stdio"),
+}
+
 
 def check_lsp_plugins() -> None:
     _print("\n=== 6. LSP PLUGINS (Windows fix) ===")
     _print("  Enable via `/plugin` in Claude Code: pyright-lsp, typescript-lsp, jdtls-lsp, kotlin-lsp.")
-    _print("  The Windows .cmd/.bat-shim patch lives in marketplace.json — re-apply after marketplace updates.")
+
+    if sys.platform != "win32":
+        return
+
+    if not LSP_MARKETPLACE.exists():
+        warn("marketplace.json", f"not found at {LSP_MARKETPLACE} — enable the LSP plugins first")
+        return
+
+    try:
+        marketplace = json.loads(LSP_MARKETPLACE.read_text(encoding="utf-8"))
+    except json.JSONDecodeError as e:
+        warn("marketplace.json", f"unreadable JSON: {e}")
+        return
+
+    mutated = False
+    for server, (candidates, stdio) in LSP_SERVERS.items():
+        shim = next((p for p in candidates if p.exists()), None)
+        if not shim:
+            check(f"{server} shim present", False,
+                  hint="install the LSP binary — tried: " + ", ".join(map(str, candidates)))
+            continue
+
+        desired = ["/c", str(shim).replace("/", "\\")] + ([stdio] if stdio else [])
+        entry = next((p["lspServers"][server] for p in marketplace.get("plugins", [])
+                      if server in (p.get("lspServers") or {})), None)
+        if entry is None:
+            warn(server, "not found in marketplace.json")
+            continue
+
+        if entry.get("command") == "cmd" and entry.get("args") == desired:
+            check(f"{server} already patched ({shim.name})", True)
+        else:
+            entry["command"] = "cmd"
+            entry["args"] = desired
+            mutated = True
+            check(f"{server} -> cmd /c {shim.name}", True)
+            RESULTS["fixed"].append(f"lsp:{server} patched to cmd /c {shim}")
+
+    if mutated:
+        backup = LSP_MARKETPLACE.with_suffix(".json.bak")
+        if not backup.exists():
+            backup.write_text(LSP_MARKETPLACE.read_text(encoding="utf-8"), encoding="utf-8")
+        LSP_MARKETPLACE.write_text(
+            json.dumps(marketplace, indent=2, ensure_ascii=False) + "\n",
+            encoding="utf-8",
+        )
+        _print("  marketplace.json updated - restart Claude Code for LSP changes to take effect.")
 
 
 # ---------------------------------------------------------------------------
