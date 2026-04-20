@@ -2,6 +2,17 @@
 
 If `SKILL.md` content from the claude-claw skill is not visible in your context, load it by invoking: `Skill(skill: "claude-claw")`. Once loaded, it stays in context for the rest of the session.
 
+All Python deps live in a skill-local venv at `~/.claude/skills/claude-claw/.venv/`. The `claw` CLI on PATH is a shim to that venv — never `pip install claw` into system Python. `scripts/healthcheck.py --install` creates the venv if missing; `--recreate-venv` wipes and rebuilds it.
+
+**Scope of the skill venv:** use it for *skill-level* Python work — claw commands, ad-hoc scripts that reach for claw's libs (pymupdf, openpyxl, lxml, etc.), one-off import probes, debugging claw internals. Path:
+
+- Windows: `~/.claude/skills/claude-claw/.venv/Scripts/python.exe`
+- POSIX: `~/.claude/skills/claude-claw/.venv/bin/python`
+
+**Do NOT use it for project work.** If the current working directory is inside a project with its own venv / `pyproject.toml` / `requirements.txt` / poetry / uv / pipenv, project deps go into the project's env — never into the claw venv, and never into system Python. The claw venv is isolated for the skill only; it must not absorb unrelated project dependencies.
+
+When adding a dep that claw itself depends on, update `scripts/claw/pyproject.toml` (correct extra + `all`) and `PACKAGES` in `scripts/healthcheck.py` so `--install` reproduces the setup.
+
 ## Working With the Skill
 
 - Follow direct links inside SKILL.md to load only specific sections.

@@ -7,12 +7,18 @@ description: >
 
 # Claude Claw — Productivity OS
 
+> All Python deps + the `claw` CLI live in a skill-local venv at `~/.claude/skills/claude-claw/.venv/`. `claw` on PATH is a `.bat` shim to it — never `pip install claw` globally. Healthcheck auto-creates the venv on `--install`.
+>
+> **Scope:** use `.venv/Scripts/python.exe` (Win) / `.venv/bin/python` (POSIX) for *skill-level* Python — claw commands, ad-hoc scripts using claw's libs, import probes. **NOT for project work** — if the CWD is inside another project (own venv / `pyproject.toml` / `requirements.txt` / poetry / uv), project deps go into that project's env, never into the claw venv or system Python. For deps claw itself depends on, register them in `scripts/claw/pyproject.toml` + `PACKAGES` in `scripts/healthcheck.py`.
+
 - [Bootstrap](#bootstrap) · [Workflow](#workflow) · [Decision-Tree List Format](#decision-tree-list-format) · [Templates & Extension Guides](#templates--extension-guides) · [Scripts](#scripts)
 
 ## Bootstrap
 
 ```bash
-python ~/.claude/skills/claude-claw/scripts/healthcheck.py
+python ~/.claude/skills/claude-claw/scripts/healthcheck.py               # check only
+python ~/.claude/skills/claude-claw/scripts/healthcheck.py --install     # create .venv + install everything
+python ~/.claude/skills/claude-claw/scripts/healthcheck.py --recreate-venv  # wipe + rebuild the venv
 ```
 
 ## Workflow

@@ -27,10 +27,82 @@ from pathlib import Path
 HOME = Path.home()
 SKILL_DIR = Path(__file__).resolve().parent.parent
 CLAW_PKG = SKILL_DIR / "scripts" / "claw"
+VENV_DIR = SKILL_DIR / ".venv"
 
 RESULTS: dict[str, list[str]] = {"pass": [], "fail": [], "warn": [], "fixed": []}
 INSTALL_MODE = False
 UPGRADE_MODE = False  # implies INSTALL_MODE; forces fix_cmd even when detection PASSes
+
+
+def venv_python() -> Path:
+    """Path to the interpreter inside the skill-local venv."""
+    if sys.platform == "win32":
+        return VENV_DIR / "Scripts" / "python.exe"
+    return VENV_DIR / "bin" / "python"
+
+
+def venv_scripts_dir() -> Path:
+    return VENV_DIR / ("Scripts" if sys.platform == "win32" else "bin")
+
+
+def venv_exe(name: str) -> Path:
+    suffix = ".exe" if sys.platform == "win32" else ""
+    return venv_scripts_dir() / f"{name}{suffix}"
+
+
+def ensure_venv() -> bool:
+    """Create .venv if missing; verify the interpreter runs.
+
+    Bootstraps with sys.executable (the Python that launched healthcheck). Pip
+    is upgraded once at creation. Returns False only on hard failure — callers
+    gate further phases on the return value.
+    """
+    _print("\n=== 0. SKILL VENV ===")
+    vpy = venv_python()
+    if vpy.exists():
+        ok, out = run_cmd([str(vpy), "--version"], timeout=10)
+        if ok:
+            check(f"venv at {VENV_DIR} ({out})", True)
+            return True
+        warn("venv", f"{vpy} exists but won't run — rerun with --recreate-venv")
+        return False
+
+    if sys.version_info < (3, 11):
+        check("venv bootstrap", False,
+              hint=f"claw requires Python >=3.11; this interpreter is {sys.version.split()[0]}")
+        return False
+
+    if not INSTALL_MODE:
+        check("venv present", False,
+              hint=f"rerun with --install to create {VENV_DIR}")
+        return False
+
+    _print(f"  [CREATE] {sys.executable} -m venv {VENV_DIR} --upgrade-deps")
+    try:
+        r = subprocess.run(
+            [sys.executable, "-m", "venv", str(VENV_DIR), "--upgrade-deps"],
+            capture_output=True, text=True, timeout=300,
+        )
+    except Exception as e:
+        check("venv bootstrap", False, hint=f"venv creation crashed: {e}")
+        return False
+    if r.returncode != 0:
+        check("venv bootstrap", False,
+              hint=f"venv creation failed: {(r.stderr or r.stdout)[:300]}")
+        return False
+    if not vpy.exists():
+        check("venv bootstrap", False, hint=f"{vpy} missing after successful venv -m")
+        return False
+    RESULTS["fixed"].append(f"venv at {VENV_DIR}")
+    _print(f"  [FIXED] venv at {VENV_DIR}")
+    return True
+
+
+def recreate_venv() -> None:
+    """Remove the venv tree before ensure_venv rebuilds it."""
+    if VENV_DIR.exists():
+        _print(f"  [RECREATE] removing {VENV_DIR}")
+        shutil.rmtree(VENV_DIR, ignore_errors=True)
 
 
 def _print(msg: str) -> None:
@@ -209,26 +281,58 @@ PACKAGES: list[tuple[str, str]] = [
 ]
 
 
+def _probe_packages_in_venv() -> tuple[set[str], set[str]]:
+    """Return (present, missing) pip names by importing each module in the venv.
+
+    One subprocess call does the whole sweep — avoids fork-per-package overhead.
+    If the venv interpreter is unavailable, everything counts as missing.
+    """
+    vpy = venv_python()
+    if not vpy.exists():
+        return set(), {pip for pip, _ in PACKAGES}
+    probe = "\n".join(
+        f"try:\n  import {imp}\n  print('OK:{pip}')\nexcept Exception:\n  print('NO:{pip}')"
+        for pip, imp in PACKAGES
+    )
+    try:
+        r = subprocess.run([str(vpy), "-c", probe],
+                           capture_output=True, text=True, timeout=60)
+    except Exception:
+        return set(), {pip for pip, _ in PACKAGES}
+    present, missing = set(), set()
+    for line in (r.stdout or "").splitlines():
+        if line.startswith("OK:"):
+            present.add(line[3:])
+        elif line.startswith("NO:"):
+            missing.add(line[3:])
+    # Packages with no response at all (stderr/crash) → treat as missing.
+    seen = present | missing
+    for pip, _ in PACKAGES:
+        if pip not in seen:
+            missing.add(pip)
+    return present, missing
+
+
 def check_python_packages() -> None:
-    _print("\n=== 1. PYTHON PACKAGES ===")
-    missing: list[str] = []
-    present: list[str] = []
-    for pip_name, import_name in PACKAGES:
-        try:
-            importlib.import_module(import_name)
+    _print("\n=== 1. PYTHON PACKAGES (venv) ===")
+    if not venv_python().exists():
+        warn("python packages", "venv missing — skipping (rerun --install)")
+        return
+    present, missing = _probe_packages_in_venv()
+    for pip_name, _ in PACKAGES:
+        if pip_name in present:
             check(pip_name, True)
-            present.append(pip_name)
-        except ImportError:
+        else:
             RESULTS["fail"].append(pip_name)
             _print(f"  [FAIL] {pip_name}")
-            missing.append(pip_name)
 
     # --upgrade forces a refresh of everything; --install only fixes missing.
-    targets = (missing + present) if UPGRADE_MODE else missing
+    targets = sorted(missing | present) if UPGRADE_MODE else sorted(missing)
     if targets and INSTALL_MODE:
-        cmd = [sys.executable, "-m", "pip", "install", "--quiet", "--upgrade", *targets]
+        cmd = [str(venv_python()), "-m", "pip", "install",
+               "--no-cache-dir", "--quiet", "--upgrade", *targets]
         label = "UPGRADE" if UPGRADE_MODE else "BATCH FIX"
-        _print(f"  [{label}] pip install --upgrade {' '.join(targets)}")
+        _print(f"  [{label}] (venv) pip install --upgrade {' '.join(targets)}")
         try:
             r = subprocess.run(cmd, capture_output=True, text=True, timeout=600)
             if r.returncode == 0:
@@ -472,24 +576,61 @@ def check_gws_auth() -> None:
 # 4. claw package itself
 # ---------------------------------------------------------------------------
 
+def _ensure_claw_shim() -> None:
+    """Write ~/.local/bin/claw.bat (Windows) or claw symlink (POSIX) pointing at venv entry point.
+
+    The shim keeps `claw` on PATH without leaking the rest of the venv's
+    Scripts dir. ~/.local/bin is already prepended to PATH at module load.
+    """
+    target = venv_exe("claw")
+    if not target.exists():
+        warn("claw shim", f"venv entry point {target} missing — skipping shim")
+        return
+    bindir = HOME / ".local" / "bin"
+    bindir.mkdir(parents=True, exist_ok=True)
+    if sys.platform == "win32":
+        shim = bindir / "claw.bat"
+        body = f'@echo off\r\n"{target}" %*\r\n'.encode("utf-8")
+        if shim.exists() and shim.read_bytes() == body:
+            check(f"claw shim {shim}", True)
+            return
+        shim.write_bytes(body)
+        RESULTS["fixed"].append(f"claw shim {shim}")
+        _print(f"  [FIXED] wrote {shim} -> {target}")
+    else:
+        shim = bindir / "claw"
+        if shim.is_symlink() and shim.resolve() == target.resolve():
+            check(f"claw shim {shim}", True)
+            return
+        if shim.exists() or shim.is_symlink():
+            shim.unlink()
+        shim.symlink_to(target)
+        shim.chmod(0o755)
+        RESULTS["fixed"].append(f"claw shim {shim}")
+        _print(f"  [FIXED] linked {shim} -> {target}")
+
+
 def check_claw_package() -> None:
-    _print("\n=== 4. CLAW PACKAGE ===")
-    try:
-        import claw  # noqa: F401
-        version = getattr(claw, "__version__", "?")
-        check(f"claw {version}", True)
-        # verify entry point
-        exe = shutil.which("claw")
-        if exe:
-            check(f"claw CLI on PATH ({exe})", True)
-        else:
-            check("claw CLI on PATH", False,
-                  fix_cmd=f"{sys.executable} -m pip install -e {CLAW_PKG}",
-                  hint="the entry point wasn't registered — reinstall")
-    except ImportError:
-        check("claw package", False,
-              fix_cmd=f"{sys.executable} -m pip install -e {CLAW_PKG}[all]",
-              hint=f"pip install -e {CLAW_PKG}[all]")
+    _print("\n=== 4. CLAW PACKAGE (venv) ===")
+    vpy = venv_python()
+    if not vpy.exists():
+        warn("claw", "venv missing — skipping")
+        return
+
+    probe = subprocess.run(
+        [str(vpy), "-c",
+         "import claw; print(getattr(claw,'__version__','?'))"],
+        capture_output=True, text=True, timeout=30,
+    )
+    if probe.returncode == 0:
+        check(f"claw {probe.stdout.strip()} (venv)", True)
+    else:
+        install = [str(vpy), "-m", "pip", "install", "--no-cache-dir",
+                   "-e", f"{CLAW_PKG}[all]"]
+        check("claw package", False, fix_cmd=install,
+              hint=f"pip install -e {CLAW_PKG}[all] into {VENV_DIR}")
+
+    _ensure_claw_shim()
 
 
 # ---------------------------------------------------------------------------
@@ -653,16 +794,18 @@ def main() -> int:
                     help="Install every missing dependency (fast — skips already-present).")
     ap.add_argument("--upgrade", action="store_true",
                     help="Force upgrade everything (pip --upgrade, winget upgrade, re-download clickup/npm). Implies --install.")
+    ap.add_argument("--recreate-venv", action="store_true",
+                    help="Wipe the skill-local .venv and rebuild it from scratch. Implies --install.")
     ap.add_argument("--json", action="store_true",
                     help="Emit a JSON summary on stdout (human log still goes to stderr).")
     ap.add_argument("--skip", action="append", default=[],
-                    choices=["packages", "cli", "gws", "claw", "mcp", "lsp", "claude-md"],
+                    choices=["venv", "packages", "cli", "gws", "claw", "mcp", "lsp", "claude-md"],
                     help="Skip a check group.")
     args = ap.parse_args()
 
     global UPGRADE_MODE
     UPGRADE_MODE = args.upgrade
-    INSTALL_MODE = args.install or args.upgrade
+    INSTALL_MODE = args.install or args.upgrade or args.recreate_venv
 
     # Before any CLI check, refresh PATH from the registry so we see winget
     # installs from a previous session without needing a shell restart.
@@ -673,6 +816,10 @@ def main() -> int:
         global _print
         _print = lambda msg: print(msg, file=sys.stderr, flush=True)  # type: ignore[assignment]
 
+    if args.recreate_venv:
+        recreate_venv()
+    if "venv" not in args.skip:
+        ensure_venv()
     if "packages" not in args.skip:
         check_python_packages()
     if "cli" not in args.skip:
