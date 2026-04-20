@@ -768,13 +768,12 @@ LSP_SERVERS: dict[str, tuple[list[Path], str | None]] = {
     "pyright":    ([Path("C:/nvm4w/nodejs/pyright-langserver.cmd"),
                     HOME / "AppData/Roaming/npm/pyright-langserver.cmd"], "--stdio"),
     "jdtls":      ([HOME / ".local/bin/jdtls.bat", HOME / ".local/bin/jdtls.cmd"], None),
-    "kotlin-lsp": ([HOME / ".local/kls-jetbrains/kotlin-lsp.cmd"], "--stdio"),
 }
 
 
 def check_lsp_plugins() -> None:
     _print("\n=== 6. LSP PLUGINS (Windows fix) ===")
-    _print("  Enable via `/plugin` in Claude Code: pyright-lsp, typescript-lsp, jdtls-lsp, kotlin-lsp.")
+    _print("  Enable via `/plugin` in Claude Code: pyright-lsp, typescript-lsp, jdtls-lsp.")
 
     if sys.platform != "win32":
         return

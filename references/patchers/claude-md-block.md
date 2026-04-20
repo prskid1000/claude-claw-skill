@@ -21,7 +21,7 @@ When adding a dep that claw itself depends on, update `scripts/claw/pyproject.to
 
 ## LSP-First Navigation
 
-When working on code in Python, TypeScript/JavaScript, Java, or Kotlin, use the LSP tool as your primary source of code intelligence before falling back to Grep, Glob, or file reads.
+When working on code in Python, TypeScript/JavaScript, or Java, use the LSP tool as your primary source of code intelligence before falling back to Grep, Glob, or file reads.
 
 - **Prefer LSP for:**
   - Finding definitions — `goToDefinition` instead of grepping for function/class names

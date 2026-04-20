@@ -97,7 +97,7 @@ Run anytime to verify everything is set up:
 python ~/.claude/skills/claude-claw/scripts/healthcheck.py
 ```
 
-Checks: Python packages · CLI tools · Google Workspace auth · MCP servers (MySQL, Chrome DevTools) · LSP plugins (Pyright, TypeScript, jdtls, Kotlin). Auto-fixes the Windows LSP `uv_spawn` issue.
+Checks: Python packages · CLI tools · Google Workspace auth · MCP servers (MySQL, Chrome DevTools) · LSP plugins (Pyright, TypeScript, jdtls). Auto-fixes the Windows LSP `uv_spawn` issue.
 
 ## License
 
