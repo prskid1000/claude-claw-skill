@@ -235,10 +235,3 @@ _Primary entry point: the **`claw`** CLI. Library-level references are escape ha
 
 - [scripts/healthcheck.py](scripts/healthcheck.py) — one-command installer (`--install` / `--upgrade`); verifies packages, CLI tools, MCP servers, LSP plugins, claw package, and the `claude-claw` block in `~/.claude/CLAUDE.md`.
 - [scripts/claw/](scripts/claw/) — the `claw` CLI package itself (`pip install -e scripts/claw[all]` registered by healthcheck). Package layout: [scripts/claw/src/claw/](scripts/claw/src/claw/) · entry point [__main__.py](scripts/claw/src/claw/__main__.py) · shared helpers [common/](scripts/claw/src/claw/common/) · metadata [pyproject.toml](scripts/claw/pyproject.toml).
-- [scripts/patchers/claude-patcher.js](scripts/patchers/claude-patcher.js) — Claude Code binary patcher (context window, output limits).
-- [scripts/patchers/claude-desktop-3p.py](scripts/patchers/claude-desktop-3p.py) — Claude Desktop 3P/BYOM toggle (registry policy).
-- [scripts/patchers/md-section-patcher.py](scripts/patchers/md-section-patcher.py) — generic idempotent markdown-section injector (used by healthcheck to maintain the `claude-claw` block in `~/.claude/CLAUDE.md`).
-- [scripts/wrappers/codel.bat](scripts/wrappers/codel.bat) — VS Code Insiders + local-model env.
-- [scripts/wrappers/claudel.bat](scripts/wrappers/claudel.bat) — Claude Code CLI + local-model env.
-- [scripts/wrappers/claudedl.bat](scripts/wrappers/claudedl.bat) — Claude Desktop launcher + dynamic MSIX path + local-model env.
-- [scripts/wrappers/codexl.bat](scripts/wrappers/codexl.bat) — Codex CLI in OSS mode.
