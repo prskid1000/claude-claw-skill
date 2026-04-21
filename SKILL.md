@@ -70,47 +70,34 @@ _Primary entry point: the **`claw`** CLI. Library-level references are escape ha
 
 ## READ / EXTRACT
 
-- PDF → text — `claw pdf extract-text [--mode plain|blocks|dict|html]` · [src](scripts/claw/src/claw/pdf/extract_text.py)
+- PDF → text — `claw pdf extract-text <SRC_PDF> [--json]` · [src](scripts/claw/src/claw/pdf/extract_text.py)
   - Ref: [claw pdf § READ](references/claw/pdf.md) · [OCR](references/claw/pdf.md)
-  - Escape hatch: [PyMuPDF / pdfplumber](references/claw/pdf.md#when-claw-pdf-isnt-enough)
-- PDF → tables — `claw pdf extract-tables [--strategy text --vlines …]` · [src](scripts/claw/src/claw/pdf/extract_tables.py)
-  - Ref: [claw pdf § extract-tables](references/claw/pdf.md)
-  - Escape hatch: [pdfplumber](references/claw/pdf.md#when-claw-pdf-isnt-enough)
-- PDF → images — `claw pdf extract-images | render` · [src](scripts/claw/src/claw/pdf/)
-  - Escape hatch: [PyMuPDF](references/claw/pdf.md#when-claw-pdf-isnt-enough)
-- Excel → data — `claw xlsx read | sql | stat | to-csv` · [src](scripts/claw/src/claw/xlsx/)
-- HTML — `claw html select | text | strip | sanitize | absolutize | rewrite` · [src](scripts/claw/src/claw/html/)
+- PDF → tables — `claw pdf extract-tables <SRC_PDF> [--json]` · [src](scripts/claw/src/claw/pdf/extract_tables.py)
+- PDF → images — `claw pdf render <SRC_PDF> --page <N> -o <OUT>` · [src](scripts/claw/src/claw/pdf/)
+- Excel → data — `claw xlsx read <SRC> | sql <SRC> <QUERY> | stat <SRC> | to-csv <SRC> --sheet <S>` · [src](scripts/claw/src/claw/xlsx/)
+- HTML — `claw html select <SRC> --css <CSS> | text <SRC> | strip <SRC> --css <CSS>` · [src](scripts/claw/src/claw/html/)
   - Ref: [claw html](references/claw/html.md)
-  - Escape hatch: [BeautifulSoup4 / lxml.html / trafilatura](references/claw/html.md#when-claw-html-isnt-enough)
-- XML — `claw xml xpath | xslt | validate | canonicalize | stream-xpath | to-json` · [src](scripts/claw/src/claw/xml/)
+- XML — `claw xml xpath <SRC> <EXPR> | xslt <SRC> <SHEET> --out <OUT> | to-json <SRC>` · [src](scripts/claw/src/claw/xml/)
   - Ref: [claw xml](references/claw/xml.md)
-  - Escape hatch: [lxml](references/claw/xml.md#when-claw-xml-isnt-enough) — XSLT params, Schematron, custom element classes, resolver registration
-- Web page → article — `claw web fetch | extract | table | links | snapshot` · [src](scripts/claw/src/claw/web/)
+- Web page → article — `claw web fetch | extract <URL|FILE> | table <SRC> | links <SRC>` · [src](scripts/claw/src/claw/web/)
   - Ref: [claw web](references/claw/web.md)
-- Email — `claw email search | download-attachment` · [src](scripts/claw/src/claw/email/)
 
 
 ## EDIT
 
 - PDF annotate / redact / watermark — `claw pdf annotate|redact|watermark|stamp|flatten` · [src](scripts/claw/src/claw/pdf/)
   - Ref: [claw pdf § STAMP / SECURE / ANNOTATE](references/claw/pdf.md)
-  - Escape hatch: [PyMuPDF](references/claw/pdf.md#when-claw-pdf-isnt-enough)
-- PDF merge / split / rotate / crop — `claw pdf merge|split|rotate|crop` · [src](scripts/claw/src/claw/pdf/)
-  - Escape hatch: [pypdf](references/claw/pdf.md#when-claw-pdf-isnt-enough)
-- Excel / Word / PPT — same `claw xlsx|docx|pptx` nouns (CREATE verbs also edit in place) · [xlsx src](scripts/claw/src/claw/xlsx/) · [docx src](scripts/claw/src/claw/docx/) · [pptx src](scripts/claw/src/claw/pptx/)
-- Image — `claw img crop | resize | composite | exif | rename | batch` · [src](scripts/claw/src/claw/img/)
+- PDF merge / split / rotate / crop — `claw pdf merge <INPUTS...> -o <OUT> | split <SRC> | rotate <SRC> --by <DEG> -o <OUT>` · [src](scripts/claw/src/claw/pdf/)
+- Excel / Word / PPT — same `claw xlsx|docx|pptx` nouns · [xlsx src](scripts/claw/src/claw/xlsx/) · [docx src](scripts/claw/src/claw/docx/) · [pptx src](scripts/claw/src/claw/pptx/)
+- Image — `claw img resize <SRC> --geometry <WxH> --out <OUT> | fit | convert <SRC> <OUT> | exif <SRC>` · [src](scripts/claw/src/claw/img/)
   - Ref: [claw img](references/claw/img.md)
-- HTML tree — `claw html unwrap | wrap | replace` · [src](scripts/claw/src/claw/html/)
-- XML — `claw xml fmt` (pretty-print) · [src](scripts/claw/src/claw/xml/fmt.py) · [canonicalize](references/claw/xml.md)
 
 
 ## CONVERT format — `claw convert` · [src](scripts/claw/src/claw/convert/)
 
-- Any ↔ Any (Markdown, Word, PDF, HTML, EPUB, Slides, LaTeX, …) — `claw convert <in> <out> [--toc --template F --ref-doc F --css F --engine xelatex|weasyprint|typst]` · [src](scripts/claw/src/claw/convert/convert.py)
+- Any ↔ Any (Markdown, Word, PDF, HTML, EPUB, Slides, LaTeX, …) — `claw convert <SRC> <DST> [--toc] [--reference <REF_DOC>]` · [src](scripts/claw/src/claw/convert/convert.py)
   - Ref: [claw convert](references/claw/convert.md)
-  - Escape hatch: [pandoc](references/claw/convert.md#when-claw-convert-isnt-enough) — custom Lua filters, Defaults YAML beyond passthrough
-  - Ex: [recipes — convert](examples/claw-recipes.md)
-- PDF without LaTeX — `claw convert md2pdf-nolatex` (pandoc → HTML → PyMuPDF Story) · [src](scripts/claw/src/claw/convert/md2pdf_nolatex.py)
+- PDF without LaTeX — `claw convert md2pdf-nolatex <SRC> <DST>` · [src](scripts/claw/src/claw/convert/md2pdf_nolatex.py)
 - Multi-chapter book — `claw convert book <chapters…> [--csl FILE --bib FILE]` · [src](scripts/claw/src/claw/convert/book.py)
 - Slides — `claw convert slides <in.md> --format reveal|beamer|pptx` · [src](scripts/claw/src/claw/convert/slides.py)
 
