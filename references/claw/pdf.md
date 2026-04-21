@@ -1,110 +1,198 @@
 # `claw pdf` — PDF Operations Reference
 
-CLI wrapper over PyMuPDF (fitz), pypdf, and pdfplumber.
+CLI wrapper over PyMuPDF (fitz), pypdf, and pdfplumber. Handles creation, extraction, transformation, and security for PDF documents.
 
 ## Contents
 
 - **CREATE**
-  - [From HTML](#from-html) · [From Markdown](#from-md) · [QR Code](#qr) · [Barcode](#barcode)
+  - [From HTML](#11-from-html) · [From Markdown](#12-from-md) · [QR Code](#13-qr) · [Barcode](#14-barcode)
 - **READ / EXTRACT**
-  - [Text](#extract-text) · [Tables](#extract-tables) · [Images](#extract-images) · [Metadata](#meta) · [Search](#search)
+  - [Text](#21-extract-text) · [Tables](#22-extract-tables) · [Metadata](#23-info) · [Search](#24-search) · [OCR](#25-ocr) · [Chars/Words/Shapes](#26-chars)
 - **EDIT / TRANSFORM**
-  - [Merge](#merge) · [Split](#split) · [Rotate](#rotate) · [Crop](#crop) · [Render to Image](#render)
-- **SECURITY / ANNOTATE**
-  - [Watermark](#watermark) · [Redact](#redact) · [Encrypt/Decrypt](#encrypt-decrypt) · [Annotate](#annotate) · [Flatten](#flatten)
+  - [Merge](#31-merge) · [Split](#32-split) · [Rotate](#33-rotate) · [Crop](#34-crop) · [Render to Image](#35-render) · [Watermark](#36-watermark) · [Redact](#37-redact)
+- **ADVANCED**
+  - [Annotate](#41-annotate) · [Attachments](#42-attach) · [Bookmarks](#43-bookmark) · [Form Fields](#44-form) · [Labels](#45-labels) · [Layers](#46-layer) · [Stamping](#47-stamp) · [Table Debugging](#48-tables-debug) · [TOC](#49-toc)
+- **SECURITY**
+  - [Encrypt/Decrypt](#51-encryptdecrypt)
 
 ---
 
-## 1. CREATE
+## Critical Rules
 
-### `from-html`
+1. **OCR Dependencies** — The `ocr` command requires `tesseract-ocr` and `ghostscript` to be installed on the system.
+2. **Redaction Safety** — `redact` physically removes content and cleans the underlying XREF table. Always verify on a copy.
+3. **Table Extraction** — If `extract-tables` fails on a scanned document, run `ocr` first.
+4. **Coordinate System** — PDF uses a bottom-left (0,0) origin by default, but `claw` transforms to top-left (0,0) for consistency with image tools.
+
+---
+
+## 1.1 from-html
+Render HTML to PDF using a headless browser or library.
 ```bash
 claw pdf from-html <SRC_HTML> <OUT_PDF> [--force]
 ```
 
-### `from-md`
+## 1.2 from-md
+Render Markdown to PDF via Pandoc or direct conversion.
 ```bash
 claw pdf from-md <SRC_MD> <OUT_PDF> [--force]
 ```
 
-### `qr`
+## 1.3 qr
+Generate a PDF containing a QR code.
 ```bash
-claw pdf qr --value <TEXT> -o <OUT_PDF> [--force]
+claw pdf qr --value <TEXT> -o <OUT_PDF> [--size N] [--force]
 ```
 
-### `barcode`
+## 1.4 barcode
+Generate a PDF containing a barcode.
 ```bash
 claw pdf barcode --type <TYPE> --value <TEXT> -o <OUT_PDF> [--force]
 ```
 
 ---
 
-## 2. READ / EXTRACT
-
-### `extract-text`
+## 2.1 extract-text
+Extract plain text or structured JSON text from the PDF.
 ```bash
-claw pdf extract-text <SRC_PDF> [--json]
+claw pdf extract-text <SRC_PDF> [--json] [--pages N-M]
 ```
 
-### `extract-tables`
+## 2.2 extract-tables
+Detect and extract tabular data.
 ```bash
-claw pdf extract-tables <SRC_PDF> [--json]
+claw pdf extract-tables <SRC_PDF> [--json] [--csv] [--format format]
 ```
 
-### `info`
+## 2.3 info
+Display metadata, encryption status, and page count.
 ```bash
 claw pdf info <SRC_PDF> [--json]
 ```
 
-### `search`
+## 2.4 search
+Search for text patterns (regex supported).
 ```bash
-claw pdf search <SRC_PDF> --term <TEXT> [--json]
+claw pdf search <SRC_PDF> --term <PATTERN> [--json]
 ```
+
+## 2.5 ocr
+Optical Character Recognition for scanned documents.
+```bash
+claw pdf ocr <SRC_PDF> -o <OUT_PDF> [--lang eng] [--force]
+```
+
+## 2.6 chars
+Extract individual character positions and properties.
+```bash
+claw pdf chars <SRC_PDF> [--json]
+```
+*(Also supports `words` and `shapes` for granular element extraction.)*
 
 ---
 
-## 3. EDIT / TRANSFORM
-
-### `merge`
+## 3.1 merge
+Combine multiple PDF files into one.
 ```bash
 claw pdf merge <INPUTS...> -o <OUT_PDF> [--force]
 ```
 
-### `split`
+## 3.2 split
+Split a PDF by page ranges or into individual pages.
 ```bash
-claw pdf split <SRC_PDF> --out-dir <DIR> [--per-page] [--force]
+claw pdf split <SRC_PDF> --out-dir <DIR> [--per-page] [--ranges 1-5,6-10] [--force]
 ```
 
-### `rotate`
+## 3.3 rotate
+Rotate pages in increments of 90 degrees.
 ```bash
 claw pdf rotate <SRC_PDF> --by <DEGREES> -o <OUT_PDF> [--force]
 ```
 
-### `crop`
+## 3.4 crop
+Crop pages to a specific bounding box.
 ```bash
 claw pdf crop <SRC_PDF> --box <x0,y0,x1,y1> -o <OUT_PDF> [--force]
 ```
 
-### `render`
+## 3.5 render
+Render PDF pages to images (PNG/JPG).
 ```bash
-claw pdf render <SRC_PDF> --page <N> -o <OUT_IMAGE> [--force]
+claw pdf render <SRC_PDF> --page <N> -o <OUT_IMAGE> [--dpi 300] [--force]
 ```
 
----
-
-## 4. SECURITY / ANNOTATE
-
-### `watermark`
+## 3.6 watermark
+Apply a text or image watermark to all pages.
 ```bash
-claw pdf watermark <SRC_PDF> --text <TEXT> -o <OUT_PDF> [--force]
+claw pdf watermark <SRC_PDF> --text <TEXT> -o <OUT_PDF> [--opacity 0.5] [--force]
 ```
 
-### `redact`
+## 3.7 redact
+Black out text or areas and remove underlying data.
 ```bash
 claw pdf redact <SRC_PDF> --regex <PATTERN> -o <OUT_PDF> [--force]
 ```
 
-### `encrypt` / `decrypt`
+---
+
+## 4.1 annotate
+Add highlights, underlines, or sticky notes.
+```bash
+claw pdf annotate <SRC_PDF> --type highlight --range <TEXT> -o <OUT_PDF> [--force]
+```
+
+## 4.2 attach
+Manage file attachments within the PDF.
+```bash
+claw pdf attach <SRC_PDF> --file <ATTACHMENT> -o <OUT_PDF> [--force]
+```
+
+## 4.3 bookmark
+Manage the document outline (bookmarks).
+```bash
+claw pdf bookmark <list|add|remove> <SRC_PDF> [--title <TEXT>] [--page <N>]
+```
+
+## 4.4 form
+List, fill, or flatten PDF form fields (AcroForms).
+```bash
+claw pdf form <list|fill> <SRC_PDF> [--data <FILE.json>] -o <OUT_PDF>
+```
+
+## 4.5 labels
+Set or read page labels (e.g., i, ii, 1, 2).
+```bash
+claw pdf labels <SRC_PDF> [--json]
+```
+
+## 4.6 layer
+List or toggle visibility of PDF layers (Optional Content Groups).
+```bash
+claw pdf layer <list|toggle> <SRC_PDF> [--name <LAYER>]
+```
+
+## 4.7 stamp
+Apply a digital stamp to the document.
+```bash
+claw pdf stamp <SRC_PDF> --image <FILE.png> --page <N> -o <OUT_PDF> [--force]
+```
+
+## 4.8 tables-debug
+Visualizes detected table boundaries for troubleshooting.
+```bash
+claw pdf tables-debug <SRC_PDF> -o <OUT_IMG>
+```
+
+## 4.9 toc
+Extract or modify the Table of Contents.
+```bash
+claw pdf toc <SRC_PDF> [--json]
+```
+
+---
+
+## 5.1 encrypt/decrypt
+Manage PDF password protection and permissions.
 ```bash
 claw pdf encrypt <SRC_PDF> --password <PW> -o <OUT_PDF> [--force]
 claw pdf decrypt <SRC_PDF> --password <PW> -o <OUT_PDF> [--force]
@@ -112,11 +200,18 @@ claw pdf decrypt <SRC_PDF> --password <PW> -o <OUT_PDF> [--force]
 
 ---
 
-## Quick Reference
+## Footguns
+- **Invisible Text** — Some PDFs contain invisible text layers (OCR results) over images. `extract-text` will find them, but they may be poorly aligned.
+- **Incremental Saves** — PDFs can be saved "incrementally," keeping old versions of data. `claw` performs a full rewrite to ensure deleted/redacted data is purged.
+
+## Escape Hatch
+Underlying libraries: `PyMuPDF` (fitz) for performance, `pdfplumber` for table extraction, and `pypdf` for structural merging.
+
+## Quick Reference Table
 | Task | Command |
 |------|---------|
-| Extract Text | `claw pdf extract-text f.pdf` |
-| Merge PDFs | `claw pdf merge a.pdf b.pdf -o out.pdf` |
-| QR Code PDF | `claw pdf qr --value "https://..." -o qr.pdf` |
-| Rotate PDF | `claw pdf rotate f.pdf --by 90 -o rot.pdf` |
-| Render Page | `claw pdf render f.pdf --page 1 -o p1.png` |
+| Extract Text | `claw pdf extract-text doc.pdf` |
+| Merge Files | `claw pdf merge *.pdf -o combined.pdf` |
+| OCR Scan | `claw pdf ocr scan.pdf -o searchable.pdf` |
+| Fill Form | `claw pdf form fill doc.pdf --data f.json -o out.pdf` |
+| Redact Info | `claw pdf redact doc.pdf --regex "\d{3}-\d{2}-\d{4}"` |
