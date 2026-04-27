@@ -113,7 +113,7 @@ claw media gif <SRC> --out <OUT_GIF> [--fps 15] [--scale 480] [--force]
 ## Escape Hatch
 Underlying tool: `ffmpeg`. For complex filtergraphs, use `run_shell_command` to execute `ffmpeg` directly.
 
-## Quick Reference Table
+## Quick Reference
 | Task | Command |
 |------|---------|
 | Stream Info | `claw media info video.mp4` |

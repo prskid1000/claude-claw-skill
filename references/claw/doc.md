@@ -77,7 +77,7 @@ claw doc tabs list <DOC_ID> [--json]
 ## Escape Hatch
 Underlying API: `Google Docs API` (v1). For complex batch requests not supported by `claw`, use the `google-api-python-client` directly.
 
-## Quick Reference Table
+## Quick Reference
 | Task | Command |
 |------|---------|
 | Create New | `claw doc create "Project Plan"` |

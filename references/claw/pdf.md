@@ -5,15 +5,17 @@ CLI wrapper over PyMuPDF (fitz), pypdf, and pdfplumber. Handles creation, extrac
 ## Contents
 
 - **CREATE**
-  - [From HTML](#11-from-html) · [From Markdown](#12-from-md) · [QR Code](#13-qr) · [Barcode](#14-barcode)
+  - [From HTML](#11-from-html) · [From Markdown](#12-from-md) · [QR Code](#13-qr) · [Barcode](#14-barcode) · [Convert from EPUB/XPS/CBZ](#15-convert)
 - **READ / EXTRACT**
-  - [Text](#21-extract-text) · [Tables](#22-extract-tables) · [Metadata](#23-info) · [Search](#24-search) · [OCR](#25-ocr) · [Chars/Words/Shapes](#26-chars)
+  - [Text](#21-extract-text) · [Tables](#22-extract-tables) · [Metadata](#23-info) · [Search](#24-search) · [OCR](#25-ocr) · [Chars](#26-chars) · [Words](#27-words) · [Shapes](#28-shapes) · [Extract images](#29-extract-images)
 - **EDIT / TRANSFORM**
   - [Merge](#31-merge) · [Split](#32-split) · [Rotate](#33-rotate) · [Crop](#34-crop) · [Render to Image](#35-render) · [Watermark](#36-watermark) · [Redact](#37-redact)
 - **ADVANCED**
-  - [Annotate](#41-annotate) · [Attachments](#42-attach) · [Bookmarks](#43-bookmark) · [Form Fields](#44-form) · [Labels](#45-labels) · [Layers](#46-layer) · [Stamping](#47-stamp) · [Table Debugging](#48-tables-debug) · [TOC](#49-toc)
+  - [Annotate](#41-annotate) · [Attachments](#42-attach) · [Bookmarks](#43-bookmark) · [Form Fields](#44-form) · [Labels](#45-labels) · [Layers](#46-layer) · [Stamping](#47-stamp) · [Table Debugging](#48-tables-debug) · [TOC](#49-toc) · [Flatten](#410-flatten) · [Journal](#411-journal)
 - **SECURITY**
   - [Encrypt/Decrypt](#51-encryptdecrypt)
+- **PROPERTIES**
+  - [Core metadata](#61-meta)
 
 ---
 
@@ -48,6 +50,12 @@ claw pdf qr --value <TEXT> -o <OUT_PDF> [--size N] [--force]
 Generate a PDF containing a barcode.
 ```bash
 claw pdf barcode --type <TYPE> --value <TEXT> -o <OUT_PDF> [--force]
+```
+
+## 1.5 convert
+Convert EPUB / XPS / CBZ / FB2 / OXPS into PDF via PyMuPDF.
+```bash
+claw pdf convert <SRC> <OUT_PDF> [--page-size A4]
 ```
 
 ---
@@ -87,7 +95,24 @@ Extract individual character positions and properties.
 ```bash
 claw pdf chars <SRC_PDF> [--json]
 ```
-*(Also supports `words` and `shapes` for granular element extraction.)*
+
+## 2.7 words
+Extract words with font attributes; filter by name/size/style.
+```bash
+claw pdf words <SRC_PDF> [--pages N-M] [--filter "fontname~=Bold"] [-o out.json] [--json]
+```
+
+## 2.8 shapes
+Dump vector shapes (lines, rects, curves) from the page content stream.
+```bash
+claw pdf shapes <SRC_PDF> [--pages N-M] [--kind line|rect|curve|all] [-o out.json] [--json]
+```
+
+## 2.9 extract-images
+Save embedded raster images to a directory; filter by dimensions/format.
+```bash
+claw pdf extract-images <SRC_PDF> --out <DIR> [--pages N-M] [--format png|jpeg|original] [--min-width N] [--min-height N]
+```
 
 ---
 
@@ -189,6 +214,21 @@ Extract or modify the Table of Contents.
 claw pdf toc <SRC_PDF> [--json]
 ```
 
+## 4.10 flatten
+Bake AcroForm fields and/or annotations into the page content (irreversible).
+```bash
+claw pdf flatten <SRC_PDF> [--forms/--no-forms] [--annotations/--no-annotations] (-o <OUT> | --in-place) [--force]
+```
+
+## 4.11 journal
+Stage edits in a sidecar; commit or rollback atomically (subcommands: `start`, `status`, `commit`, `rollback`).
+```bash
+claw pdf journal start <SRC_PDF>
+claw pdf journal status <SRC_PDF>
+claw pdf journal commit <SRC_PDF>
+claw pdf journal rollback <SRC_PDF>
+```
+
 ---
 
 ## 5.1 encrypt/decrypt
@@ -200,6 +240,15 @@ claw pdf decrypt <SRC_PDF> --password <PW> -o <OUT_PDF> [--force]
 
 ---
 
+## 6.1 meta
+Read or write PDF core metadata (title, author, subject, keywords, ...).
+```bash
+claw pdf meta get <SRC_PDF> [--json]
+claw pdf meta set <SRC_PDF> [--title <T>] [--author <A>] [--subject <S>] [--keywords <K>]
+```
+
+---
+
 ## Footguns
 - **Invisible Text** — Some PDFs contain invisible text layers (OCR results) over images. `extract-text` will find them, but they may be poorly aligned.
 - **Incremental Saves** — PDFs can be saved "incrementally," keeping old versions of data. `claw` performs a full rewrite to ensure deleted/redacted data is purged.
@@ -207,7 +256,7 @@ claw pdf decrypt <SRC_PDF> --password <PW> -o <OUT_PDF> [--force]
 ## Escape Hatch
 Underlying libraries: `PyMuPDF` (fitz) for performance, `pdfplumber` for table extraction, and `pypdf` for structural merging.
 
-## Quick Reference Table
+## Quick Reference
 | Task | Command |
 |------|---------|
 | Extract Text | `claw pdf extract-text doc.pdf` |

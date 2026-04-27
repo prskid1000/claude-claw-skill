@@ -101,7 +101,7 @@ claw html diagnose <SRC>
 ## Escape Hatch
 Underlying library: `BeautifulSoup4` (Python) with `lxml` backend. For high-speed stream processing, consider `selectolax`.
 
-## Quick Reference Table
+## Quick Reference
 | Task | Command |
 |------|---------|
 | Extract Text | `claw html text index.html` |

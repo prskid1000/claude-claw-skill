@@ -158,7 +158,7 @@ claw docx custom-xml attach <SRC_DOCX> --part <FILE.xml> [--force]
 ## Escape Hatch
 Underlying library: `python-docx` (Python). For lower-level manipulation of the XML structure, use `lxml` on the extracted `.docx` (ZIP) contents.
 
-## Quick Reference Table
+## Quick Reference
 | Task | Command |
 |------|---------|
 | New Document | `claw docx new report.docx` |

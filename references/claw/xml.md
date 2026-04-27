@@ -77,7 +77,7 @@ claw xml validate <SRC> [--xsd <FILE>] [--dtd <FILE>] [--relaxng <FILE>]
 ## Escape Hatch
 Underlying library: `lxml` (Python). For high-performance streaming, consider `xml.etree.ElementTree` or `SAX`.
 
-## Quick Reference Table
+## Quick Reference
 | Task | Command |
 |------|---------|
 | XPath Search | `claw xml xpath data.xml "//item[@id='1']"` |

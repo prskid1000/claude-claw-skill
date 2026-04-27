@@ -145,7 +145,7 @@ claw img gif-from-frames <FILES...> --out <OUT_GIF> [--delay MS] [--loop]
 ## Escape Hatch
 Underlying library: `Pillow` (PIL). For high-performance batch processing, consider `ImageMagick` via shell.
 
-## Quick Reference Table
+## Quick Reference
 | Task | Command |
 |------|---------|
 | Resize | `claw img resize img.png --geometry 800x600` |

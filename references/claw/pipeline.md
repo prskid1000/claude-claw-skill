@@ -5,7 +5,7 @@ Declarative DAG runner for multi-step `claw` tasks.
 ## Contents
 
 - **EXECUTION**
-  - [Run pipeline](#11-run) · [Resume failed](#12-resume)
+  - [Run pipeline](#11-run) (use `--resume` to skip successful upstream steps)
 - **INSPECTION**
   - [Validate recipe](#21-validate) · [Show graph](#22-graph) · [List steps](#23-list-steps)
 
@@ -20,15 +20,9 @@ Declarative DAG runner for multi-step `claw` tasks.
 ---
 
 ## 1.1 run
-Execute a YAML pipeline recipe.
+Execute a YAML pipeline recipe. Pass `--resume` to skip steps whose inputs / logic are unchanged from the previous run (or `--run-id ID` to resume a specific run).
 ```bash
-claw pipeline run <RECIPE.yaml> [--var KEY=VAL]... [--resume] [--force]
-```
-
-## 1.2 resume
-Resume a specific previous run by ID (or the latest by default).
-```bash
-claw pipeline run <RECIPE.yaml> --resume [--run-id ID]
+claw pipeline run <RECIPE.yaml> [--var KEY=VAL]... [--resume] [--run-id ID] [--force]
 ```
 
 ---

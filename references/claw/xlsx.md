@@ -207,7 +207,7 @@ claw xlsx pivots list <SRC_XLSX> [--sheet NAME] [--json]
 ## Escape Hatch
 Underlying library: `openpyxl` (Python). For complex logic, write a Python script using `openpyxl` and run it via `python`.
 
-## Quick Reference Table
+## Quick Reference
 | Task | Command |
 |------|---------|
 | New File | `claw xlsx new data.xlsx` |
