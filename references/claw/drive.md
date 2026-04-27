@@ -18,7 +18,7 @@ CLI wrapper over the Google Drive API (via `gws`). Works on any file type — Sh
 ## Critical Rules
 
 1. **ID vs Path** — Use `FILE_ID` for existing Drive items and standard local paths for uploads/downloads.
-2. **Safe Deletes** — `delete` is permanent in Drive (does not use Trash). Use with caution.
+2. **Trash by Default** — `delete` moves to Trash by default. Use `--permanent` to skip Trash and permanently destroy the file.
 3. **Conversion** — `upload` auto-converts `.xlsx`/`.csv`/`.docx`/`.pptx` to Google-native by default; pass `--no-convert` to keep them as binary blobs.
 4. **Auth** — Depends on `gws auth login` being completed first.
 
@@ -71,9 +71,9 @@ claw drive rename <FILE_ID> --name <NEW_NAME> [--json]
 ```
 
 ## 3.3 delete
-Permanently delete a file.
+Trash a Drive file (default) or permanently delete it. Prompts for confirmation unless `--yes` is given.
 ```bash
-claw drive delete <FILE_ID> [--force]
+claw drive delete <FILE_ID> [--permanent] [--yes]
 ```
 
 ---
@@ -99,7 +99,7 @@ claw drive share-revoke <FILE_ID> --email <USER_EMAIL> [--json]
 ---
 
 ## Footguns
-- **No Trash** — `claw drive delete` bypasses the Trash folder.
+- **Delete = Trash** — `claw drive delete` moves to Trash by default (recoverable). Pass `--permanent` to skip Trash and irrecoverably destroy the file. Use `--yes` to bypass the confirmation prompt.
 - **Conversion default** — `upload` defaults to converting office formats; pass `--no-convert` if you want a binary blob in Drive.
 - **Native exports need `--as`** — Downloading a Google Doc/Sheet/Slide without `--as` errors out; pick a format.
 
@@ -117,4 +117,5 @@ claw drive share-revoke <FILE_ID> --email <USER_EMAIL> [--json]
 | Export Doc to PDF | `claw drive download FILE_ID --out doc.pdf --as pdf` |
 | List Drive Files | `claw drive list --json` |
 | File Metadata | `claw drive info FILE_ID --json` |
-| Delete File | `claw drive delete FILE_ID --force` |
+| Trash File | `claw drive delete FILE_ID --yes` |
+| Permanently Delete | `claw drive delete FILE_ID --permanent --yes` |

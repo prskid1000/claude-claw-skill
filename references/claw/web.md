@@ -20,9 +20,9 @@ CLI wrapper over `trafilatura` and `httpx` for article extraction and robust fet
 ---
 
 ## 1.1 fetch
-Download raw HTML or content with headers and cookies.
+HTTP GET/POST a URL; write body to `--out` (or stdout). Supports custom method/headers/body, retries with `--retry-on`, cookie jars, proxy, and on-the-fly content extraction via `--format` + optional `--selector`.
 ```bash
-claw web fetch <URL|FILE> [--json] [--cache]
+claw web fetch <URL> [--out <PATH|->] [--method get|post|...] [--header K=V]... [--data TEXT|@FILE] [--timeout FLOAT] [--retries N] [--retry-on 5xx,429,timeout,...] [--save-cookies PATH] [--load-cookies PATH] [--ua TEXT] [--proxy URL] [--format text|html|markdown|json] [--selector CSS]
 ```
 
 ## 1.2 snapshot
@@ -40,9 +40,9 @@ claw web extract <URL|FILE> [--json] [--include-comments]
 ```
 
 ## 2.2 links
-Extract all URLs found in a document.
+Enumerate `<a href=...>` from a URL, file, or stdin. Use `--absolute` (with optional `--base`) to resolve relative URLs, `--same-origin` to keep only the host's own links, `--unique` to de-dupe by absolute URL, and `--filter` for predicate filtering (e.g. `"href contains 'docs'"`).
 ```bash
-claw web links <URL|FILE> [--internal|--external] [--json]
+claw web links <SRC> [--absolute] [--base <URL>] [--filter <EXPR>] [--same-origin] [--unique] [--format text|json] [--out <PATH>]
 ```
 
 ## 2.3 table

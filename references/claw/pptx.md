@@ -9,7 +9,7 @@ CLI wrapper over `python-pptx` for deck creation and manipulation.
 - **INSERT OBJECTS**
   - [Add chart](#21-add-chart) · [Add table](#22-add-table) · [Add image](#23-add-image) · [Add shape](#24-add-shape) · [Fill placeholder](#25-fill)
 - **ADVANCED**
-  - [Brand template](#31-brand) · [Refresh charts](#32-chart-refresh) · [Speaker notes](#33-notes) · [Reorder slides](#34-reorder) · [Image crop](#35-image) · [Hyperlink](#36-link)
+  - [Brand template](#31-brand) · [Refresh charts](#32-chart) · [Speaker notes](#33-notes) · [Reorder slides](#34-reorder) · [Image crop](#35-image) · [Hyperlink](#36-link)
 - **PROPERTIES**
   - [Core metadata](#41-meta)
 
@@ -81,22 +81,22 @@ Apply a corporate template / master-slide to an existing deck.
 claw pptx brand <SRC_PPTX> --template <FILE.pptx> [--force]
 ```
 
-## 3.2 chart-refresh
-Force PowerPoint to re-render charts linked to embedded data.
+## 3.2 chart
+Chart update operations (subcommand: `refresh`). Re-reads the linked CSV and replaces the chart's data in place.
 ```bash
-claw pptx chart-refresh <SRC_PPTX> [--force]
+claw pptx chart refresh <SRC_PPTX> --slide <N> --data <FILE.csv>
 ```
 
 ## 3.3 notes
-Get or set speaker notes for a specific slide.
+Set, append, or clear speaker notes on a slide. Flat command (no `get`/`set` subcommand). `--text` accepts literal text or a path to a `.md` file. Use `--append` to add to existing notes, `--clear` to wipe.
 ```bash
-claw pptx notes <get|set> <SRC_PPTX> --slide <N> [--text <TEXT>]
+claw pptx notes <SRC_PPTX> --slide <N> [--text <TEXT|FILE.md>] [--append] [--clear]
 ```
 
 ## 3.4 reorder
-Change slide sequence based on ID or index mapping.
+Reorder slides by a comma-separated index list (1-based by default). Manipulates `sldIdLst` XML directly because `python-pptx` has no stable slide-move API. Use `--start-at 0` if your indices are 0-based.
 ```bash
-claw pptx reorder <SRC_PPTX> --mapping <ID:NEW_INDEX,...> [--force]
+claw pptx reorder <SRC_PPTX> --order <N,N,N,...> [--start-at <0|1>]
 ```
 
 ## 3.5 image
@@ -137,4 +137,4 @@ claw pptx meta set <SRC_PPTX> [--title <T>] [--author <A>] [--subject <S>] [--ke
 | New Deck | `claw pptx new report.pptx` |
 | Add Title Slide | `claw pptx add-slide report.pptx --title "Main"` |
 | Add Table | `claw pptx add-table report.pptx --slide 2 --data t.csv` |
-| Set Notes | `claw pptx notes set report.pptx --slide 1 --text "Speak loud"` |
+| Set Notes | `claw pptx notes report.pptx --slide 1 --text "Speak loud"` |

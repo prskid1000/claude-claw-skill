@@ -29,27 +29,27 @@ CLI wrapper over PyMuPDF (fitz), pypdf, and pdfplumber. Handles creation, extrac
 ---
 
 ## 1.1 from-html
-Render HTML to PDF using a headless browser or library.
+Convert HTML to PDF via PyMuPDF Story. Remote `<link>` stylesheets are skipped unless `--fetch-remote-css`.
 ```bash
-claw pdf from-html <SRC_HTML> <OUT_PDF> [--force]
+claw pdf from-html <SRC_HTML> <OUT_PDF> [--page-size Letter|Legal|A4|A3] [--rect x0,y0,x1,y1] [--css FILE] [--fetch-remote-css]
 ```
 
 ## 1.2 from-md
-Render Markdown to PDF via Pandoc or direct conversion.
+Convert Markdown to PDF. `--engine` picks the renderer (`reportlab` default).
 ```bash
-claw pdf from-md <SRC_MD> <OUT_PDF> [--force]
+claw pdf from-md <SRC_MD> <OUT_PDF> [--theme minimal|corporate|academic|dark] [--page-size Letter|A4|Legal] [--margin M] [--toc] [--title T] [--author A] [--engine reportlab|pymupdf|pandoc]
 ```
 
 ## 1.3 qr
-Generate a PDF containing a QR code.
+Generate a single-page PDF containing a QR code. `--size` is in points.
 ```bash
-claw pdf qr --value <TEXT> -o <OUT_PDF> [--size N] [--force]
+claw pdf qr --value <TEXT> -o <OUT_PDF> [--size POINTS] [--ec L|M|Q|H] [--page-size Letter|A4|Legal] [--caption TEXT]
 ```
 
 ## 1.4 barcode
-Generate a PDF containing a barcode.
+Generate a single-page barcode PDF.
 ```bash
-claw pdf barcode --type <TYPE> --value <TEXT> -o <OUT_PDF> [--force]
+claw pdf barcode --type code128|ean|ean13|upc|upca|qr --value <TEXT> -o <OUT_PDF> [--size WxH[unit]] [--caption TEXT]
 ```
 
 ## 1.5 convert
@@ -61,15 +61,15 @@ claw pdf convert <SRC> <OUT_PDF> [--page-size A4]
 ---
 
 ## 2.1 extract-text
-Extract plain text or structured JSON text from the PDF.
+Extract text from the PDF in one of PyMuPDF's output modes.
 ```bash
-claw pdf extract-text <SRC_PDF> [--json] [--pages N-M]
+claw pdf extract-text <SRC_PDF> [--pages N-M] [--mode plain|blocks|dict|html|xhtml|xml|json] [-o OUT|-] [--dehyphenate] [--preserve-ligatures] [--json]
 ```
 
 ## 2.2 extract-tables
-Detect and extract tabular data.
+Detect and extract tabular data via pdfplumber strategies. Output format follows `-o`'s extension (`.csv` / `.json` / `.xlsx`); stdout CSV if omitted.
 ```bash
-claw pdf extract-tables <SRC_PDF> [--json] [--csv] [--format format]
+claw pdf extract-tables <SRC_PDF> [--pages N-M] [--strategy lines|lines_strict|text|explicit] [--vlines x1,x2,...] [--hlines y1,y2,...] [--bbox x0,y0,x1,y1] [-o OUT] [--json]
 ```
 
 ## 2.3 info
@@ -79,15 +79,15 @@ claw pdf info <SRC_PDF> [--json]
 ```
 
 ## 2.4 search
-Search for text patterns (regex supported).
+Search the PDF; returns page + bbox + surrounding context for each hit.
 ```bash
-claw pdf search <SRC_PDF> --term <PATTERN> [--json]
+claw pdf search <SRC_PDF> --term <PATTERN> [--regex] [--case-sensitive] [--pages N-M] [--context N] [--json]
 ```
 
 ## 2.5 ocr
-Optical Character Recognition for scanned documents.
+Add an OCR text layer over scanned pages (requires `tesseract` on PATH).
 ```bash
-claw pdf ocr <SRC_PDF> -o <OUT_PDF> [--lang eng] [--force]
+claw pdf ocr <SRC_PDF> [--lang eng+fra] [--dpi N] [--pages N-M] [--sidecar] [--tessdata DIR] (-o <OUT_PDF> | --in-place)
 ```
 
 ## 2.6 chars
@@ -117,134 +117,139 @@ claw pdf extract-images <SRC_PDF> --out <DIR> [--pages N-M] [--format png|jpeg|o
 ---
 
 ## 3.1 merge
-Combine multiple PDF files into one.
+Combine multiple PDFs into one. Each input may carry an inline range, e.g. `file.pdf:1-3,7`. `--toc-from filenames` adds a top-level outline entry per input.
 ```bash
-claw pdf merge <INPUTS...> -o <OUT_PDF> [--force]
+claw pdf merge <INPUTS...> -o <OUT_PDF> [--toc-from filenames|none]
 ```
 
 ## 3.2 split
-Split a PDF by page ranges or into individual pages.
+Split a PDF by ranges or into individual pages. `--name-template` supports `{stem} {n} {start} {end}`.
 ```bash
-claw pdf split <SRC_PDF> --out-dir <DIR> [--per-page] [--ranges 1-5,6-10] [--force]
+claw pdf split <SRC_PDF> --out-dir <DIR> (--ranges 1-5,6-end | --per-page) [--name-template "{stem}_{n}"]
 ```
 
 ## 3.3 rotate
-Rotate pages in increments of 90 degrees.
+Rotate pages in increments of 90 degrees. `--by` must be `90|-90|180|270`.
 ```bash
-claw pdf rotate <SRC_PDF> --by <DEGREES> -o <OUT_PDF> [--force]
+claw pdf rotate <SRC_PDF> --by <90|-90|180|270> [--pages N-M] (-o <OUT_PDF> | --in-place)
 ```
 
 ## 3.4 crop
-Crop pages to a specific bounding box.
+Crop pages to a specific bounding box. `--box-type` selects which page box to modify.
 ```bash
-claw pdf crop <SRC_PDF> --box <x0,y0,x1,y1> -o <OUT_PDF> [--force]
+claw pdf crop <SRC_PDF> --box <x0,y0,x1,y1> [--pages N-M] [--box-type media|crop|trim|bleed|art] (-o <OUT_PDF> | --in-place)
 ```
 
 ## 3.5 render
-Render PDF pages to images (PNG/JPG).
+Render a PDF page to a raster image (PNG/JPG). `--clip` is in PDF points with top-left origin.
 ```bash
-claw pdf render <SRC_PDF> --page <N> -o <OUT_IMAGE> [--dpi 300] [--force]
+claw pdf render <SRC_PDF> --page <N> -o <OUT_IMAGE> [--dpi 300 | --zoom 2.0] [--colorspace rgb|gray|cmyk] [--clip x0,y0,x1,y1] [--no-annots]
 ```
 
 ## 3.6 watermark
-Apply a text or image watermark to all pages.
+Apply a text watermark across pages. `--layer behind` places it under content.
 ```bash
-claw pdf watermark <SRC_PDF> --text <TEXT> -o <OUT_PDF> [--opacity 0.5] [--force]
+claw pdf watermark <SRC_PDF> --text <TEXT> [--opacity 0.5] [--rotate DEG] [--color C] [--font F] [--size N] [--pages N-M] [--layer behind|above] (-o <OUT_PDF> | --in-place)
 ```
 
 ## 3.7 redact
-Black out text or areas and remove underlying data.
+Black out text or areas and purge underlying data. Supply at least one of `--regex`, `--terms`, or `--boxes`. `--preview` renders a PNG without applying.
 ```bash
-claw pdf redact <SRC_PDF> --regex <PATTERN> -o <OUT_PDF> [--force]
+claw pdf redact <SRC_PDF> [--regex PATTERN] [--terms FILE] [--boxes FILE.json] [--fill COLOR] [--pages N-M] [--preview PNG] (-o <OUT_PDF> | --in-place)
 ```
 
 ---
 
 ## 4.1 annotate
-Add highlights, underlines, or sticky notes.
+Add highlights, sticky notes, or free-hand ink to a single page. Supply one of `--highlight`, `--note --at`, or `--ink-path`.
 ```bash
-claw pdf annotate <SRC_PDF> --type highlight --range <TEXT> -o <OUT_PDF> [--force]
+claw pdf annotate <SRC_PDF> --page <N> [--highlight TERM [--regex]] [--note TEXT --at x,y] [--ink-path "x1,y1 x2,y2 ..."] [--color C] [--opacity F] [--author A] (-o <OUT_PDF> | --in-place)
 ```
 
 ## 4.2 attach
-Manage file attachments within the PDF.
+Manage embedded file attachments. Subcommand group: `add | list | extract | remove`.
 ```bash
-claw pdf attach <SRC_PDF> --file <ATTACHMENT> -o <OUT_PDF> [--force]
+claw pdf attach add     <SRC_PDF> --file <ATTACHMENT> [--name N] [--description D] (-o <OUT> | --in-place)
+claw pdf attach list    <SRC_PDF> [--json]
+claw pdf attach extract <SRC_PDF> --name <ATTACHMENT_NAME> -o <OUT_FILE>
+claw pdf attach remove  <SRC_PDF> --name <ATTACHMENT_NAME> (-o <OUT> | --in-place)
 ```
 
 ## 4.3 bookmark
-Manage the document outline (bookmarks).
+Append a bookmark to the document outline. Only `add` is implemented; for full TOC editing use `pdf toc set`.
 ```bash
-claw pdf bookmark <list|add|remove> <SRC_PDF> [--title <TEXT>] [--page <N>]
+claw pdf bookmark add <SRC_PDF> --title <TEXT> --page <N> [--level N] [--parent "Parent Title"] (-o <OUT> | --in-place)
 ```
 
 ## 4.4 form
-List, fill, or flatten PDF form fields (AcroForms).
+AcroForm operations. `fill` reads a JSON object mapping field name → value from `--values`; `--flatten` bakes filled values into page content.
 ```bash
-claw pdf form <list|fill> <SRC_PDF> [--data <FILE.json>] -o <OUT_PDF>
+claw pdf form list <SRC_PDF> [--json]
+claw pdf form fill <SRC_PDF> --values <FILE.json> [--flatten] (-o <OUT_PDF> | --in-place)
 ```
 
 ## 4.5 labels
-Set or read page labels (e.g., i, ii, 1, 2).
+Set page labels via a `--rule` like `"i:1-5,1:6-end"`. Styles: `i I a A 1`.
 ```bash
-claw pdf labels <SRC_PDF> [--json]
+claw pdf labels set <SRC_PDF> --rule "i:1-5,1:6-end" (-o <OUT_PDF> | --in-place)
 ```
 
 ## 4.6 layer
-List or toggle visibility of PDF layers (Optional Content Groups).
+Toggle visibility of an OCG (Optional Content Group) by name. Only `toggle` is implemented.
 ```bash
-claw pdf layer <list|toggle> <SRC_PDF> [--name <LAYER>]
+claw pdf layer toggle <SRC_PDF> --name <LAYER> [--show | --hide] (-o <OUT_PDF> | --in-place)
 ```
 
 ## 4.7 stamp
-Apply a digital stamp to the document.
+Stamp an image onto pages. Position via `--at` anchor (TL/TR/BL/BR/C) plus `--offset`.
 ```bash
-claw pdf stamp <SRC_PDF> --image <FILE.png> --page <N> -o <OUT_PDF> [--force]
+claw pdf stamp <SRC_PDF> --image <FILE.png> [--scale 0..1] [--at TL|TR|BL|BR|C] [--offset x,y] [--opacity F] [--pages N-M] (-o <OUT_PDF> | --in-place)
 ```
 
 ## 4.8 tables-debug
-Visualizes detected table boundaries for troubleshooting.
+Render a page with pdfplumber's detected table edges drawn on top.
 ```bash
-claw pdf tables-debug <SRC_PDF> -o <OUT_IMG>
+claw pdf tables-debug <SRC_PDF> --page <N> -o <OUT.png> [--strategy lines|lines_strict|text|explicit] [--vlines x1,x2,...] [--hlines y1,y2,...] [--resolution DPI]
 ```
 
 ## 4.9 toc
-Extract or modify the Table of Contents.
+Read / overwrite the table of contents (outline). `set --json` takes a JSON array matching `doc.set_toc()`.
 ```bash
-claw pdf toc <SRC_PDF> [--json]
+claw pdf toc get <SRC_PDF> [--json]
+claw pdf toc set <SRC_PDF> --json <FILE.json> (-o <OUT_PDF> | --in-place)
 ```
 
 ## 4.10 flatten
 Bake AcroForm fields and/or annotations into the page content (irreversible).
 ```bash
-claw pdf flatten <SRC_PDF> [--forms/--no-forms] [--annotations/--no-annotations] (-o <OUT> | --in-place) [--force]
+claw pdf flatten <SRC_PDF> [--forms/--no-forms] [--annotations/--no-annotations] (-o <OUT> | --in-place)
 ```
 
 ## 4.11 journal
-Stage edits in a sidecar; commit or rollback atomically (subcommands: `start`, `status`, `commit`, `rollback`).
+Stage edits in a sidecar; commit or rollback atomically. All subcommands take `--name <SESSION>`; `start` binds the session to a `<SRC_PDF>`.
 ```bash
-claw pdf journal start <SRC_PDF>
-claw pdf journal status <SRC_PDF>
-claw pdf journal commit <SRC_PDF>
-claw pdf journal rollback <SRC_PDF>
+claw pdf journal start    <SRC_PDF> --name <SESSION>
+claw pdf journal status   --name <SESSION> [--json]
+claw pdf journal commit   --name <SESSION> (-o <OUT_PDF> | --in-place)
+claw pdf journal rollback --name <SESSION>
 ```
 
 ---
 
 ## 5.1 encrypt/decrypt
-Manage PDF password protection and permissions.
+Manage PDF password protection and permissions. Cipher flags are mutually exclusive (`--aes256` needs `pycryptodome`). `--allow` / `--deny` accept CSV subsets of `print,copy,modify,annotate,fill-forms,assemble,print-high`.
 ```bash
-claw pdf encrypt <SRC_PDF> --password <PW> -o <OUT_PDF> [--force]
-claw pdf decrypt <SRC_PDF> --password <PW> -o <OUT_PDF> [--force]
+claw pdf encrypt <SRC_PDF> -p <PW> [--owner-password <PW>] [--aes256|--aes128|--rc4-128] [--allow csv] [--deny csv] -o <OUT_PDF>
+claw pdf decrypt <SRC_PDF> -p <PW> (-o <OUT_PDF> | --in-place)
 ```
 
 ---
 
 ## 6.1 meta
-Read or write PDF core metadata (title, author, subject, keywords, ...).
+Read or write PDF core metadata. `--keywords` is comma-separated; dates use `YYYY-MM-DD`.
 ```bash
 claw pdf meta get <SRC_PDF> [--json]
-claw pdf meta set <SRC_PDF> [--title <T>] [--author <A>] [--subject <S>] [--keywords <K>]
+claw pdf meta set <SRC_PDF> [--title T] [--author A] [--subject S] [--keywords K1,K2] [--creator C] [--producer P] [--creation-date YYYY-MM-DD] [--mod-date YYYY-MM-DD] (-o <OUT_PDF> | --in-place)
 ```
 
 ---
@@ -262,5 +267,5 @@ Underlying libraries: `PyMuPDF` (fitz) for performance, `pdfplumber` for table e
 | Extract Text | `claw pdf extract-text doc.pdf` |
 | Merge Files | `claw pdf merge *.pdf -o combined.pdf` |
 | OCR Scan | `claw pdf ocr scan.pdf -o searchable.pdf` |
-| Fill Form | `claw pdf form fill doc.pdf --data f.json -o out.pdf` |
+| Fill Form | `claw pdf form fill doc.pdf --values f.json -o out.pdf` |
 | Redact Info | `claw pdf redact doc.pdf --regex "\d{3}-\d{2}-\d{4}"` |

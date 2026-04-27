@@ -23,9 +23,9 @@ CLI wrapper over `lxml` for structured data manipulation. Handles querying, tran
 ---
 
 ## 1.1 xpath
-Query the XML tree using XPath 1.0.
+Query the XML tree using XPath 1.0. Output as JSON, text, XML, or attribute-only via `--json/--text/--xml/--attr NAME`; `--count` returns a node count. Bind variables with repeatable `--var NAME=VALUE` and namespaces with `--ns PREFIX=URI`. Security flags (off by default): `--allow-undeclared-vars`, `--allow-entities`, `--allow-network`, `--huge-tree`.
 ```bash
-claw xml xpath <SRC> <EXPRESSION> [--json] [--text]
+claw xml xpath <SRC> <EXPRESSION> [--json|--text|--xml|--attr NAME|--count] [--var NAME=VAL]... [--ns PREFIX=URI]...
 ```
 
 ## 1.2 stream-xpath
@@ -49,9 +49,9 @@ claw xml xslt <SRC> <STYLESHEET> --out <OUT> [--param KEY=VAL] [--force]
 ```
 
 ## 2.2 fmt
-Pretty-print or minify XML.
+Pretty-print XML with configurable indent. `--sort-attrs` gives deterministic attribute order; `--declaration` emits the `<?xml...?>` prolog; `--encoding` sets the output encoding.
 ```bash
-claw xml fmt <SRC> [--minify] --out <OUT> [--force]
+claw xml fmt <SRC> [--indent <INTEGER>] [--sort-attrs] [--declaration] [--encoding <TEXT>] [--out <PATH>]
 ```
 
 ## 2.3 canonicalize
@@ -63,9 +63,9 @@ claw xml canonicalize <SRC> [--out <OUT>] [--force]
 ---
 
 ## 3.1 validate
-Validate XML against a DTD, XML Schema (XSD), or RelaxNG.
+Validate `<SRC>` against a schema. Pick one: `--xsd` (XML Schema), `--rng` (RelaxNG XML syntax), `--rnc` (RelaxNG compact syntax), or `--dtd`. Exits 6 on validation failure. `--all-errors` reports every error rather than stopping at the first.
 ```bash
-claw xml validate <SRC> [--xsd <FILE>] [--dtd <FILE>] [--relaxng <FILE>]
+claw xml validate <SRC> (--xsd <PATH> | --rng <PATH> | --rnc <PATH> | --dtd <PATH>) [--all-errors]
 ```
 
 ---

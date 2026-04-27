@@ -22,15 +22,15 @@ CLI wrapper over Gmail API (via `gws`) and standard MIME generation.
 ---
 
 ## 1.1 send
-Compose and send an email immediately.
+Compose and send an email immediately. `--to` is repeatable; body comes from one of `--body`/`--body-file`/`--body-stdin`; HTML alternative via `--html`.
 ```bash
-claw email send --to <EMAIL> --subject <TEXT> [--body <TEXT> | --html <FILE>] [--attach <PATH>] [--dry-run]
+claw email send --to <EMAIL> --subject <TEXT> [--body <TEXT> | --body-file <FILE> | --body-stdin] [--html <FILE>] [--cc <EMAIL>] [--bcc <EMAIL>] [--attach @<PATH>[:mime/type]] [--inline CID=@<PATH>] [--from <EMAIL>] [--reply-to <EMAIL>] [--header KEY=VAL]
 ```
 
 ## 1.2 draft
-Create an email draft in the user's Gmail account.
+Create an email draft in the user's Gmail account (same option surface as `send`).
 ```bash
-claw email draft --to <EMAIL> --subject <TEXT> [--body <TEXT>] [--dry-run]
+claw email draft --to <EMAIL> --subject <TEXT> [--body <TEXT> | --body-file <FILE> | --body-stdin] [--html <FILE>] [--cc <EMAIL>] [--bcc <EMAIL>] [--attach @<PATH>] [--inline CID=@<PATH>] [--from <EMAIL>] [--reply-to <EMAIL>] [--header KEY=VAL]
 ```
 
 ---
@@ -38,13 +38,13 @@ claw email draft --to <EMAIL> --subject <TEXT> [--body <TEXT>] [--dry-run]
 ## 2.1 reply
 Reply to an existing message (auto-populates In-Reply-To/References).
 ```bash
-claw email reply <MSG_ID> --body <TEXT> [--all] [--dry-run]
+claw email reply <MSG_ID> [--body <TEXT> | --body-file <FILE> | --body-stdin] [--all] [--remove <EMAIL>] [--add-cc <EMAIL>] [--html <FILE>] [--attach @<PATH>] [--inline CID=@<PATH>] [--subject <TEXT>]
 ```
 
 ## 2.2 forward
-Forward a message to new recipients.
+Forward a message to new recipients with an optional note.
 ```bash
-claw email forward <MSG_ID> --to <EMAIL> [--body <TEXT>] [--dry-run]
+claw email forward <MSG_ID> --to <EMAIL> [--cc <EMAIL>] [--bcc <EMAIL>] [--body <TEXT> | --body-file <FILE> | --body-stdin] [--subject <TEXT>] [--no-attachments] [--strip-html] [--attach @<PATH>]
 ```
 
 ---
@@ -52,13 +52,13 @@ claw email forward <MSG_ID> --to <EMAIL> [--body <TEXT>] [--dry-run]
 ## 3.1 search
 Search Gmail messages using standard Gmail query syntax.
 ```bash
-claw email search --q <QUERY> [--max N] [--json]
+claw email search --q <QUERY> [--max N] [--format table|json|full] [--include-spam-trash] [--label <LABEL>]
 ```
 
 ## 3.2 download-attachment
-Save an attachment from a specific message to disk.
+Save an attachment from a specific message to disk; optionally verify SHA-256.
 ```bash
-claw email download-attachment <MSG_ID> <ATT_ID> --out <PATH> [--force]
+claw email download-attachment <MSG_ID> <ATT_ID> --out <PATH> [--verify-hash <SHA256>]
 ```
 
 ---

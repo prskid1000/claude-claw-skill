@@ -49,15 +49,15 @@ claw html unwrap <SRC> --css <SELECTOR> -o <OUT> [--force]
 ```
 
 ## 2.3 wrap
-Wrap each matched element in a new parent tag.
+Wrap each matched element in a new parent tag. `--with` accepts a tag spec like `tag`, `tag.class`, or `tag.a.b#id`.
 ```bash
-claw html wrap <SRC> --css <SELECTOR> --tag <NEW_TAG> -o <OUT> [--force]
+claw html wrap <SRC> (--css <SELECTOR> | --xpath <PATH>) --with <TAG_SPEC> (--in-place | --out <PATH>)
 ```
 
 ## 2.4 replace
-Replace matched elements with new HTML or text content.
+Replace matched elements (`tag.replace_with(...)`). Pick exactly one source: `--text` for literal text, `--html` for an inline HTML fragment, or `--with-file` to read the fragment from disk.
 ```bash
-claw html replace <SRC> --css <SELECTOR> --with <NEW_HTML> -o <OUT> [--force]
+claw html replace <SRC> (--css <SELECTOR> | --xpath <PATH>) (--text <TEXT> | --html <FRAGMENT> | --with-file <PATH>) (--in-place | --out <PATH>)
 ```
 
 ---
@@ -75,9 +75,9 @@ claw html absolutize <SRC> --base <URL> -o <OUT> [--force]
 ```
 
 ## 3.3 rewrite
-Perform bulk search-and-replace on URL attributes (href, src).
+Rewrite URL substrings across link-bearing attributes. `--from` is the substring to match; `--to` is the replacement. By default, `lxml`'s default link-bearing attrs are scanned — override with `--attrs` (comma-separated).
 ```bash
-claw html rewrite <SRC> --match <STR> --replace <STR> -o <OUT> [--force]
+claw html rewrite <SRC> --from <STR> --to <STR> [--attrs href,src,...] (--in-place | --out <PATH>)
 ```
 
 ## 3.4 fmt

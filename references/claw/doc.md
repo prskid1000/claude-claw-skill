@@ -23,35 +23,35 @@ CLI wrapper over the Google Docs API. Handles document creation, content manipul
 ---
 
 ## 1.1 create
-Create a new, blank Google Doc.
+Create a new, blank Google Doc (optionally seeded from a markdown file).
 ```bash
-claw doc create <TITLE> [--json]
+claw doc create --title <TITLE> [--from <FILE.md>] [--parent <FOLDER_ID>] [--share <SPEC>] [--tab <ID>]
 ```
 
 ## 1.2 read
-Extract the document's content as plain text or a full JSON structure.
+Extract the document's content as plain text, JSON structure, or markdown.
 ```bash
-claw doc read <DOC_ID> [--text|--json] [--tab <ID>]
+claw doc read <DOC_ID> [--format text|json|md] [--out <PATH>] [--tab <ID>]
 ```
 
 ---
 
 ## 2.1 append
-Append text or Markdown content to the end of the document.
+Append text or markdown content to the end of the document.
 ```bash
-claw doc append <DOC_ID> --data <FILE.md|TEXT> [--force]
+claw doc append <DOC_ID> [--from <FILE>] [--text <TEXT>] [--tab <ID>] [--chunk-size N]
 ```
 
 ## 2.2 build
-Overwrite or build a document's structure from a local Markdown file.
+Apply a markdown file to an existing Doc (replaces content by default).
 ```bash
-claw doc build <DOC_ID> --data <FILE.md> [--force]
+claw doc build <DOC_ID> --from <FILE.md> [--append] [--replace-all] [--force-clear] [--tab <ID>] [--from-index N] [--chunk-size N]
 ```
 
 ## 2.3 replace
 Perform a find-and-replace operation on literal text strings.
 ```bash
-claw doc replace <DOC_ID> --match <STR> --with <STR> [--case-sensitive] [--force]
+claw doc replace <DOC_ID> --find <STR> --with <STR> [--match-case] [--tab <ID>]
 ```
 
 ---
@@ -59,13 +59,13 @@ claw doc replace <DOC_ID> --match <STR> --with <STR> [--case-sensitive] [--force
 ## 3.1 export
 Download a Google Doc in a specific local format.
 ```bash
-claw doc export <DOC_ID> <OUT_FILE> --as <pdf|docx|html|md|txt|epub> [--force]
+claw doc export <DOC_ID> --as <pdf|docx|html|md|txt|epub|odt|rtf> --out <PATH>
 ```
 
 ## 3.2 tabs
-List or interact with document tabs (if the doc uses the tabs feature).
+Subgroup of tab operations on Docs that use the tabs feature.
 ```bash
-claw doc tabs list <DOC_ID> [--json]
+claw doc tabs list <DOC_ID>
 ```
 
 ---
@@ -80,8 +80,8 @@ Underlying API: `Google Docs API` (v1). For complex batch requests not supported
 ## Quick Reference
 | Task | Command |
 |------|---------|
-| Create New | `claw doc create "Project Plan"` |
-| Read Text | `claw doc read 1aBcDe... --text` |
-| Append File | `claw doc append 1aBcDe... --data notes.md` |
-| Export PDF | `claw doc export 1aBcDe... report.pdf --as pdf` |
-| Swap Variable | `claw doc replace 1aBcDe... --match "{{NAME}}" --with "Alice"` |
+| Create New | `claw doc create --title "Project Plan"` |
+| Read Text | `claw doc read 1aBcDe... --format text` |
+| Append File | `claw doc append 1aBcDe... --from notes.md` |
+| Export PDF | `claw doc export 1aBcDe... --as pdf --out report.pdf` |
+| Swap Variable | `claw doc replace 1aBcDe... --find "{{NAME}}" --with "Alice"` |

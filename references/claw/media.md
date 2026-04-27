@@ -31,15 +31,15 @@ claw media info <SRC> [--json]
 ---
 
 ## 2.1 extract-audio
-Rip audio tracks from a video file.
+Rip an audio track from a video file. `--quality` is a codec-native quality knob (not a bitrate string). Use `--track` to pick a specific audio stream index.
 ```bash
-claw media extract-audio <SRC> --out <OUT> [--format mp3|wav|m4a] [--bitrate 192k] [--force]
+claw media extract-audio <SRC> --out <OUT> [--format mp3|aac|wav|opus|flac] [--quality <INT>] [--track <INT>]
 ```
 
 ## 2.2 thumbnail
-Extract a single frame or create a contact sheet.
+Grab a single frame at `--at`, OR build a contact sheet with `--count` + `--grid`. `--width` sets per-frame width (height auto).
 ```bash
-claw media thumbnail <SRC> --out <OUT> --at <SECONDS|HH:MM:SS> [--scale WxH] [--force]
+claw media thumbnail <SRC> --out <OUT> [--at <SEC|HH:MM:SS>] [--count <N>] [--grid <WxH>] [--width <PX>]
 ```
 
 ---
@@ -51,15 +51,15 @@ claw media trim <SRC> --out <OUT> --from <T> [--to <T>|--duration <T>] [--force]
 ```
 
 ## 3.2 compress
-Reduce file size by adjusting bitrate or using CRF (Constant Rate Factor).
+Shrink video to `--target-size` (2-pass) OR `--crf` (1-pass). Pick a codec via `--codec`; tune speed/quality tradeoff via `--preset`.
 ```bash
-claw media compress <SRC> --out <OUT> [--target-size MB] [--crf N] [--force]
+claw media compress <SRC> --out <OUT> [--target-size 25M|1.5G] [--crf <INT>] [--codec h264|h265|vp9|av1] [--preset <NAME>] [--audio-bitrate <RATE>]
 ```
 
 ## 3.3 scale
-Change video resolution.
+Scale a video to a target geometry (ImageMagick geometry syntax, e.g. `1280x720`, `1280x`, `50%`).
 ```bash
-claw media scale <SRC> --size <WxH> --out <OUT> [--preserve-aspect] [--force]
+claw media scale <SRC> --geometry <GEOM> --out <OUT> [--codec h264|h265|vp9|av1] [--crf <INT>]
 ```
 
 ## 3.4 speed
@@ -99,9 +99,9 @@ claw media loudnorm <SRC> --out <OUT> [--target <DBLU>] [--force]
 ```
 
 ## 3.10 gif
-Convert a video clip into an animated GIF.
+Convert a video slice into an animated GIF. `--duration` is required; `--start` sets the slice origin. Sizing is via `--width` (not a `WxH` scale).
 ```bash
-claw media gif <SRC> --out <OUT_GIF> [--fps 15] [--scale 480] [--force]
+claw media gif <SRC> --out <OUT_GIF> --duration <SEC> [--start <SEC|HH:MM:SS>] [--width <PX>] [--fps <INT>] [--dither bayer|sierra|none]
 ```
 
 ---

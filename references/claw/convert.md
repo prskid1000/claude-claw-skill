@@ -15,14 +15,15 @@ CLI wrapper over Pandoc for format-to-format transformation.
 
 1. **Pandoc dependency** — Requires `pandoc` to be on the system PATH.
 2. **Positional Args** — Most verbs use `SRC DST` as positional arguments.
-3. **Reference Docs** — Use `--reference-doc` for Word/PPTX to inherit styles/branding.
+3. **Reference Docs** — Use `--ref-doc` for Word/PPTX to inherit styles/branding.
+4. **Nested verb name** — `convert` is also a subcommand: invoke as `claw convert convert <SRC> <DST>`.
 
 ---
 
 ## 1.1 convert
-General purpose conversion between any formats supported by Pandoc.
+General purpose conversion between any formats supported by Pandoc. Note the nested `convert convert` form.
 ```bash
-claw convert <SRC> <DST> [--toc] [--template <FILE>] [--reference-doc <FILE>] [--force]
+claw convert convert <SRC> <DST> [--from <FMT>] [--to <FMT>] [-s|--standalone] [--embed-resources] [--toc] [--toc-depth N] [--template <FILE>] [--ref-doc <FILE>] [--css <FILE>] [--mathjax] [--katex] [--citeproc] [--bib <FILE>] [--csl <FILE>] [--engine xelatex|lualatex|pdflatex|weasyprint|typst|tectonic] [--highlight-style <NAME>] [--number-sections] [--metadata K=V] [--variable K=V] [--defaults <YAML>]
 ```
 
 ## 1.2 list-formats
@@ -42,13 +43,13 @@ claw convert md2pdf-nolatex <SRC> <DST> [--css <FILE>] [--force]
 ## 2.2 slides
 Convert Markdown to presentation formats (reveal.js, Beamer, PPTX).
 ```bash
-claw convert slides <SRC.md> --format <reveal|beamer|pptx> [-o OUT] [--force]
+claw convert slides <SRC.md> --format <reveal|beamer|pptx> --out <PATH> [--theme <NAME>] [--ref-doc <FILE>] [--slide-level N]
 ```
 
 ## 2.3 book
 Concatenate multiple chapters into a single PDF/EPUB/DOCX/HTML output.
 ```bash
-claw convert book <CHAPTERS...> -o <OUT> [--csl <FILE>] [--bib <FILE>] [--force]
+claw convert book <CHAPTERS...> --out <PATH> [--title <TEXT>] [--author <TEXT>] [--metadata K=V] [--toc] [--toc-depth N] [--csl <FILE>] [--bib <FILE>] [--css <FILE>] [--engine <NAME>] [--ref-doc <FILE>] [--cover <IMG>] [--stream]
 ```
 
 ---
@@ -65,7 +66,7 @@ claw convert book <CHAPTERS...> -o <OUT> [--csl <FILE>] [--bib <FILE>] [--force]
 ## Quick Reference
 | Task | Command |
 |------|---------|
-| MD to DOCX | `claw convert in.md out.docx` |
+| MD to DOCX | `claw convert convert in.md out.docx` |
 | MD to PDF (Light) | `claw convert md2pdf-nolatex in.md out.pdf` |
-| Build Book | `claw convert book ch1.md ch2.md -o book.epub` |
+| Build Book | `claw convert book ch1.md ch2.md --out book.epub` |
 | List Formats | `claw convert list-formats` |

@@ -20,9 +20,9 @@ Declarative DAG runner for multi-step `claw` tasks.
 ---
 
 ## 1.1 run
-Execute a YAML pipeline recipe. Pass `--resume` to skip steps whose inputs / logic are unchanged from the previous run (or `--run-id ID` to resume a specific run).
+Execute a YAML pipeline recipe as a DAG. Pass `--resume` to skip cache-hit steps whose inputs / logic are unchanged. Bound execution with `--from`/`--until` step names; tune parallelism with `--jobs`.
 ```bash
-claw pipeline run <RECIPE.yaml> [--var KEY=VAL]... [--resume] [--run-id ID] [--force]
+claw pipeline run <RECIPE.yaml> [--jobs N] [--resume] [--from <STEP>] [--until <STEP>] [--var KEY=VAL]... [--progress auto|json]
 ```
 
 ---
@@ -34,9 +34,9 @@ claw pipeline validate <RECIPE.yaml> [--json]
 ```
 
 ## 2.2 graph
-Generate a Mermaid or DOT visualization of the pipeline DAG.
+Render the pipeline DAG as Mermaid, Graphviz DOT, or ASCII.
 ```bash
-claw pipeline graph <RECIPE.yaml> [--format mermaid|dot]
+claw pipeline graph <RECIPE.yaml> [--format dot|mermaid|ascii] [--out <PATH>]
 ```
 
 ## 2.3 list-steps

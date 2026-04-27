@@ -11,7 +11,7 @@ CLI wrapper over `python-docx` (plus pandoc for markdown ingestion). Authoring a
 - **EDIT body content**
   - [Headings](#31-add-heading) · [Paragraphs](#32-add-paragraph) · [Tables](#33-add-table) · [Images](#34-add-image) · [Insert page break](#35-insert) · [Hyperlinks](#36-hyperlink)
 - **FORMAT / STYLE**
-  - [Define / apply styles](#41-style) · [Sections (orientation, columns)](#42-section) · [Headers](#43-header) · [Footers](#44-footer) · [Table of contents](#45-toc) · [Table column fitting](#46-table-fit)
+  - [Define / apply styles](#41-style) · [Sections (orientation, columns)](#42-section) · [Headers](#43-header) · [Footers](#44-footer) · [Table of contents](#45-toc) · [Table column fitting](#46-table)
 - **META**
   - [Core / custom properties](#51-meta) · [Attach custom XML](#52-custom-xml)
 
@@ -22,7 +22,7 @@ CLI wrapper over `python-docx` (plus pandoc for markdown ingestion). Authoring a
 1. **TOC Updates** — The `toc` command inserts a field code. Word will prompt to "Update Table" when the file is first opened.
 2. **Style Availability** — `style apply` requires the style name to exist in the document's style gallery or template.
 3. **Pandoc Dependency** — `from-md` requires `pandoc` to be installed and available in the system PATH.
-4. **Table Fitting** — Use `table-fit` after `add-table` if column widths appear inconsistent.
+4. **Table Fitting** — Use `table fit` after `add-table` if column widths appear inconsistent.
 
 ---
 
@@ -47,9 +47,9 @@ claw docx read <SRC_DOCX> [--text|--json|--tables|--headings]
 ```
 
 ## 2.2 comments
-Comment-review operations.
+Comment-review operations. Only subcommand is `dump` — emits each comment as `{author, text, range_text, timestamp}`.
 ```bash
-claw docx comments list <SRC_DOCX> [--json]
+claw docx comments dump <SRC_DOCX> [--author TEXT] [--json]
 ```
 
 ## 2.3 diff
@@ -85,9 +85,9 @@ claw docx add-image <SRC_DOCX> --image <FILE.png|.jpg> [--width FLOAT] [--force]
 ```
 
 ## 3.5 insert
-Structural insertions like pagebreaks.
+Structural insertions like pagebreaks. `--before`/`--after` require an existing paragraph to anchor to — pass the paragraph text. If multiple paragraphs match, use `--match-nth N` (1-based) to pick one.
 ```bash
-claw docx insert pagebreak <SRC_DOCX> [--before <TEXT>] [--after <TEXT>] [--force]
+claw docx insert pagebreak <SRC_DOCX> (--before <TEXT> | --after <TEXT>) [--match-nth N]
 ```
 
 ## 3.6 hyperlink
@@ -129,10 +129,10 @@ Insert a Table of Contents field code.
 claw docx toc <SRC_DOCX> [--force]
 ```
 
-## 4.6 table-fit
-Autofit table columns to content.
+## 4.6 table
+Table layout operations (subcommand: `fit`). Toggles autofit / fixed widths on a table, optionally setting column widths.
 ```bash
-claw docx table-fit <SRC_DOCX> [--table-index N] [--force]
+claw docx table fit <SRC_DOCX> --index <N> [--autofit] [--widths W1,W2,...]
 ```
 
 ---

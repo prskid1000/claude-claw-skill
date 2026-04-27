@@ -1,39 +1,40 @@
 # `claw doctor` — Diagnostics Reference
 
-CLI tool for environment verification and dependency health checks.
+Flat command that checks external dependencies and auth in one pass. No subcommands.
 
 ## Contents
 
 - **DIAGNOSTICS**
-  - [Run all checks](#11-run) · [Verify system](#12-system) · [Verify MCP](#13-mcp)
+  - [Run checks](#11-doctor)
 
 ---
 
 ## Critical Rules
 
-1. **Venv Scope** — Doctor checks the Python environment it is currently running in.
-2. **Path Verification** — Ensures external binaries (ffmpeg, pandoc, magick) are correctly indexed.
-3. **JSON Output** — Use `--json` for automated health-monitoring integration.
+1. **Flat command** — `claw doctor` is a single command; there are no `doctor system` / `doctor mcp` subcommands.
+2. **Exit codes** — `0` = all OK, `3` = warnings only, `4` = at least one failure. Useful for CI gating.
+3. **Scopes** — `--scope` narrows what's checked: `all` (default), `packages` (Python deps in the claw venv), `cli` (external binaries like ffmpeg/pandoc/magick), `gws` (Google Workspace auth).
+4. **No `--fix`** — Doctor only reports; it does not auto-repair. To repair the venv, run `python ~/.claude/skills/claude-claw/scripts/healthcheck.py --install` (or `--recreate-venv`).
 
 ---
 
-## 1.1 run
-Execute the full suite of diagnostic tests.
+## 1.1 doctor
+Run dependency and auth checks. Emits a human-readable report by default; pass `--json` for machine-readable output.
 ```bash
-claw doctor [--json] [--fix]
+claw doctor [--scope all|packages|cli|gws] [--json]
 ```
 
-## 1.2 system
-Verify system-level dependencies (OS, Disk, TTY).
-```bash
-claw doctor system [--json]
-```
+---
 
-## 1.3 mcp
-Check health and configuration of integrated MCP servers (MySQL, Browser).
-```bash
-claw doctor mcp [--json]
-```
+## Footguns
+- **Exit 3 ≠ failure** — Warnings exit `3`, not `0`. CI scripts that treat any non-zero as failure will trip on warnings; gate on `< 4` if warnings are acceptable.
+- **`--scope cli` ≠ shim resolution** — Doctor checks whether external binaries are reachable, but Python `subprocess.run([...])` calls still need `shutil.which()` to resolve `.cmd`/`.bat` shims on Windows.
+- **No auto-fix** — There is no `--fix` flag. Doctor reports problems; you fix them manually (or via `healthcheck.py`).
+
+## Escape Hatch
+- Repair venv / Python deps: `python ~/.claude/skills/claude-claw/scripts/healthcheck.py --install`
+- Wipe and rebuild venv: `python ~/.claude/skills/claude-claw/scripts/healthcheck.py --recreate-venv`
+- Re-auth Google Workspace: `gws auth login`
 
 ---
 
@@ -42,4 +43,6 @@ claw doctor mcp [--json]
 |------|---------|
 | Full Check | `claw doctor` |
 | JSON Report | `claw doctor --json` |
-| Auto-fix Issues | `claw doctor --fix` |
+| Python Deps Only | `claw doctor --scope packages` |
+| External Binaries | `claw doctor --scope cli` |
+| Google Auth | `claw doctor --scope gws` |

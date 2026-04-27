@@ -85,27 +85,27 @@ claw img watermark <SRC> --text <TEXT> --out <OUT> [--opacity 0.5] [--force]
 ```
 
 ## 3.2 enhance
-Adjust brightness, contrast, color, or sharpness.
+Apply tonal corrections. Combine any of `--autocontrast`, `--equalize`, `--posterize`, `--solarize`. Note: there is no `--type`/`--factor`; for brightness/contrast/color enhancement, use ImageMagick directly.
 ```bash
-claw img enhance <SRC> --type <brightness|contrast|color> --factor <FLOAT> --out <OUT> [--force]
+claw img enhance <SRC> --out <OUT> [--autocontrast] [--cutoff <0-49>] [--equalize] [--posterize <1-8>] [--solarize <0-255>]
 ```
 
 ## 3.3 sharpen
-Apply a sharpening filter to the image.
+Apply an unsharp mask. Tune via `--radius` (px), `--amount` (percent), `--threshold` (skip low-contrast pixels).
 ```bash
-claw img sharpen <SRC> --out <OUT> [--factor <FLOAT>] [--force]
+claw img sharpen <SRC> --out <OUT> [--radius <FLOAT>] [--amount <INT>] [--threshold <INT>]
 ```
 
 ## 3.4 composite
-Combine two images using an alpha mask or blending mode.
+Alpha-composite a foreground image onto a background at pixel offset `x,y`. `--bg` accepts a path OR a color string; `--fg` is a path.
 ```bash
-claw img composite <BASE> <OVERLAY> --out <OUT> [--force]
+claw img composite --bg <PATH|COLOR> --fg <FG_PATH> --out <OUT> [--at <X,Y>] [--alpha <0-1>]
 ```
 
 ## 3.5 overlay
-Simple overlay of one image onto another at a specific position.
+Composite a scaled logo onto `BG` at a named corner (TL/TR/BL/BR/center). Logo size is `--scale` × shortest edge of base.
 ```bash
-claw img overlay <BASE> <OVERLAY> --pos <X,Y> --out <OUT> [--force]
+claw img overlay <BG> --logo <LOGO_PATH> --out <OUT> [--scale <FLOAT>] [--position TL|TR|BL|BR|center] [--padding <PX>] [--margin <PX>]
 ```
 
 ---
@@ -125,9 +125,9 @@ claw img rename <FILES...> --pattern <PATTERN> [--force]
 ```
 
 ## 5.2 batch
-Apply a set of operations to multiple images in one pass.
+Run an op chain on every image in a directory. The chain is a single `--op` string with pipe-separated steps, e.g. `'resize:1024x|strip|webp:85'`.
 ```bash
-claw img batch <FILES...> --ops <RESIZE,CONVERT,...> --out-dir <DIR>
+claw img batch <DIRECTORY> --op '<step1>|<step2>|...' [--out <DIR>] [--recursive] [--pattern <GLOB>] [--workers <N>] [--stream]
 ```
 
 ## 5.3 gif-from-frames

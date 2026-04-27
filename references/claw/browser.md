@@ -22,13 +22,13 @@ CLI wrapper for launching Chrome/Edge with remote debugging enabled for MCP tool
 ## 1.1 launch
 Start a browser instance with remote debugging active.
 ```bash
-claw browser launch [--browser chrome|edge] [--port 9222] [--profile default|throwaway] [--headless]
+claw browser launch [--browser chrome|edge] [--port 9222] [--profile default|throwaway] [--user-data-dir <PATH>] [--browser-path <EXE>] [--kill-existing] [--timeout <SEC>]
 ```
 
 ## 1.2 stop
-Terminate all browser processes associated with a debugging port.
+Terminate browser debug processes by port, PID, or sweep all matching browsers.
 ```bash
-claw browser stop [--port 9222]
+claw browser stop [--port 9222] [--pid <PID>] [--all] [--browser edge|chrome|both] [--cleanup]
 ```
 
 ---
@@ -36,7 +36,7 @@ claw browser stop [--port 9222]
 ## 2.1 verify
 Check if the Chrome DevTools protocol is responding on the specified port.
 ```bash
-claw browser verify [--port 9222] [--json]
+claw browser verify [--port 9222] [--timeout <SEC>]
 ```
 
 ---

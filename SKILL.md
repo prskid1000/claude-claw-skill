@@ -68,7 +68,7 @@ python ~/.claude/skills/claude-claw/scripts/healthcheck.py --install     # creat
 - [header](references/claw/docx.md#43-header) — Set section header
 - [footer](references/claw/docx.md#44-footer) — Set section footer
 - [toc](references/claw/docx.md#45-toc) — Insert TOC field
-- [table-fit](references/claw/docx.md#46-table-fit) — Auto-size column widths
+- [table](references/claw/docx.md#46-table) — Table layout (autofit, widths)
 - [meta](references/claw/docx.md#51-meta) — Core doc properties
 - [custom-xml](references/claw/docx.md#52-custom-xml) — Custom XML parts on OPC
 
@@ -82,7 +82,7 @@ python ~/.claude/skills/claude-claw/scripts/healthcheck.py --install     # creat
 - [add-shape](references/claw/pptx.md#24-add-shape) — Rect/oval/arrow/callout
 - [fill](references/claw/pptx.md#25-fill) — Write text into placeholder
 - [brand](references/claw/pptx.md#31-brand) — Apply logo/colors/fonts
-- [chart-refresh](references/claw/pptx.md#32-chart-refresh) — Re-render embedded charts
+- [chart](references/claw/pptx.md#32-chart) — Re-read CSV → refresh chart data
 - [notes](references/claw/pptx.md#33-notes) — Speaker-notes get/set
 - [reorder](references/claw/pptx.md#34-reorder) — Reorder slides
 - [image](references/claw/pptx.md#35-image) — Picture-shape crop
@@ -167,7 +167,7 @@ python ~/.claude/skills/claude-claw/scripts/healthcheck.py --install     # creat
 - [info](references/claw/drive.md#23-info) — File metadata (name/mime/size/parents/owners)
 - [move](references/claw/drive.md#31-move) — Move file between folders
 - [rename](references/claw/drive.md#32-rename) — Rename Drive file
-- [delete](references/claw/drive.md#33-delete) — Permanently delete (no Trash)
+- [delete](references/claw/drive.md#33-delete) — Trash (default) or `--permanent` to skip Trash
 - [share](references/claw/drive.md#41-share) — Grant access (user/domain/anyone)
 - [share-list](references/claw/drive.md#42-share-list) — List permissions
 - [share-revoke](references/claw/drive.md#43-share-revoke) — Remove user access
