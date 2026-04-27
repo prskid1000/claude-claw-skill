@@ -18,6 +18,7 @@ import argparse
 import importlib
 import json
 import os
+import platform
 import shutil
 import subprocess
 import sys
@@ -461,9 +462,11 @@ def _download_clickup() -> None:
     with urllib.request.urlopen(req, timeout=20) as r:
         data = _json.loads(r.read())
     assets = data.get("assets", [])
+    arch = "arm64" if platform.machine().lower() in ("arm64", "aarch64") else "amd64"
     want = [a for a in assets
-            if "windows" in a["name"].lower() or "win" in a["name"].lower()
-            or a["name"].endswith(".exe")]
+            if "windows" in a["name"].lower() and arch in a["name"].lower()]
+    if not want:
+        want = [a for a in assets if "windows" in a["name"].lower()]
     if not want:
         raise RuntimeError("no Windows asset in latest release")
     url = want[0]["browser_download_url"]
